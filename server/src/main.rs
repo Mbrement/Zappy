@@ -1,5 +1,5 @@
 extern crate getopts;
-use getopts::Options;
+use getopts::{Options, ParsingStyle};
 use std::env;
 use std::io::{Read, Write};
 mod server;
@@ -34,10 +34,13 @@ fn main() -> std::io::Result<()> {
         }
     };
     let mut server: Server;
-    if matches.opt_present("p") {
-        let port = matches.opt_str("p").unwrap();
-        server = Server::new(port.parse().unwrap());
+    if matches.opt_present("p")
+        && matches.opt_str("p").is_some()
+        && matches.opt_str("p").unwrap().parse::<u16>().is_ok()
+    {
+        server = Server::new(matches.opt_str("p").unwrap().parse().unwrap());
     } else {
+        println!("Default port : 4242");
         server = Server::new(4242);
     }
     println!("Server running on port: {}", server.get_port());
@@ -50,84 +53,66 @@ fn main() -> std::io::Result<()> {
     }
     if matches.opt_present("x") {
         let width = matches.opt_str("x").unwrap();
+        if width.parse::<u32>().is_ok() {
+            server.set_map_width(width.parse().unwrap());
+        } else {
+            eprintln!(
+                "Invalid map width value, keeping default value of {}",
+                server.get_width()
+            );
+        }
     }
     if matches.opt_present("y") {
         let height = matches.opt_str("y").unwrap();
-        println!("Map height: {}", height);
-    }
-    if matches.opt_present("n") {
-        let teams = matches.opt_str("n").unwrap();
-        println!("Teams: {}", teams);
+        if height.parse::<u32>().is_ok() {
+            server.set_map_height(height.parse().unwrap());
+        } else {
+            eprintln!(
+                "Invalid map height value, keeping default value of {}",
+                server.get_height()
+            );
+        }
     }
     if matches.opt_present("c") {
         let clients = matches.opt_str("c").unwrap();
         println!("Number of clients: {}", clients);
+        if clients.parse::<u32>().is_ok() {
+            server.set_clients_number(clients.parse().unwrap());
+        } else {
+            eprintln!(
+                "Invalid client value, keeping default value of {}",
+                server.get_clients_number()
+            );
+        }
     }
     if matches.opt_present("t") {
         let tick = matches.opt_str("t").unwrap();
         println!("Tick per second: {}", tick);
+        if tick.parse::<u32>().is_ok() {
+            server.set_ticks(tick.parse().unwrap());
+        } else {
+            eprintln!(
+                "Invalid tick value, keeping default value of {}",
+                server.get_ticks()
+            );
+        }
+    }
+    if matches.opt_present("n") {
+        let teams = matches.opt_positions("n");
+        let mut team_names: Vec<String> = Vec::new();
+        let mut tmp = 0usize;
+        for arg in &args {
+            if arg.starts_with("-") {
+                tmp += 1;
+            }
+            if tmp == teams[0] + 1 && !arg.starts_with("-") {
+                team_names.push(arg.clone());
+            }
+        }
+        println!("Teams: {:?}", team_names);
     }
 
-    //
+    server.run();
 
-    // let addr = "127.0.0.1:4242".parse().unwrap();
-    // let mut server = TcpListener::bind(addr)?;
-
-    // let mut poll = server.get_poll_mut();
-    // let mut events = server.get_events_mut();
-
-    // poll.registry()
-    //     .register(server.get_socket_mut(), SERVER, Interest::READABLE)?;
-
-    // let mut clients: HashMap<Token, TcpStream> = HashMap::new();
-    // let mut next_token = 1;
-
-    // loop {
-    //     poll.poll(&mut events, None)?;
-
-    //     for event in events.iter() {
-    //         match event.token() {
-    //             SERVER => loop {
-    //                 match server.get_socket().accept() {
-    //                     Ok((mut client, _)) => {
-    //                         let token = Token(next_token);
-    //                         next_token += 1;
-
-    //                         poll.registry()
-    //                             .register(&mut client, token, Interest::READABLE)?;
-    //                         clients.insert(token, client);
-    //                     }
-    //                     Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => break,
-    //                     Err(e) => return Err(e),
-    //                 }
-    //             },
-    //             token => {
-    //                 let mut disconnected = false;
-    //                 {
-    //                     if let Some(client) = clients.get_mut(&token) {
-    //                         let response = format!("Bienvenue\n");
-    //                         if client.write(response.as_bytes()).is_err() {
-    //                             disconnected = true;
-    //                         }
-    //                         let mut buf = [0; 1024];
-    //                         let _ = client.read(&mut buf);
-    //                         println!(
-    //                             "Received data from {:?}: {:?}",
-    //                             token,
-    //                             String::from_utf8_lossy(&buf)
-    //                         );
-    //                     }
-    //                 }
-
-    //                 if disconnected {
-    //                     if let Some(mut client) = clients.remove(&token) {
-    //                         let _ = client.shutdown(std::net::Shutdown::Both);
-    //                         println!("Client {:?} disconnected", token);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-	return Ok(());
+    return Ok(());
 }
