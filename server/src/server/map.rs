@@ -1,25 +1,38 @@
-pub struct map {
+pub struct Map {
     width: u32,
     height: u32,
-    tiles: Vec<Vec<u32>>,
+    tiles: Vec<Vec<Tile>>,
 }
 
-impl map {
+#[derive(Clone)]
+pub struct Tile {
+    strings: Vec<String>,
+}
+
+impl Tile {
+    pub fn new() -> Self {
+        Tile {
+            strings: Vec::new(),
+        }
+    }
+}
+
+impl Map {
     pub fn new(width: u32, height: u32) -> Self {
-        map {
+        Map {
             width,
             height,
-            tiles: vec![vec![0; width as usize]; height as usize],
+            tiles: vec![vec![Tile::new(); width as usize]; height as usize],
         }
     }
     pub fn set_width(&mut self, width: u32) {
         self.width = width;
-        self.tiles = vec![vec![0; width as usize]; self.height as usize];
+        self.tiles = vec![vec![Tile::new(); width as usize]; self.height as usize];
     }
 
     pub fn set_height(&mut self, height: u32) {
         self.height = height;
-        self.tiles = vec![vec![0; self.width as usize]; height as usize];
+        self.tiles = vec![vec![Tile::new(); self.width as usize]; height as usize];
     }
 
     pub fn resize(&mut self, width: u32, height: u32) {
@@ -35,8 +48,18 @@ impl map {
     pub fn get_height(&self) -> u32 {
         self.height
     }
-
-    pub fn get_tiles(&self) -> &Vec<Vec<u32>> {
+    pub fn get_tiles(&self) -> &Vec<Vec<Tile>> {
         &self.tiles
     }
+    pub fn fill_start(&mut self) {
+        for row in &mut self.tiles {
+            for tile in row {
+                
+            }
+        }
+    }
+}
+
+pub fn fill_case(tile: &mut Tile) {
+	tile.strings.push("Case".into());
 }

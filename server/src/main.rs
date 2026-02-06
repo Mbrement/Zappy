@@ -97,7 +97,8 @@ fn main() -> std::io::Result<()> {
             );
         }
     }
-    if matches.opt_present("n") { //TODO FIXE, IF LAST ARG TEAM ARE NOT ADDED
+    if matches.opt_present("n") {
+        //TODO FIXE, IF LAST ARG TEAM ARE NOT ADDED
         let teams = matches.opt_positions("n");
         let mut team_names: Vec<String> = Vec::new();
         let mut tmp = 0usize;
@@ -108,7 +109,7 @@ fn main() -> std::io::Result<()> {
             if tmp == teams[0] + 1 && !arg.starts_with("-") {
                 team_names.push(arg.clone());
             }
-			server.teams.insert(arg.clone(), Vec::new());
+            server.teams.insert(arg.clone(), Vec::new());
         }
         println!("Teams: {:?}", team_names);
     }

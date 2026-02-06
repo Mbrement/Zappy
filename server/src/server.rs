@@ -220,11 +220,11 @@ impl Server {
         &mut self.socket
     }
 
-    pub fn get_map(&self) -> &map::map {
+    pub fn get_map(&self) -> &map::Map {
         &self.game.map
     }
 
-    pub fn get_map_mut(&mut self) -> &mut map::map {
+    pub fn get_map_mut(&mut self) -> &mut map::Map {
         &mut self.game.map
     }
 
