@@ -1,14 +1,14 @@
 use crate::server;
+use crate::server::map::map;
 use mio::Token;
 use std::collections::HashMap;
 use std::time;
-use crate::server::map::map;
 
 pub struct Game {
     pub team: HashMap<String, Vec<Token>>,
     pub map: server::map::map,
-	pub starting_time: time::Instant,
-	pub last_update: time::Instant,
+    pub starting_time: time::Instant,
+    pub last_update: time::Instant,
 }
 
 impl Game {
@@ -20,6 +20,4 @@ impl Game {
             last_update: time::Instant::now(),
         }
     }
-
-
 }

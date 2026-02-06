@@ -8,8 +8,7 @@ use crate::server::client::Client;
 use std::{process, time};
 mod game;
 
-
-type CommandFn = Box<dyn Fn(&client::Client, &str)>;
+type CommandFn = Box<dyn Fn(&mut client::Client, &str)>;
 
 struct CommandManager {
     commands: HashMap<String, CommandFn>,
@@ -23,71 +22,69 @@ impl CommandManager {
     }
 
     // default configuration of commande for a server
-    fn new_server() -> Self {
-        let mut command_manager = CommandManager::new();
-        command_manager.register("avance", |_c: &client::Client, _arg: &str| {
-            // if _c.r#type == "player" {
-            // 	// Move the player forward
-            // }
-        });
-
-        command_manager.register("droite", |_c: &client::Client, _arg: &str| {
-            // let mut server = server::Server::new(8080);
-            // server.run();
-        });
-        command_manager.register("gauche", |_c: &client::Client, _arg: &str| {
-            // let mut server = server::Server::new(8080);
-            // server.run();
-        });
-        command_manager.register("voir", |_c: &client::Client, _arg: &str| {
-            println!("Voir command received with '{}' args", _arg);
-            // let mut server = server::Server::new(8080);
-            // server.run();
-        });
-        command_manager.register("inventaire", |_c: &client::Client, _arg: &str| {
-            // let mut server = server::Server::new(8080);
-            // server.run();
-        });
-        command_manager.register("prend", |_c: &client::Client, _arg: &str| {
-            // let mut server = server::Server::new(8080);
-            // server.run();
-        });
-        command_manager.register("pose", |_c: &client::Client, _arg: &str| {
-            // let mut server = server::Server::new(8080);
-            // server.run();
-        });
-        command_manager.register("expluse", |_c: &client::Client, _arg: &str| {
-            // let mut server = server::Server::new(8080);
-            // server.run();
-        });
-        command_manager.register("broadcast", |_c: &client::Client, _arg: &str| {
-            // let mut server = server::Server::new(8080);
-            // server.run();
-        });
-        command_manager.register("incantation", |_c: &client::Client, _arg: &str| {
-            // let mut server = server::Server::new(8080);
-            // server.run();
-        });
-        command_manager.register("fork", |_c: &client::Client, _arg: &str| {
-            // let mut server = server::Server::new(8080);
-            // server.run();
-        });
-        command_manager.register("connect_nbr", |_c: &client::Client, _arg: &str| {
-            // let mut server = server::Server::new(8080);
-            // server.run();
-        });
-        command_manager
-    }
+        fn new_server() -> Self {
+            let mut command_manager = CommandManager::new();
+            command_manager.register("avance", |_c: &mut client::Client, _arg: &str| {
+                let _ = _c.get_socket_mut().write("pouet\n".as_bytes());
+            });
+    
+            command_manager.register("droite", |_c: &mut client::Client, _arg: &str| {
+                // let mut server = server::Server::new(8080);
+                // server.run();
+            });
+            command_manager.register("gauche", |_c: &mut client::Client, _arg: &str| {
+                // let mut server = server::Server::new(8080);
+                // server.run();
+            });
+            command_manager.register("voir", |_c: &mut client::Client, _arg: &str| {
+                println!("Voir command received with '{}' args", _arg);
+                // let mut server = server::Server::new(8080);
+                // server.run();
+            });
+            command_manager.register("inventaire", |_c: &mut client::Client, _arg: &str| {
+                // let mut server = server::Server::new(8080);
+                // server.run();
+            });
+            command_manager.register("prend", |_c: &mut client::Client, _arg: &str| {
+                // let mut server = server::Server::new(8080);
+                // server.run();
+            });
+            command_manager.register("pose", |_c: &mut client::Client, _arg: &str| {
+                // let mut server = server::Server::new(8080);
+                // server.run();
+            });
+            command_manager.register("expluse", |_c: &mut client::Client, _arg: &str| {
+                // let mut server = server::Server::new(8080);
+                // server.run();
+            });
+            command_manager.register("broadcast", |_c: &mut client::Client, _arg: &str| {
+                // let mut server = server::Server::new(8080);
+                // server.run();
+            });
+            command_manager.register("incantation", |_c: &mut client::Client, _arg: &str| {
+                // let mut server = server::Server::new(8080);
+                // server.run();
+            });
+            command_manager.register("fork", |_c: &mut client::Client, _arg: &str| {
+                // let mut server = server::Server::new(8080);
+                // server.run();
+            });
+            command_manager.register("connect_nbr", |_c: &mut client::Client, _arg: &str| {
+                // let mut server = server::Server::new(8080);
+                // server.run();
+            });
+            command_manager
+        }
 
     fn register<F>(&mut self, name: &str, func: F)
     where
-        F: Fn(&client::Client, &str) + 'static,
+        F: Fn(&mut client::Client, &str) + 'static,
     {
         self.commands.insert(name.to_string(), Box::new(func));
     }
-
-    fn execute(&self, name: &str, client: &client::Client, arg: &str) {
+    fn execute(&self, name: &str, client: &mut client::Client, arg: &str) {
         if let Some(func) = self.commands.get(name) {
+			println!("Executing command '{}' with args: {}", name, arg);
             func(client, arg);
         } else {
             println!("Commande '{}' non trouvée.", name);
@@ -257,7 +254,10 @@ impl Server {
         }
 
         loop {
-            let check = self.poll.poll(&mut self.events, Some(time::Duration::from_millis((1000/self.ticks).into())));
+            let check = self.poll.poll(
+                &mut self.events,
+                Some(time::Duration::from_millis((1000 / self.ticks).into())),
+            );
             if check.is_err() {
                 eprintln!("Failed to poll events");
                 return;
@@ -309,9 +309,8 @@ impl Server {
                                 eprintln!("Error accepting connection: {}", e);
                                 break;
                             }
-							
                         }
-						break
+                        break;
                     }
                 } else {
                     let token = event.token();
@@ -324,42 +323,33 @@ impl Server {
                                 println!("Client {:?} disconnected", token);
                             }
                             Ok(n) => {
-                                println!("Received {} bytes from {:?}", n, token);
-                                let client_ref = self.clients.get(&token);
-                                if client_ref.is_none() {
-                                    eprintln!("Failed to get client");
-                                    self.clients.remove(&token);
-                                    break;
-                                }
-                                if client_ref.unwrap().r#type != "player" {
-                                } else {
+                                println!("Received {} bytes from {:?} 1", n, token);
+                                if client.r#type != "player" || 1 == 1 {
                                     let cmd = String::from_utf8_lossy(&buf[..n]).trim().to_string();
                                     let mut parts = cmd.splitn(2, ' ');
                                     let name = parts.next().unwrap_or("");
                                     let arg = parts.next().unwrap_or("");
                                     println!("Received command '{}' from {:?}", cmd, token);
-                                    self.command_manager.execute(name, client_ref.unwrap(), arg);
+                                    self.command_manager.execute(name, client, arg);
                                 }
                             }
-                            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-
-							}
                             Err(_) => {
                                 let _ = client.get_socket_mut().shutdown(std::net::Shutdown::Both);
                                 self.clients.remove(&token);
                                 println!("Client {:?} disconnected (error)", token);
                             }
-
                         }
                     }
                 }
             }
-			if time::Instant::now().duration_since(self.game.last_update).as_millis() >= (1000/self.ticks) as u128 {
-				// println!("Game has been running for {} second", (time::Instant::now().duration_since(self.game.starting_time).as_millis()));
-				self.game.last_update = time::Instant::now();
-			}
-		}
+            if time::Instant::now()
+                .duration_since(self.game.last_update)
+                .as_millis()
+                >= (1000 / self.ticks) as u128
+            {
+                // println!("Game has been running for {} second", (time::Instant::now().duration_since(self.game.starting_time).as_millis()));
+                self.game.last_update = time::Instant::now();
+            }
+        }
     }
 }
-
-
