@@ -1,0 +1,7 @@
+{
+  "name": "zappy",
+  "main": "src/index.html",
+  "dependencies": {
+    "three": "^0.182.0"
+  }
+}
