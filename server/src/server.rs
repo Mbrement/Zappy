@@ -25,40 +25,64 @@ impl CommandManager {
     fn new_server() -> Self {
         let mut command_manager = CommandManager::new();
         command_manager.register("avance", |_c: &mut client::Client, _arg: &str| {
-            let _ = _c.get_socket_mut().write(format!("command {} recived {{{}}}\n", "avance", _arg).as_bytes());
-		});
+            let _ = _c
+                .get_socket_mut()
+                .write(format!("command {} recived {{{}}}\n", "avance", _arg).as_bytes());
+        });
         command_manager.register("droite", |_c: &mut client::Client, _arg: &str| {
-            let _ = _c.get_socket_mut().write(format!("command {} recived {{{}}}\n", "droite", _arg).as_bytes());
+            let _ = _c
+                .get_socket_mut()
+                .write(format!("command {} recived {{{}}}\n", "droite", _arg).as_bytes());
         });
         command_manager.register("gauche", |_c: &mut client::Client, _arg: &str| {
-            let _ = _c.get_socket_mut().write(format!("command {} recived {{{}}}\n", "gauche", _arg).as_bytes());
+            let _ = _c
+                .get_socket_mut()
+                .write(format!("command {} recived {{{}}}\n", "gauche", _arg).as_bytes());
         });
         command_manager.register("voir", |_c: &mut client::Client, _arg: &str| {
-            let _ = _c.get_socket_mut().write(format!("command {} recived {{{}}}\n", "voir", _arg).as_bytes());
+            let _ = _c
+                .get_socket_mut()
+                .write(format!("command {} recived {{{}}}\n", "voir", _arg).as_bytes());
         });
         command_manager.register("inventaire", |_c: &mut client::Client, _arg: &str| {
-            let _ = _c.get_socket_mut().write(format!("command {} recived {{{}}}\n", "inventaire", _arg).as_bytes());
+            let _ = _c
+                .get_socket_mut()
+                .write(format!("command {} recived {{{}}}\n", "inventaire", _arg).as_bytes());
         });
         command_manager.register("prend", |_c: &mut client::Client, _arg: &str| {
-            let _ = _c.get_socket_mut().write(format!("command {} recived {{{}}}\n", "prend", _arg).as_bytes());
+            let _ = _c
+                .get_socket_mut()
+                .write(format!("command {} recived {{{}}}\n", "prend", _arg).as_bytes());
         });
         command_manager.register("pose", |_c: &mut client::Client, _arg: &str| {
-            let _ = _c.get_socket_mut().write(format!("command {} recived {{{}}}\n", "pose", _arg).as_bytes());
+            let _ = _c
+                .get_socket_mut()
+                .write(format!("command {} recived {{{}}}\n", "pose", _arg).as_bytes());
         });
         command_manager.register("expluse", |_c: &mut client::Client, _arg: &str| {
-            let _ = _c.get_socket_mut().write(format!("command {} recived {{{}}}\n", "expluse", _arg).as_bytes());
+            let _ = _c
+                .get_socket_mut()
+                .write(format!("command {} recived {{{}}}\n", "expluse", _arg).as_bytes());
         });
         command_manager.register("broadcast", |_c: &mut client::Client, _arg: &str| {
-            let _ = _c.get_socket_mut().write(format!("command {} recived {{{}}}\n", "broadcast", _arg).as_bytes());
+            let _ = _c
+                .get_socket_mut()
+                .write(format!("command {} recived {{{}}}\n", "broadcast", _arg).as_bytes());
         });
         command_manager.register("incantation", |_c: &mut client::Client, _arg: &str| {
-            let _ = _c.get_socket_mut().write(format!("command {} recived {{{}}}\n", "incantation", _arg).as_bytes());
+            let _ = _c
+                .get_socket_mut()
+                .write(format!("command {} recived {{{}}}\n", "incantation", _arg).as_bytes());
         });
         command_manager.register("fork", |_c: &mut client::Client, _arg: &str| {
-            let _ = _c.get_socket_mut().write(format!("command {} recived {{{}}}\n", "fork", _arg).as_bytes());
+            let _ = _c
+                .get_socket_mut()
+                .write(format!("command {} recived {{{}}}\n", "fork", _arg).as_bytes());
         });
         command_manager.register("connect_nbr", |_c: &mut client::Client, _arg: &str| {
-            let _ = _c.get_socket_mut().write(format!("command {} recived {{{}}}\n", "connect_nbr", _arg).as_bytes());
+            let _ = _c
+                .get_socket_mut()
+                .write(format!("command {} recived {{{}}}\n", "connect_nbr", _arg).as_bytes());
         });
         command_manager
     }
@@ -292,7 +316,8 @@ impl Server {
                                     self.clients.remove(&token);
                                     break;
                                 }
-								self.clients.get_mut(&token).unwrap().r#type = "welcomed".to_string();
+                                self.clients.get_mut(&token).unwrap().r#type =
+                                    "welcomed".to_string();
                             }
                             Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => break,
                             Err(e) => {
@@ -314,31 +339,43 @@ impl Server {
                             }
                             Ok(n) => {
                                 println!("Received {} bytes from {:?} 1", n, token);
-                                if client.r#type == "player"{
+                                if client.r#type == "player" {
                                     let cmd = String::from_utf8_lossy(&buf[..n]).trim().to_string();
                                     let mut parts = cmd.splitn(2, ' ');
                                     let name = parts.next().unwrap_or("");
                                     let arg = parts.next().unwrap_or("");
                                     println!("Received command '{}' from {:?}", cmd, token);
                                     self.command_manager.execute(name, client, arg);
+                                } else if client.r#type == "welcomed" {
+                                    let cmd = String::from_utf8_lossy(&buf[..n]).trim().to_string();
+                                    if self.teams.contains_key(&cmd)
+                                        && self.teams[&cmd].len() < self.max_clients as usize
+                                    {
+                                        self.teams.get_mut(&cmd).unwrap().push(token);
+                                        client.r#type = "player".to_string();
+                                        let response = format!(
+                                            "{}",
+                                            self.max_clients as usize - self.teams[&cmd].len()
+                                        );
+                                        if client
+                                            .get_socket_mut()
+                                            .write(response.as_bytes())
+                                            .is_err()
+                                        {
+                                            self.clients.remove(&token);
+                                        }
+                                    } else {
+                                        let response =
+                                            format!("WHO THE FUCK ARE YOU {}\n", client.r#type);
+                                        if client
+                                            .get_socket_mut()
+                                            .write(response.as_bytes())
+                                            .is_err()
+                                        {
+                                            self.clients.remove(&token);
+                                        }
+                                    }
                                 }
-								else if client.r#type == "welcomed" {
-									let cmd = String::from_utf8_lossy(&buf[..n]).trim().to_string();
-									if self.teams.contains_key(&cmd) && self.teams[&cmd].len() < self.max_clients as usize {
-										self.teams.get_mut(&cmd).unwrap().push(token);
-										client.r#type = "player".to_string();
-										let response = format!("{}", self.max_clients as usize - self.teams[&cmd].len());
-										if client.get_socket_mut().write(response.as_bytes()).is_err() {
-											self.clients.remove(&token);
-										}
-									}
-								else {
-									let response = format!("WHO THE FUCK ARE YOU {}\n",  client.r#type);
-									if client.get_socket_mut().write(response.as_bytes()).is_err() {
-										self.clients.remove(&token);
-									}
-								}
-								}
                             }
                             Err(_) => {
                                 let _ = client.get_socket_mut().shutdown(std::net::Shutdown::Both);

@@ -53,13 +53,11 @@ impl Map {
     }
     pub fn fill_start(&mut self) {
         for row in &mut self.tiles {
-            for tile in row {
-                
-            }
+            for tile in row {}
         }
     }
 }
 
 pub fn fill_case(tile: &mut Tile) {
-	tile.strings.push("Case".into());
+    tile.strings.push("Case".into());
 }
