@@ -27,11 +27,15 @@ class Main {
      */
     parseArgv(argv) {
         if (argv.length !== 4 && argv.length !== 6) {
-            throw Error(ARGV_ERROR);
+            throw new Error(ARGV_ERROR);
         }
 
-        if (argv[0] !== '-n' || argv[2] !== '-p' || argv[4] && argv[4] !== '-h') {
-            throw Error(ARGV_ERROR)
+        if (argv[0] !== '-n' || argv[2] !== '-p') {
+            throw new Error(ARGV_ERROR)
+        }
+
+        if (argv.length === 6 && argv[4] !== '-h') {
+            throw new Error(ARGV_ERROR)
         }
 
         this.config.teamName = argv[1]
