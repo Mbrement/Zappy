@@ -18,3 +18,9 @@
 # Node packages
 node_modules
 package-lock.json
+
+# AIClient executable
+AIClient
+
+# ESbuild Bundle
+*.bundle.js

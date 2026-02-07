@@ -11,5 +11,8 @@
     "url": "https://github.com/Mbrement/symmetrical-pancake.git"
   },
   "private": true,
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "esbuild": "^0.27.3"
+  }
 }
