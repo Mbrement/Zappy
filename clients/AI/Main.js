@@ -44,7 +44,8 @@ class Main {
     }
 
     /**
-     * author Corentin (ccharton) Charton
+     * @author Corentin (ccharton) Charton
+     * @description Try to transform a given String into a valid Int Port
      * @param portStr {String} - The string Port to parse and convert to a Number(Int)
      * @returns {number} - The parsed port in Int.
      */
