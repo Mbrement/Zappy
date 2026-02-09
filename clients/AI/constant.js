@@ -19,7 +19,6 @@ export const DERAUMERE = 'deraumere'
 export const SIBUR = 'sibur'
 export const MENDIANE = 'mendiane'
 export const PHIRAS = 'phiras'
-export const THISTAME = 'thistame'
 export const THYSTAME = 'thystame'
 
 
@@ -38,14 +37,14 @@ export const TAKE_LINEMATE = `prend ${LINEMATE}\n`
 export const TAKE_DERAUMERE = `prend ${DERAUMERE}\n`
 export const TAKE_SIBUR = `prend ${SIBUR}\n`
 export const TAKE_PHIRAS = `prend ${PHIRAS}\n`
-export const TAKE_THISTAME = `prend ${THISTAME}\n`
+export const TAKE_THYSTAME = `prend ${THYSTAME}\n`
 
 export const PUT_FOOD = `pose ${FOOD}\n`
 export const PUT_LINEMATE = `pose ${LINEMATE}\n`
 export const PUT_DERAUMERE = `pose ${DERAUMERE}\n`
 export const PUT_SIBUR = `pose ${SIBUR}\n`
 export const PUT_PHIRAS = `pose ${PHIRAS}\n`
-export const PUT_THISTAME = `pose ${THISTAME}\n`
+export const PUT_THYSTAME = `pose ${THYSTAME}\n`
 
 export const KICK = 'expulse\n'
 export const INCANTATION = 'incatation\n'
