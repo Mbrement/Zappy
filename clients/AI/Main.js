@@ -1,6 +1,7 @@
 import process from 'node:process'
 import {ARGV_ERROR, DEFAULT_HOSTNAME} from "./constant.js";
 import NetworkClient from "./NetworkClient.js";
+import ProcessManager from "./ProcessManager.js";
 
 class Main {
     constructor() {
@@ -26,7 +27,12 @@ class Main {
         });
         this.networkClient.on('message', (message) => {
             console.log('Server has send: ', message)
+            if (message === 'FORK') {
+                this.processManager.fork()
+            }
         })
+
+        this.processManager = new ProcessManager(this.config.teamName, this.config.port, this.config.hostname)
     }
 
     /**

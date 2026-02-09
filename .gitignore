@@ -24,3 +24,6 @@ AIClient
 
 # ESbuild Bundle
 *.bundle.js
+
+# AIClients Logs
+logs
