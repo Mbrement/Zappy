@@ -1,4 +1,4 @@
-extern crate getopts;
+// extern crate getopts;
 use getopts::{Options, ParsingStyle};
 use std::env;
 use std::io::{Read, Write};
@@ -7,7 +7,7 @@ use mio::net::{TcpListener, TcpStream};
 use mio::{Events, Interest, Poll, Token};
 use std::collections::HashMap;
 
-use crate::server::Server;
+use crate::server::{Server, define};
 
 fn print_usage(program: &str, opts: Options) {
     let brief = format!("Usage: {} [options]", program);
@@ -22,7 +22,7 @@ fn main() -> std::io::Result<()> {
     opts.optopt("p", "port", "set the port for the server", "PORT");
     opts.optopt("x", "", "set the width of the map", "WIDTH");
     opts.optopt("y", "", "set the height of the map", "HEIGHT");
-    opts.optopt("n", "", "set team", "team_name_1 team_name_2 ...");
+    opts.reqopt("n", "", "set team", "team_name_1 team_name_2 ...");
     opts.optopt("c", "", "number of clients", "CLIENT");
     opts.optopt("t", "", "number of tick per sec", "TICK");
     opts.optflag("h", "help", "print this help menu");
@@ -43,9 +43,8 @@ fn main() -> std::io::Result<()> {
         println!("Default port : 4242");
         server = Server::new(4242);
     }
+    #[cfg(feature = "log")]
     println!("Server running on port: {}", server.get_port());
-    // server.set_port(8080);
-    // return Ok(());
 
     if matches.opt_present("h") {
         print_usage(&program, opts);
@@ -75,6 +74,7 @@ fn main() -> std::io::Result<()> {
     }
     if matches.opt_present("c") {
         let clients = matches.opt_str("c").unwrap();
+        #[cfg(feature = "log")]
         println!("Number of clients: {}", clients);
         if clients.parse::<u32>().is_ok() {
             server.set_clients_number(clients.parse().unwrap());
@@ -87,6 +87,7 @@ fn main() -> std::io::Result<()> {
     }
     if matches.opt_present("t") {
         let tick = matches.opt_str("t").unwrap();
+        #[cfg(feature = "log")]
         println!("Tick per second: {}", tick);
         if tick.parse::<u32>().is_ok() {
             server.set_ticks(tick.parse().unwrap());
@@ -100,18 +101,45 @@ fn main() -> std::io::Result<()> {
     if matches.opt_present("n") {
         //TODO FIXE, IF LAST ARG TEAM ARE NOT ADDED
         let teams = matches.opt_positions("n");
-        let mut team_names: Vec<String> = Vec::new();
+        // let mut team_names: Vec<String> = Vec::new();
         let mut tmp = 0usize;
         for arg in &args {
+            #[cfg(feature = "debug")]
+            println!("{}", arg);
             if arg.starts_with("-") {
                 tmp += 1;
             }
-            if tmp == teams[0] + 1 && !arg.starts_with("-") {
-                team_names.push(arg.clone());
+            if arg == define::GRAPHICAL_CLIENT {
+                eprintln!(
+                    "Found graphical client as team argument, {}, please do not use this as a team name",
+                    arg
+                );
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::InvalidInput,
+                    "graphical client name used as team",
+                ));
+            } else if server.teams.get(&arg.clone()).is_some() {
+                eprintln!(
+                    "Found duplicate {} team, please do not use this as a team name",
+                    arg
+                );
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::InvalidInput,
+                    "duplicate team name",
+                ));
+            } else if tmp == teams[0] + 1 && !arg.starts_with("-") {
+                server.teams.insert(arg.clone(), Vec::new());
             }
-            server.teams.insert(arg.clone(), Vec::new());
         }
-        println!("Teams: {:?}", team_names);
+        #[cfg(feature = "log")]
+        println!("Server teams: {:?}", server.teams);
+        if server.teams.is_empty() {
+            eprintln!("No teams found, please add teams using the -n option");
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                "no teams found",
+            ));
+        }
     }
 
     server.run();

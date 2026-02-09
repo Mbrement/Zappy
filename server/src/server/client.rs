@@ -5,12 +5,12 @@ use mio::net::TcpStream;
 pub struct Client {
     socket: TcpStream,
     token: Token,
-    pub r#type: String,
-    pub inventory: Vec<String>,
-    pub level: u8,
-    pub hunger: u32,
-    pub position: (u32, u32),
-    pub orientation: char,
+    pub(crate) r#type: String,
+    pub(crate) inventory: Vec<String>,
+    pub(crate) level: u8,
+    pub(crate) hunger: u32,
+    pub(crate) position: (u32, u32),
+    pub(crate) orientation: char,
 }
 
 impl client::Client {
