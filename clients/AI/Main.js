@@ -1,5 +1,6 @@
 import process from 'node:process'
 import {ARGV_ERROR, DEFAULT_HOSTNAME} from "./constant.js";
+import NetworkClient from "../NetworkClient.js";
 
 class Main {
     constructor() {
@@ -18,6 +19,12 @@ class Main {
             console.error(error.message);
             process.exit(1);
         }
+
+        this.networkClient = new NetworkClient(this.config.hostname, this.config.port)
+
+        this.networkClient.on('message', (message) => {
+            console.log('Server has send: ', message)
+        })
     }
 
     /**
