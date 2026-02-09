@@ -12,12 +12,15 @@ export const ARGV_ERROR = 'Usage: ./client -n <team> -p <port> [-h <hostname>]\n
  *     OBJECT    *
  ****************/
 
+export const PLAYER = 'player'
 export const FOOD = 'nourriture'
 export const LINEMATE = 'linemate'
 export const DERAUMERE = 'deraumere'
 export const SIBUR = 'sibur'
+export const MENDIANE = 'mendiane'
 export const PHIRAS = 'phiras'
 export const THISTAME = 'thistame'
+export const THYSTAME = 'thystame'
 
 
 /*****************
