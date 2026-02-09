@@ -26,6 +26,9 @@ class NetworkClient extends EventEmitter {
         this.socket.connect({host: this.address, port: this.port})
         this.socket.on('data', this.receiveMessageBind)
         this.socket.on('error', this.socketErrorBind)
+        this.socket.on('connect', () => {
+            this.emit('connect');
+        })
     }
 
     /**

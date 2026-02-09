@@ -21,7 +21,9 @@ class Main {
         }
 
         this.networkClient = new NetworkClient(this.config.hostname, this.config.port)
-
+        this.networkClient.on('connect', () => {
+            this.networkClient.send("Hii from the AI client\n");
+        });
         this.networkClient.on('message', (message) => {
             console.log('Server has send: ', message)
         })
