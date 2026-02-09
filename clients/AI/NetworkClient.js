@@ -1,5 +1,6 @@
 import EventEmitter from 'node:events';
 import {Socket} from 'node:net';
+import process from 'node:process'
 import PacketBuffer from "./PacketBuffer.js"
 
 class NetworkClient extends EventEmitter {
@@ -10,6 +11,8 @@ class NetworkClient extends EventEmitter {
         this.port = port;
 
         this.receiveMessageBind = this.receiveMessage.bind(this);
+        this.socketErrorBind = this.socketError.bind(this);
+
 
         this.socket = new Socket({keepalive: true, onread: this.receiveMessageBind})
         this.connect()
@@ -21,7 +24,8 @@ class NetworkClient extends EventEmitter {
      */
     connect() {
         this.socket.connect({host: this.address, port: this.port})
-        this.socket.on('data', this.receiveMessage.bind(this))
+        this.socket.on('data', this.receiveMessageBind)
+        this.socket.on('error', this.socketErrorBind)
     }
 
     /**
@@ -45,6 +49,29 @@ class NetworkClient extends EventEmitter {
         for (const message of messageArray) {
             this.emit('message', message)
         }
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Handle socket error and exit process.
+     * @param event {Object} -  The error Object from the socket.
+     */
+    socketError(event) {
+        console.log('An error on the socket connection has occured:', event.message)
+        console.log('AI client will now exit...')
+        if (!this.socket.destroyed) {
+            this.socket.destroy()
+        }
+        process.exit(1)
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Close the socket connection.
+     */
+    closeSocket() {
+        this.socket.end()
+        this.socket.destroy()
     }
 }
 
