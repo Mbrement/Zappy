@@ -5,7 +5,7 @@
     "three": "^0.182.0"
   },
   "scripts": {
-    "start": "nw ."
+    "start": "nw --enable-features=NWESM,NWChainImportNode ."
   },
   "type": "module",
   "devDependencies": {
