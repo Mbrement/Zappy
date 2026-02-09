@@ -1,14 +1,11 @@
 {
   "name": "zappy",
-  "main": "src/index.html",
+  "main": "src/electron-main.js",
   "dependencies": {
+    "electron": "^40.2.1",
     "three": "^0.182.0"
   },
   "scripts": {
-    "start": "nw --enable-features=NWESM,NWChainImportNode ."
-  },
-  "type": "module",
-  "devDependencies": {
-    "nw": "^0.107.0-sdk"
+    "start": "electron ."
   }
 }

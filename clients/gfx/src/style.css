@@ -14,7 +14,7 @@ h3 {
     color: white;
 }
 
-#app {
+#connectMenu {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -25,7 +25,7 @@ h3 {
     z-index: 5;
 }
 
-#connectContainer {
+#connectInputContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -44,6 +44,11 @@ h3 {
     padding: 0 20px;
 }
 
+.errorText {
+    color: red;
+    font-size: 1rem;
+}
+
 label {
     color: white;
 }
@@ -55,8 +60,4 @@ label {
     left: 0;
     outline: none;
     z-index: 1;
-}
-
-.tp-dfwv {
-    width: 350px !important;
 }
