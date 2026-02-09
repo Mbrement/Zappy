@@ -3,5 +3,12 @@
   "main": "src/index.html",
   "dependencies": {
     "three": "^0.182.0"
+  },
+  "scripts": {
+    "start": "nw ."
+  },
+  "type": "module",
+  "devDependencies": {
+    "nw": "^0.107.0-sdk"
   }
 }

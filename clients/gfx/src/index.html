@@ -7,7 +7,20 @@
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+    <div id="app">
+        <div id="connectContainer">
+            <h3>Connect to server</h3>
+            <br />
+            <label for="address">Ip address of the server</label>
+            <input type="text" id="address" name="address" placeholder="localhost" required/>
+            <br />
+            <label for="port">Port</label>
+            <input type="text" id="port" name="port" placeholder="4242" required/>
+            <br />
+            <button id="connectButton">Connect</button>
+        </div>
+    </div>
     <canvas id="webgpu" class="webgpu"></canvas>
-    <script type="module" src="./script.js"></script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>

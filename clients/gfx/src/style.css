@@ -10,12 +10,51 @@ body
     overflow: hidden;
 }
 
-.webgl
+h3 {
+    color: white;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-width: 100vw;
+    background: #222222;
+    z-index: 5;
+}
+
+#connectContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 25vh;
+    min-width: 25vw;
+    background: #444444;
+    z-index: 6;
+}
+
+#connectButton {
+    display: flex;
+    background: #00bb00;
+    color: white;
+    line-height: 2.5;
+    padding: 0 20px;
+}
+
+label {
+    color: white;
+}
+
+.webgpu
 {
     position: fixed;
     top: 0;
     left: 0;
     outline: none;
+    z-index: 1;
 }
 
 .tp-dfwv {

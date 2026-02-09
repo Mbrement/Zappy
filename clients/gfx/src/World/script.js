@@ -4,15 +4,8 @@ nwWindow.showDevTools()
 const THREE = require('three/webgpu')
 const {OrbitControls} = require('three/examples/jsm/controls/OrbitControls.js');
 
-// const websocket = new WebSocket("ws://localhost:4242")
-//
-// websocket.addEventListener("open", (e) => {
-//     console.log("CONNECTED", e);
-// })
-//
-// websocket.addEventListener("error", (e) => {
-//     console.log(`ERROR`, e);
-// });
+const net = require('node:net')
+console.log(net)
 
 /**
  * Base
