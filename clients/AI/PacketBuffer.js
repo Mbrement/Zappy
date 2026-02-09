@@ -21,6 +21,10 @@ class PacketBuffer {
      * returns {string[]} - The extracted array of message from the buffer or an empty array.
      */
     extractMessage() {
+        if (!this.#buffer.includes('\n')) {
+            return []
+        }
+
         const messageArray = this.#buffer.split('\n')
         this.#buffer = messageArray.pop()
 
