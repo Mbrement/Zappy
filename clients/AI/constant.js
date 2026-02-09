@@ -1,6 +1,5 @@
 export const DEFAULT_HOSTNAME = 'localhost';
 
-
 /*****************
  *     ERROR     *
  ****************/
@@ -46,6 +45,7 @@ export const TAKE_FOOD = `prend ${FOOD}\n`
 export const TAKE_LINEMATE = `prend ${LINEMATE}\n`
 export const TAKE_DERAUMERE = `prend ${DERAUMERE}\n`
 export const TAKE_SIBUR = `prend ${SIBUR}\n`
+export const TAKE_MENDIANE = `prend ${MENDIANE}\n`
 export const TAKE_PHIRAS = `prend ${PHIRAS}\n`
 export const TAKE_THYSTAME = `prend ${THYSTAME}\n`
 
@@ -53,6 +53,7 @@ export const PUT_FOOD = `pose ${FOOD}\n`
 export const PUT_LINEMATE = `pose ${LINEMATE}\n`
 export const PUT_DERAUMERE = `pose ${DERAUMERE}\n`
 export const PUT_SIBUR = `pose ${SIBUR}\n`
+export const PUT_MENDIANE = `pose ${MENDIANE}\n`
 export const PUT_PHIRAS = `pose ${PHIRAS}\n`
 export const PUT_THYSTAME = `pose ${THYSTAME}\n`
 
