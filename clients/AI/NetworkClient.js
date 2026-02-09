@@ -1,6 +1,6 @@
 import EventEmitter from 'node:events';
 import {Socket} from 'node:net';
-import PacketBuffer from "./AI/PacketBuffer"
+import PacketBuffer from "./PacketBuffer.js"
 
 class NetworkClient extends EventEmitter {
     constructor(address, port) {

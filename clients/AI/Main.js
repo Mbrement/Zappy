@@ -1,6 +1,6 @@
 import process from 'node:process'
 import {ARGV_ERROR, DEFAULT_HOSTNAME} from "./constant.js";
-import NetworkClient from "../NetworkClient.js";
+import NetworkClient from "./NetworkClient.js";
 
 class Main {
     constructor() {
