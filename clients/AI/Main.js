@@ -29,8 +29,9 @@ class Main {
         import('./communication/NetworkClient.js').then(({ default: NetworkClient }) => {
             this.networkClient = new NetworkClient(this.config.hostname, this.config.port)
         })
-
-        this.processManager = new ProcessManager(this.config.teamName, this.config.port, this.config.hostname)
+        import('./communication/CommandManager.js').then(({ default: CommandManager }) => {
+            this.commandManager = new CommandManager(this.networkClient)
+        })
         import('./ProcessManager.js').then(({ default: ProcessManager }) => {
             this.processManager = new ProcessManager(this.config.teamName, this.config.port, this.config.hostname)
         })
