@@ -1,7 +1,5 @@
 import process from 'node:process'
 import {ARGV_ERROR, DEFAULT_HOSTNAME} from "./constant.js";
-import NetworkClient from "./NetworkClient.js";
-import ProcessManager from "./ProcessManager.js";
 
 let singleton = null
 
@@ -28,18 +26,14 @@ class Main {
             process.exit(1);
         }
 
-        this.networkClient = new NetworkClient(this.config.hostname, this.config.port)
-        this.networkClient.on('connect', () => {
-            this.networkClient.send("Hii from the AI client\n");
-        });
-        this.networkClient.on('message', (message) => {
-            console.log('Server has send: ', message)
-            if (message === 'FORK') {
-                this.processManager.fork()
-            }
+        import('./communication/NetworkClient.js').then(({ default: NetworkClient }) => {
+            this.networkClient = new NetworkClient(this.config.hostname, this.config.port)
         })
 
         this.processManager = new ProcessManager(this.config.teamName, this.config.port, this.config.hostname)
+        import('./ProcessManager.js').then(({ default: ProcessManager }) => {
+            this.processManager = new ProcessManager(this.config.teamName, this.config.port, this.config.hostname)
+        })
     }
 
     /**
