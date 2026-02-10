@@ -1,17 +1,20 @@
-use crate::server;
+use crate::server::client;
+use crate::server::command_manager::CommandManager;
 use crate::server::map::Map;
+use rand::RngExt;
+use crate::server::{self};
 use mio::Token;
 use std::collections::HashMap;
 use std::time;
 
 pub struct Game {
-    pub(crate) team: HashMap<String, Vec<Token>>,
+    pub(crate) team: HashMap<String, Vec<mio::Token>>,
     pub(crate) map: server::map::Map,
     pub(crate) starting_time: time::Instant,
     pub(crate) last_update: time::Instant,
     _is_running: bool,
     pub(crate) starting: bool,
-    _tick: u32,
+    pub(crate) _tick: u128,
 }
 
 impl Game {
@@ -66,5 +69,67 @@ impl Game {
     }
     pub fn update_player_position(&mut self, token: Token, position: (u32, u32)) {
         self.map.player_position.insert(token, position);
+    }
+
+    pub(crate) fn change_player_orientation(
+        &mut self,
+        player: &mut client::Client,
+        rotation: String,
+    ) {
+        let orientation = player.orientation.clone();
+        if rotation == "droite" {
+            player.orientation = match orientation {
+                'N' => 'E',
+                'E' => 'S',
+                'S' => 'W',
+                'W' => 'N',
+                _ => orientation,
+            };
+        } else if rotation == "gauche" {
+            player.orientation = match orientation {
+                'N' => 'W',
+                'E' => 'N',
+                'S' => 'E',
+                'W' => 'S',
+                _ => orientation,
+            };
+        }
+    }
+
+    pub(crate) fn move_player(&mut self, player: &mut client::Client) {
+        let position = self.get_player_position(player.get_token());
+        // Move the player on the map
+        match player.orientation {
+            'N' => {
+                self.map
+                    .move_player(&player.get_token(), (position.0, position.1 - 1));
+            }
+            'E' => {
+                self.map
+                    .move_player(&player.get_token(), (position.0 + 1, position.1));
+            }
+            'S' => {
+                self.map
+                    .move_player(&player.get_token(), (position.0, position.1 + 1));
+            }
+            'W' => {
+                self.map
+                    .move_player(&player.get_token(), (position.0 - 1, position.1));
+            }
+            _ => {}
+        }
+    }
+
+    pub fn spawn_player(&mut self, token: Token, team: &str) -> (u32, u32) {
+        let x = self
+            .map
+            .rng
+            .random_range((0..self.map.get_width()));
+        let y = self
+            .map
+            .rng
+            .random_range((0..self.map.get_height()));
+        self.map.player_position.insert(token, (x, y));
+        (x, y)
     }
 }

@@ -4,11 +4,11 @@ use mio::net::TcpStream;
 
 pub struct Client {
     socket: TcpStream,
-    token: Token,
+    pub(crate) token: Token,
     pub(crate) r#type: String,
     pub(crate) inventory: Vec<String>,
     pub(crate) level: u8,
-    pub(crate) hunger: u32,
+    pub(crate) hunger: u128,
     pub(crate) position: (u32, u32),
     pub(crate) orientation: char,
 }

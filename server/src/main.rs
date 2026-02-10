@@ -1,3 +1,4 @@
+#![allow(warnings)]
 // extern crate getopts;
 use getopts::{Options, ParsingStyle};
 use std::env;
@@ -72,19 +73,7 @@ fn main() -> std::io::Result<()> {
             );
         }
     }
-    if matches.opt_present("c") {
-        let clients = matches.opt_str("c").unwrap();
-        #[cfg(feature = "log")]
-        println!("Number of clients: {}", clients);
-        if clients.parse::<u32>().is_ok() {
-            server.set_clients_number(clients.parse().unwrap());
-        } else {
-            eprintln!(
-                "Invalid client value, keeping default value of {}",
-                server.get_clients_number()
-            );
-        }
-    }
+
     if matches.opt_present("t") {
         let tick = matches.opt_str("t").unwrap();
         #[cfg(feature = "log")]
@@ -129,6 +118,7 @@ fn main() -> std::io::Result<()> {
                 ));
             } else if tmp == teams[0] + 1 && !arg.starts_with("-") {
                 server.teams.insert(arg.clone(), Vec::new());
+                server._game.team.insert(arg.clone(), Vec::new());
             }
         }
         #[cfg(feature = "log")]
@@ -141,7 +131,19 @@ fn main() -> std::io::Result<()> {
             ));
         }
     }
-
+    if matches.opt_present("c") {
+        let clients = matches.opt_str("c").unwrap();
+        #[cfg(feature = "log")]
+        println!("Number of clients: {}", clients);
+        if clients.parse::<u32>().is_ok() {
+            server.set_clients_number(clients.parse().unwrap());
+        } else {
+            eprintln!(
+                "Invalid client value, keeping default value of {}",
+                10
+            );
+        }
+    }
     server.run();
 
     return Ok(());
