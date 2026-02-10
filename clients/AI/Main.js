@@ -3,8 +3,15 @@ import {ARGV_ERROR, DEFAULT_HOSTNAME} from "./constant.js";
 import NetworkClient from "./NetworkClient.js";
 import ProcessManager from "./ProcessManager.js";
 
+let singleton = null
+
 class Main {
     constructor() {
+        if (singleton) {
+            return singleton
+        }
+        singleton = this
+
         this.config = {
             teamName: null,
             port: null,
@@ -79,4 +86,6 @@ class Main {
     }
 }
 
-new Main();
+export default Main;
+
+new Main()
