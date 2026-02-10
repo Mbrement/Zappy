@@ -42,11 +42,14 @@ h3 {
     color: white;
     line-height: 2.5;
     padding: 0 20px;
+    margin-bottom: 10px;
 }
 
 .errorText {
     color: red;
     font-size: 1rem;
+    margin-top: 4px;
+    margin-bottom: 2px;
 }
 
 label {

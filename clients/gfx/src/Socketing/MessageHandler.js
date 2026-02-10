@@ -26,7 +26,7 @@ class MessageHandler {
      */
     handleError() {
         window.mainInstance.eventManager.modules.ConnectMenu.showConnectMenu()
-        // TODO : Display error
+        window.mainInstance.eventManager.modules.ConnectMenu.showConnectionError("Couldn't connect to server")
     }
 
     /**

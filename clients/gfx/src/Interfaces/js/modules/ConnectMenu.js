@@ -36,6 +36,7 @@ class ConnectMenu {
     resetErrors() {
         document.getElementById('addressError').innerHTML = ""
         document.getElementById('portError').innerHTML = ""
+        document.getElementById('connectionError').innerHTML = ""
     }
 
     /**
@@ -58,13 +59,23 @@ class ConnectMenu {
 
     /**
      * @author Emma (epolitze) Politzer
+     * @description Shows address error on the connectMenu
+     * @param error - the error message
+     */
+    showConnectionError(error) {
+        document.getElementById('connectionError').innerHTML = error
+    }
+
+
+    /**
+     * @author Emma (epolitze) Politzer
      * @description If address and port are given and usable we try to connect to the server
      * This is called when the "connect" button is clicked
      */
     connect() {
-        window.mainInstance.connectToServer("localhost", 4242) // TEMPORARY
-        window.mainInstance.startVisualisation() // TEMPORARY
-        return // TEMPORARY
+        // window.mainInstance.connectToServer("localhost", 4242) // TEMPORARY
+        // window.mainInstance.startVisualisation() // TEMPORARY
+        // return // TEMPORARY
 
         this.resetErrors();
         this.address = document.getElementById("address").value;
