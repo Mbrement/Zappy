@@ -64,6 +64,19 @@ export const AVAILABLE_CONNECTION = 'connect_nbr\n'
 
 
 /*****************
+ *  SERVER RSP   *
+ ****************/
+
+export const WELCOME = 'BIENVENUE'
+export const SEE_REGEX =  /^\{([\w\s]*,?)*}$/
+export const INVENTORY_REGEX = /^\{(\s*\w+\s+\d+,?)*\s*}$/
+export const OK = 'ok'
+export const KO = 'ko'
+export const START_INCANTION = 'elevation en cours'
+export const INCANTATION_DONE = /^niveau actuel : \d$/
+export const DEATH = 'mort'
+
+/*****************
  * BROADCAST MSG *
  ****************/
 // TODO: DEFINE AVAILABLE BROADCAST MESSAGE
