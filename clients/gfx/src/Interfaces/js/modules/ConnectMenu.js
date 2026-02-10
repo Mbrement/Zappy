@@ -54,10 +54,7 @@ class ConnectMenu {
             return;
         }
 
-        const main = require("../../../main")
-        main.connectToServer(this.address, this.port)
-
-        this.hideConnectMenu()
+        window.mainInstance.connectToServer(this.address, this.port)
     }
 
     showConnectMenu() {

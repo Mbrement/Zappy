@@ -1,19 +1,19 @@
 const NetworkClient = require('./Socketing/NetworkClient');
 const THREE = require('three/webgpu');
 const {OrbitControls} = require('three/examples/jsm/controls/OrbitControls.js');
+const MessageHandler = require("./Socketing/MessageHandler");
+const EventManager = require('./Interfaces/js/EventManager')
 
-let singleton = null;
 class Main {
     constructor() {
-        if (singleton) {
-            return singleton
+        if (window.mainInstance) {
+            return window.mainInstance
         }
 
-        const EventManager = require('./Interfaces/js/EventManager')
         this.eventManager = new EventManager();
-        console.log("Starting Main", this.eventManager);
+        this.messageHandler = new MessageHandler();
 
-        singleton = this
+        window.mainInstance = this
     }
 
     /**
