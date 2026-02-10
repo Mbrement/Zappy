@@ -2,16 +2,18 @@ const NetworkClient = require('./Socketing/NetworkClient');
 const THREE = require('three/webgpu');
 const {OrbitControls} = require('three/examples/jsm/controls/OrbitControls.js');
 
-let main;
+let singleton = null;
 class Main {
     constructor() {
-        if (main) {
-            return main
+        if (singleton) {
+            return singleton
         }
 
         const EventManager = require('./Interfaces/js/EventManager')
         this.eventManager = new EventManager();
         console.log("Starting Main", this.eventManager);
+
+        singleton = this
     }
 
     /**
@@ -85,5 +87,4 @@ class Main {
     }
 }
 
-main = new Main()
-module.exports = main
+module.exports = new Main()

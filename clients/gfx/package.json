@@ -1,6 +1,6 @@
 {
   "name": "zappy",
-  "main": "src/electron-main.js",
+  "main": "src/electron.js",
   "dependencies": {
     "electron": "^40.2.1",
     "three": "^0.182.0"
