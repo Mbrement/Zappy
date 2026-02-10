@@ -2,6 +2,7 @@ const NetworkClient = require('./Socketing/NetworkClient');
 const MessageHandler = require("./Socketing/MessageHandler");
 const EventManager = require('./Interfaces/js/EventManager')
 const World = require("./World/World");
+const GameState = require("./World/GameState");
 
 class Main {
     constructor() {
@@ -9,6 +10,7 @@ class Main {
             return window.mainInstance
         }
 
+        this.gameState = new GameState();
         this.eventManager = new EventManager();
         this.messageHandler = new MessageHandler();
 
@@ -23,7 +25,7 @@ class Main {
      */
     connectToServer(address, port) {
         this.networkClient = new NetworkClient(address, port);
-        this.messageHandler.setupHandlers(this.networkClient)
+        this.messageHandler.setupHandlers()
     }
 
     /**
