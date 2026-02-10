@@ -35,4 +35,4 @@ class PacketBuffer {
     }
 }
 
-module.exports.PacketBuffer = new PacketBuffer()
+module.exports = new PacketBuffer()
