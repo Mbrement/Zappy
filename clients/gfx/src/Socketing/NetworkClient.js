@@ -58,6 +58,7 @@ class NetworkClient extends EventEmitter {
     socketError(event) {
         console.log('An error on the socket connection has occured:', event.message)
         console.log('AI client will now exit...')
+        this.emit('error', event)
         if (!this.socket.destroyed) {
             this.socket.destroy()
         }

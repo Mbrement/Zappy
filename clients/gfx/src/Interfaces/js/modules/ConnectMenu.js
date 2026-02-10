@@ -62,6 +62,10 @@ class ConnectMenu {
      * This is called when the "connect" button is clicked
      */
     connect() {
+        window.mainInstance.connectToServer("localhost", 4242) // TEMPORARY
+        window.mainInstance.startVisualisation() // TEMPORARY
+        return // TEMPORARY
+
         this.resetErrors();
         this.address = document.getElementById("address").value;
         this.port = document.getElementById("port").value;
