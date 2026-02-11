@@ -21,12 +21,13 @@ class GameManager {
     }
 
     async awaitRessourcesAvailableFromMain() {
-        while(!this.main.commandManager) {
+        while(!this.main.commandManager && !this.main.responseParser) {
             await new Promise((resolve) => {setTimeout(resolve, 100)})
         }
 
         this.teamName = this.main.config.teamName
         this.commandManager = this.main.commandManager
+        this.responseParser = this.main.responseParser
     }
 
     /**

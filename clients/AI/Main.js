@@ -32,6 +32,9 @@ class Main {
         import('./communication/CommandManager.js').then(({ default: CommandManager }) => {
             this.commandManager = new CommandManager(this.networkClient)
         })
+        import('./communication/ResponseParser.js').then(({ default: ResponseParser }) => {
+            this.responseParser = new ResponseParser()
+        })
         import('./ProcessManager.js').then(({ default: ProcessManager }) => {
             this.processManager = new ProcessManager(this.config.teamName, this.config.port, this.config.hostname)
         })

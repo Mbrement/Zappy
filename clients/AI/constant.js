@@ -37,6 +37,18 @@ export const INCANTATION_TABLE = [
     {player: 6, linemate: 2, deraumere: 2, sibur: 2, mendiane: 2, phiras: 2, thystame: 1},
 ]
 
+export const INVENTORY_TEMPLATE = {
+    nourriture: 0,
+    linemate: 0,
+    deraumere: 0,
+    sibur: 0,
+    mendiane: 0,
+    phiras: 0,
+    thystame: 0
+}
+
+export const VALID_ITEM_LIST = new Set([PLAYER, ...Object.keys(INVENTORY_TEMPLATE)])
+
 
 /*****************
  *  SERVER MSG   *
@@ -75,7 +87,7 @@ export const AVAILABLE_CONNECTION = 'connect_nbr\n'
  ****************/
 
 export const WELCOME = 'BIENVENUE'
-export const SEE_REGEX =  /^\{([\w\s]*,?)*}$/
+export const VISION_REGEX =  /^\{([\w\s]*,?)*}$/
 export const INVENTORY_REGEX = /^\{(\s*\w+\s+\d+,?)*\s*}$/
 export const OK = 'ok'
 export const KO = 'ko'
