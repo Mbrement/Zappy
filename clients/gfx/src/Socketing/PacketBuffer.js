@@ -29,7 +29,7 @@ class PacketBuffer {
         this.#buffer = messageArray.pop()
 
         console.log('Message Array:', messageArray)
-        console.log('Buffer:', this.#buffer)
+        // console.log('Buffer:', this.#buffer)
 
         return messageArray
     }

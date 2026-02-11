@@ -41,7 +41,7 @@ class NetworkClient extends EventEmitter {
      * @param message {Buffer} - The message from server.
      */
     receiveMessage(message) {
-        console.log('receive Message with buffer :', message.toString())
+        // console.log('receive Message with buffer :', message.toString())
         PacketBuffer.push(message.toString())
 
         const messageArray = PacketBuffer.extractMessage()
