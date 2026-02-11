@@ -1,5 +1,5 @@
 import process from 'node:process'
-import {ARGV_ERROR, DEFAULT_HOSTNAME} from "./constant.js";
+import {ARGV_ERROR, DEFAULT_HOSTNAME, ONLY_NUMBER_REGEX} from "./constant.js";
 
 let singleton = null
 
@@ -67,7 +67,7 @@ class Main {
      * @returns {number} - The parsed port in Int.
      */
     parsePort(portStr) {
-        if (!/^\d+$/.test(portStr)) {
+        if (!ONLY_NUMBER_REGEX.test(portStr)) {
             throw new Error(`Port "${portStr}" is not a valid Int.\n\n${ARGV_ERROR}`);
         }
 

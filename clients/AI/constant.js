@@ -9,6 +9,12 @@ export const ARGV_ERROR = 'Usage: ./client -n <team> -p <port> [-h <hostname>]\n
 export const NO_PROMISE_TO_RESOLVE = 'Server has send a message but no promise found to resolve'
 
 /*****************
+ *     REGEX     *
+ ****************/
+export const ONLY_NUMBER_REGEX = /^\d+$/
+
+
+/*****************
  *     OBJECT    *
  ****************/
 
