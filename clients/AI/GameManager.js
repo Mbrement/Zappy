@@ -1,4 +1,5 @@
 import Main from "./Main.js";
+import {COMMAND_COST} from "./constant.js";
 
 class GameManager {
     constructor() {
@@ -73,6 +74,19 @@ class GameManager {
         const mapSize = handskakeAnswer[1].split(' ')
         this.mapSize.x = mapSize[0]
         this.mapSize.y = mapSize[1]
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Update the food actually available after a command resolve
+     * @param commandExecuted {String} - The resolved command already stripped
+     * (if command is 'pose sibur\n' param should be 'pose')
+     */
+    updateFoodAvailable(commandExecuted) {
+        if (COMMAND_COST.hasOwnProperty(commandExecuted)) {
+            this.inventory.nourriture -= COMMAND_COST[commandExecuted]
+            console.log('Command', commandExecuted, 'Costed:', COMMAND_COST[commandExecuted], 'Food left:', this.inventory.nourriture)
+        }
     }
 }
 

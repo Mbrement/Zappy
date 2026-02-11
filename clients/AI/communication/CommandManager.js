@@ -87,6 +87,7 @@ class CommandManager {
             const requestToResolve = this.#inProcessQueue.shift()
 
             requestToResolve.resolve(requestToResolve.answer)
+            GameManager.updateFoodAvailable(requestToResolve.command.trim().split(' ').at(0))
             this.trySend()
         }
     }

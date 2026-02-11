@@ -81,7 +81,20 @@ export const KICK = 'expulse\n'
 export const INCANTATION = 'incantation\n'
 export const FORK = 'fork\n'
 export const AVAILABLE_CONNECTION = 'connect_nbr\n'
-
+export const COMMAND_COST = {
+    avance: 7,
+    droite: 7,
+    gauche: 7,
+    voir: 7,
+    inventaire: 1,
+    prend: 7,
+    pose: 7,
+    expulse: 7,
+    broadcast: 7,
+    incantation: 300,
+    fork: 42,
+    connect_nbr: 0
+}
 
 /*****************
  *  SERVER RSP   *
