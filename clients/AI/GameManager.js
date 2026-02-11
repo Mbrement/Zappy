@@ -62,7 +62,7 @@ class GameManager {
      */
     async handshakeServer() {
         const handskakeAnswer = await this.commandManager.sendCommand(`${this.teamName}\n`, 2)
-        console.log('Handshake resolved with answer', teamNameRequest)
+        console.log('Handshake resolved with answer', handskakeAnswer)
 
         if (Number(handskakeAnswer[0]) < 1) {
             // TODO: Cleanly exit
