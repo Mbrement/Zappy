@@ -11,6 +11,7 @@ export const NO_PROMISE_TO_RESOLVE = 'Server has send a message but no promise f
 /*****************
  *     REGEX     *
  ****************/
+
 export const ONLY_NUMBER_REGEX = /^\d+$/
 
 
@@ -77,7 +78,7 @@ export const PUT_PHIRAS = `pose ${PHIRAS}\n`
 export const PUT_THYSTAME = `pose ${THYSTAME}\n`
 
 export const KICK = 'expulse\n'
-export const INCANTATION = 'incatation\n'
+export const INCANTATION = 'incantation\n'
 export const FORK = 'fork\n'
 export const AVAILABLE_CONNECTION = 'connect_nbr\n'
 
