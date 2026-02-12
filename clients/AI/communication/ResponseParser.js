@@ -82,11 +82,11 @@ class ResponseParser {
         message = message.trim().split(' ')
 
         const parsedBroadcast = {...BROADCAST_MSG_OBJECT}
-        parsedBroadcast.direction = direction
+        parsedBroadcast.direction = Number(direction)
         parsedBroadcast.teamName = message[0]
         parsedBroadcast.senderID = message[1]
         parsedBroadcast.action = message[2]
-        parsedBroadcast.argument = message[3] || null
+        parsedBroadcast.argument = Number(message[3]) || null
 
         return parsedBroadcast
     }
