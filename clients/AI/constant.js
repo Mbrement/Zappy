@@ -126,5 +126,5 @@ export const BROADCAST_MSG_OBJECT = {
     teamName: null,
     senderID: null,
     action: null,
-    arguments: null
+    argument: null
 }

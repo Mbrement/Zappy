@@ -86,7 +86,7 @@ class ResponseParser {
         parsedBroadcast.teamName = message[0]
         parsedBroadcast.senderID = message[1]
         parsedBroadcast.action = message[2]
-        parsedBroadcast.arguments = message[3] || null
+        parsedBroadcast.argument = message[3] || null
 
         return parsedBroadcast
     }
