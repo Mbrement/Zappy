@@ -8,7 +8,7 @@ pub const T5_MAT: &str = "phiras";
 pub const T6_MAT: &str = "thystame";
 
 //SERVER CONSTANT
-pub const GRAPHICAL_CLIENT: &str = "GRAPHICAL_CLIENT";
+pub const GRAPHICAL_CLIENT: &str = "GRAPHIC";
 pub const R_OK: &str = "ok\n";
 pub const R_KO: &str = "ko\n";
 
