@@ -1,9 +1,9 @@
 use crate::server::client;
 use crate::server::command_manager::CommandManager;
 use crate::server::map::Map;
-use rand::RngExt;
 use crate::server::{self};
 use mio::Token;
+use rand::RngExt;
 use std::collections::HashMap;
 use std::time;
 
@@ -121,14 +121,8 @@ impl Game {
     }
 
     pub fn spawn_player(&mut self, token: Token, team: &str) -> (u32, u32) {
-        let x = self
-            .map
-            .rng
-            .random_range((0..self.map.get_width()));
-        let y = self
-            .map
-            .rng
-            .random_range((0..self.map.get_height()));
+        let x = self.map.rng.random_range((0..self.map.get_width()));
+        let y = self.map.rng.random_range((0..self.map.get_height()));
         self.map.player_position.insert(token, (x, y));
         (x, y)
     }

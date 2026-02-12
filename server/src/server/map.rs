@@ -7,7 +7,7 @@ pub struct Map {
     width: u32,
     height: u32,
     tiles: Vec<Vec<Tile>>,
-	pub(crate) egg_position: HashMap<String, (u32, u32, u128)>,
+    pub(crate) egg_position: HashMap<String, (u32, u32, u128)>,
     pub(crate) player_position: HashMap<Token, (u32, u32)>,
 }
 
@@ -33,7 +33,7 @@ impl Map {
             height,
             tiles: vec![vec![Tile::new(); width as usize]; height as usize],
             player_position: HashMap::new(),
-			egg_position: HashMap::new(),
+            egg_position: HashMap::new(),
         }
     }
     pub fn set_width(&mut self, width: u32) {

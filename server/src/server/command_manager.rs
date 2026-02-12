@@ -94,6 +94,12 @@ impl CommandManager {
                     .write(format!("command {} recived {{{}}}\n", "droite", _arg).as_bytes());
                 #[cfg(feature = "log")]
                 println!("command {} recived {{{}}} {:?}", "droite", _arg, _c);
+                if let Some(client) = server._clients.get_mut(&_c) {
+                    server
+                        ._game
+                        .change_player_orientation(client, "droite".into());
+                    let _ = client.get_socket_mut().write(format!("ok\n").as_bytes());
+                }
             },
         );
         command_manager.register(
@@ -107,6 +113,12 @@ impl CommandManager {
                     .write(format!("command {} recived {{{}}}\n", "gauche", _arg).as_bytes());
                 #[cfg(feature = "log")]
                 println!("command {} recived {{{}}} {:?}", "gauche", _arg, _c);
+                if let Some(client) = server._clients.get_mut(&_c) {
+                    server
+                        ._game
+                        .change_player_orientation(client, "gauche".into());
+                    let _ = client.get_socket_mut().write(format!("ok\n").as_bytes());
+                }
             },
         );
         command_manager.register("voir", |_c: mio::Token, server: &mut Server, _arg: &str| {
@@ -272,10 +284,30 @@ impl CommandManager {
                         self.order.get_mut(&token).unwrap().pop_front()
                     {
                         self.execute(&command, tkn, &arg, server);
+                        match command.as_str() {
+                            "voir" | "prend" | "pose" | "droite" | "gauche" | "avance"
+                            | "expulse" | "broadcast" => {
+                                self.next_execute.insert(token, server._game._tick + 7)
+                            }
+                            "inventaire" => self.next_execute.insert(token, server._game._tick + 1),
+                            "fork" => self.next_execute.insert(token, server._game._tick + 42),
+                            "incantation" => {
+                                self.next_execute.insert(token, server._game._tick + 300)
+                            }
+                            // "connect_nbr" => self.next_execute.insert(token, server._game._tick + 0) ==> useless
+                            _ => self.next_execute.insert(token, server._game._tick + 1),
+                        };
                     }
                 }
             }
         }
+    }
+
+    pub fn next_command_time(&self, token: &Token) -> Option<u128> {
+        self.next_execute.get(token).cloned()
+    }
+    pub fn set_next_command_time(&mut self, token: Token, time: u128) {
+        self.next_execute.insert(token, time);
     }
 }
 
