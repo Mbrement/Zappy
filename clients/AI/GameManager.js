@@ -1,5 +1,5 @@
 import Main from "./Main.js";
-import {COMMAND_COST} from "./constant.js";
+import {COMMAND_COST, ONLY_NUMBER_REGEX} from "./constant.js";
 
 class GameManager {
     constructor() {
@@ -66,12 +66,17 @@ class GameManager {
         const handskakeAnswer = await this.commandManager.sendCommand(`${this.teamName}\n`, 2)
         console.log('Handshake resolved with answer', handskakeAnswer)
 
-        if (Number(handskakeAnswer[0]) < 1) {
+        if (!ONLY_NUMBER_REGEX.test(handskakeAnswer[0]) && Number(handskakeAnswer[0]) < 1) {
             // TODO: Cleanly exit
             process.exit(1)
         }
 
         const mapSize = handskakeAnswer[1].split(' ')
+        if (mapSize.length !== 2 || !ONLY_NUMBER_REGEX.test(mapSize[0]) || !ONLY_NUMBER_REGEX.test(mapSize[1])) {
+            // TODO: Cleanly exit
+            process.exit(1)
+        }
+
         this.mapSize.x = mapSize[0]
         this.mapSize.y = mapSize[1]
     }
