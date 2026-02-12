@@ -114,7 +114,7 @@ export const DEATH = 'mort'
  ****************/
 // Broadcast MSG format: BROADCAST [TEAM_NAME] [SENDER_ID] [ACTION] [ARGUMENTS...]
 
-export const BROADCAST_RECEIVED_REGEX = /^message [1-8], (?:\S* ){2}(?:\S*){1}(?: \d){0,1}$/
+export const BROADCAST_RECEIVED_REGEX = /^message [0-8], (?:\S* ){2}(?:\S*){1}(?: \d){0,1}$/
 export const BROADCAST = 'broadcast'
 export const BROAD_NEED_PLAYER = 'NEED'
 export const BROAD_COMING = 'OMW'
