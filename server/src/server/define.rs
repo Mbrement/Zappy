@@ -17,7 +17,7 @@ pub const T5_MAT_INV: usize = 5;
 pub const T6_MAT_INV: usize = 6;
 
 //SERVER CONSTANT
-pub const GRAPHICAL_CLIENT: &str = "GRAPHICAL_CLIENT";
+pub const GRAPHICAL_CLIENT: &str = "GRAPHIC";
 pub const R_OK: &str = "ok\n";
 pub const R_KO: &str = "ko\n";
 

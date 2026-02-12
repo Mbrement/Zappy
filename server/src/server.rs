@@ -141,6 +141,13 @@ impl Server {
         &self._clients
     }
 
+    pub fn get_clients_by_type(&self, client_type: &str) -> Vec<&Client> {
+        self._clients
+            .values()
+            .filter(|client| client.r#type == client_type)
+            .collect()
+    }
+
     // pub fn get_clients_number(&self) -> u32 {
     //     self._max_clients.values().sum()
     // }
