@@ -1,4 +1,6 @@
 import {
+    BROADCAST_MSG_OBJECT,
+    BROADCAST_RECEIVED_REGEX,
     INVENTORY_REGEX,
     INVENTORY_TEMPLATE,
     ONLY_NUMBER_REGEX,
@@ -61,6 +63,32 @@ class ResponseParser {
         })
 
         return finalVision
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Try to parse the broadcast message string received from the server
+     * @param broadcast {String} - The broadcast message string to parse
+     * @returns {Object|null} - The parsed broadcast message object or null if string passed was not valid
+     */
+    parseBroadcastMessage(broadcast) {
+        if (!BROADCAST_RECEIVED_REGEX.test(broadcast)) {
+            return null
+        }
+
+        let [direction, message] = broadcast.trim().split(',')
+
+        direction = direction.replaceAll(/\D/g, '')
+        message = message.trim().split(' ')
+
+        const parsedBroadcast = {...BROADCAST_MSG_OBJECT}
+        parsedBroadcast.direction = direction
+        parsedBroadcast.teamName = message[0]
+        parsedBroadcast.senderID = message[1]
+        parsedBroadcast.action = message[2]
+        parsedBroadcast.arguments = message[3] || null
+
+        return parsedBroadcast
     }
 }
 

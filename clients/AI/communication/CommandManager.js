@@ -1,4 +1,10 @@
-import {BROADCAST, DEATH, MAX_SERVER_MSG, NO_PROMISE_TO_RESOLVE, WELCOME} from "../constant.js";
+import {
+    BROADCAST_RECEIVED_REGEX,
+    DEATH,
+    MAX_SERVER_MSG,
+    NO_PROMISE_TO_RESOLVE,
+    WELCOME
+} from "../constant.js";
 import GameManager from "../GameManager.js";
 
 class CommandManager {
@@ -62,9 +68,9 @@ class CommandManager {
             return;
         }
 
-        if (message === BROADCAST) {
-            // TODO: define brodacast
+        if (BROADCAST_RECEIVED_REGEX.test(message)) {
             console.log('Server broadcast :', message)
+            GameManager.handleBroadcastMessage(message)
             return
         }
 

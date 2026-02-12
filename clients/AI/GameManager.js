@@ -88,6 +88,19 @@ class GameManager {
             console.log('Command', commandExecuted, 'Costed:', COMMAND_COST[commandExecuted], 'Food left:', this.inventory.nourriture)
         }
     }
+
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Handle an unparsed broadcast message and decide action to take.
+     * @param broadcast {String} -  The broadcast to handle
+     */
+    handleBroadcastMessage(broadcast) {
+        const parsedBroadcast = this.responseParser.parseBroadcastMessage(broadcast)
+
+        console.log('Broadcast', parsedBroadcast)
+
+        //TODO: TAKE Action with the parsed Broadcast
+    }
 }
 
 export default new GameManager()
