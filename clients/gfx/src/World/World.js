@@ -10,6 +10,7 @@ class World {
     constructor() {
         window.worldInstance = this
         this.main = window.mainInstance
+        this.resources = this.main.resources;
         this.canvas = document.getElementById('webgpu')
 
         this.sizes = {
@@ -22,17 +23,25 @@ class World {
         this.time = new Time()
         this.scene = new THREE.Scene()
         this.gameMap = new GameMap()
+
+        this.ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+        this.scene.add(this.ambientLight)
+
     }
 
     resizeView() {
         this.sizes.width = window.innerWidth
         this.sizes.height = window.innerHeight
 
-        this.camera.instance.aspect = this.sizes.width / this.sizes.height
-        this.camera.instance.updateProjectionMatrix()
+        if (this.camera) {
+            this.camera.instance.aspect = this.sizes.width / this.sizes.height
+            this.camera.instance.updateProjectionMatrix()
+        }
 
-        this.renderer.instance.setSize(this.sizes.width, this.sizes.height)
-        this.renderer.instance.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        if (this.renderer) {
+            this.renderer.instance.setSize(this.sizes.width, this.sizes.height)
+            this.renderer.instance.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        }
     }
 
     /**

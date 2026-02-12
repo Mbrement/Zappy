@@ -1,4 +1,6 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, protocol, net } = require('electron');
+const path = require('path');
+const url = require('url');
 
 function createWindow() {
     const mainWindow = new BrowserWindow({
@@ -21,5 +23,13 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+    protocol.handle('static', async (request) => {
+        const filePath = request.url.slice('static://'.length);
+
+        const fullPath = path.join(__dirname, '../static', filePath);
+
+        return net.fetch(url.pathToFileURL(fullPath).toString());
+    });
+
     createWindow();
 });

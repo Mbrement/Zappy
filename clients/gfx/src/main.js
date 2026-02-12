@@ -3,6 +3,8 @@ const MessageHandler = require("./Socketing/MessageHandler");
 const EventManager = require('./Interfaces/js/EventManager')
 const World = require("./World/World");
 const GameState = require("./World/GameState");
+const {textures} = require("./World/sources");
+const Resources = require("./World/Utils/Resources");
 
 class Main {
     constructor() {
@@ -14,7 +16,12 @@ class Main {
         this.gameState = new GameState();
         this.eventManager = new EventManager();
         this.messageHandler = new MessageHandler();
+        this.resources = new Resources(textures);
 
+        this.world = new World()
+        this.resources.once('loaded', () => {
+            this.eventManager.modules.ConnectMenu.showConnectMenu()
+        })
     }
 
     /**
@@ -35,7 +42,6 @@ class Main {
     startVisualisation() {
         this.eventManager.modules.ConnectMenu.hideConnectMenu()
         this.networkClient.send("GRAPHIC\n")
-        this.world = new World()
         this.world.createWorld()
         this.messageHandler.gameMap = window.worldInstance.gameMap
     }
