@@ -101,20 +101,38 @@ impl Game {
         // Move the player on the map
         match player.orientation {
             'N' => {
-                self.map
-                    .move_player(&player.get_token(), (position.0, position.1 - 1));
+                if position.1 > 0 {
+                    self.map
+                        .move_player(&player.get_token(), (position.0, position.1 - 1));
+                } else {
+                    self.map
+                        .move_player(&player.get_token(), (position.0, self.map.get_height()));
+                }
             }
             'E' => {
-                self.map
-                    .move_player(&player.get_token(), (position.0 + 1, position.1));
+                if self.map.get_width() > position.0 {
+                    self.map
+                        .move_player(&player.get_token(), (position.0 + 1, position.1));
+                } else {
+                    self.map.move_player(&player.get_token(), (0, position.1));
+                }
             }
             'S' => {
-                self.map
-                    .move_player(&player.get_token(), (position.0, position.1 + 1));
+                if self.map.get_height() > position.1 {
+                    self.map
+                        .move_player(&player.get_token(), (position.0, position.1 + 1));
+                } else {
+                    self.map.move_player(&player.get_token(), (position.0, 0));
+                }
             }
             'W' => {
-                self.map
-                    .move_player(&player.get_token(), (position.0 - 1, position.1));
+                if position.0 > 0 {
+                    self.map
+                        .move_player(&player.get_token(), (position.0 - 1, position.1));
+                } else {
+                    self.map
+                        .move_player(&player.get_token(), (self.map.get_width(), position.1));
+                }
             }
             _ => {}
         }

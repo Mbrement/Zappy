@@ -85,6 +85,7 @@ impl Map {
     }
 
     pub fn partial_fill(&mut self, ticks: u8) {
+        //TODO : optimize this with iterator on the 2nd loop
         let mut row_nb: u8 = 0;
         let mut tile_nb: u8 = 0;
         for row in &mut self.tiles {
@@ -113,8 +114,8 @@ impl Map {
     }
 
     pub fn move_player(&mut self, player: &mio::Token, new_position: (u32, u32)) {
-        // if let Some(pos) = self.player_position.get_mut(player) {
-        //     *pos = new_position;
-        // }
+        if let Some(pos) = self.player_position.get_mut(player) {
+            *pos = new_position;
+        }
     }
 }

@@ -23,6 +23,7 @@ pub struct Server {
     _clients: HashMap<Token, client::Client>,
     pub teams: HashMap<String, Vec<Token>>,
     _max_clients: HashMap<String, u32>,
+    pub _max_clients_per_team: u32,
     _socket: mio::net::TcpListener,
     _ticks: u64,
     // _command_manager: CommandManager,
@@ -43,7 +44,7 @@ impl Server {
         }
         let tmp = Server {
             _address: "127.0.0.1".to_string(),
-            _port: port.clone(),
+            _port: port,
             _client_token: Token(0),
             _poll: tmp_poll.unwrap(),
             _events: Events::with_capacity(1024),
@@ -53,6 +54,7 @@ impl Server {
             _socket: tmp_socket.unwrap(),
             _ticks: 100,
             _next_token: 1,
+            _max_clients_per_team: 10,
             // _command_manager: CommandManager::new_server(),
             _game: game::Game::new(10, 10),
         };
@@ -99,6 +101,7 @@ impl Server {
     }
 
     pub fn set_clients_number(&mut self, clients: u32) {
+        self._max_clients_per_team = clients;
         for team in self.teams.keys() {
             self._max_clients.insert(team.clone(), clients);
         }
@@ -148,6 +151,12 @@ impl Server {
             .collect()
     }
 
+    pub fn get_clients_by_type_mut(&mut self, client_type: &str) -> Vec<&mut Client> {
+        self._clients
+            .values_mut()
+            .filter(|client| client.r#type == client_type)
+            .collect()
+    }
     // pub fn get_clients_number(&self) -> u32 {
     //     self._max_clients.values().sum()
     // }
@@ -172,6 +181,54 @@ impl Server {
         &mut self._game.map
     }
 
+    pub fn disconnect_client_by_token(&mut self, token: &Token) {
+        // Remove the client first to avoid double mutable borrow
+        let mut client = match self._clients.remove(token) {
+            Some(client) => client,
+            None => {
+                eprintln!("Client with token {:?} not found for disconnection", token);
+                return;
+            }
+        };
+        self.disconnect_client_mut(&mut client);
+
+        #[cfg(feature = "log")]
+        println!("Client {:?} disconnected", token);
+    }
+
+    // pub fn disconnect_client(&mut self, client: Client) {
+    //     client.get_socket().shutdown(std::net::Shutdown::Both);
+    //     self._clients.remove(&client.get_token());
+    // 	if client.r#type == define::ROLE_PLAYER{
+
+    // 	}
+    //     #[cfg(feature = "log")]
+    //     println!("Client {:?} disconnected", client.get_token());
+    // }
+
+    pub fn disconnect_client_mut(&mut self, client: &mut Client) {
+        let _ = client.get_socket_mut().shutdown(std::net::Shutdown::Both);
+        // self._clients.remove(&client.get_token()); // Already removed in disconnect_client_by_token
+        if client.r#type == define::ROLE_PLAYER {
+            if let Some(team_name) = self.teams.iter_mut().find_map(|(name, tokens)| {
+                if let Some(pos) = tokens.iter().position(|t| t == &client.get_token()) {
+                    tokens.remove(pos);
+                    Some(name.clone())
+                } else {
+                    None
+                }
+            }) {
+                if let Some(max) = self._max_clients.get_mut(&team_name)
+                    && self._max_clients_per_team < *max
+                {
+                    *max -= 1;
+                }
+            }
+        }
+        #[cfg(feature = "log")]
+        println!("Client {:?} disconnected", client.get_token());
+    }
+
     pub fn run(&mut self) {
         let mut _command_manager = CommandManager::new_server(self);
         let mut buf = [0; 1024];
@@ -187,7 +244,7 @@ impl Server {
             eprintln!("Failed to register socket: {}", e);
             return;
         }
-
+        let mut to_disconnect = Vec::new();
         loop {
             let check = self._poll.poll(
                 &mut self._events,
@@ -253,9 +310,10 @@ impl Server {
                     if let Some(client) = self._clients.get_mut(&token) {
                         match client.get_socket_mut().read(&mut buf) {
                             Ok(0) => {
-                                let _ = client.get_socket_mut().shutdown(std::net::Shutdown::Both);
+                                // let _ = client.get_socket_mut().shutdown(std::net::Shutdown::Both);
 
-                                self._clients.remove(&token);
+                                // self._clients.remove(&token);
+                                to_disconnect.push(token);
                                 #[cfg(feature = "log")]
                                 println!("Client {:?} disconnected", token);
                             }
@@ -291,6 +349,7 @@ impl Server {
                                             .is_err()
                                         {
                                             self._clients.remove(&token);
+                                            to_disconnect.push(token);
                                         }
                                     } else if self.teams.contains_key(&cmd) {
                                         println!(
@@ -358,9 +417,10 @@ impl Server {
                                                 .as_bytes(),
                                             );
 
-                                            let _ = client
-                                                .get_socket_mut()
-                                                .shutdown(std::net::Shutdown::Both);
+                                            // let _ = client
+                                            //     .get_socket_mut()
+                                            //     .shutdown(std::net::Shutdown::Both);
+                                            to_disconnect.push(token);
                                         }
                                     } else {
                                         let response = format!(
@@ -373,18 +433,20 @@ impl Server {
                                             .write(response.as_bytes())
                                             .is_err()
                                         {
-                                            client
-                                                .get_socket_mut()
-                                                .shutdown(std::net::Shutdown::Both);
+                                            // client
+                                            //     .get_socket_mut()
+                                            //     .shutdown(std::net::Shutdown::Both);
+                                            to_disconnect.push(token);
                                         }
                                     }
                                 }
                             }
                             Err(_) => {
-                                let _ = client.get_socket_mut().shutdown(std::net::Shutdown::Both);
-                                self._clients.remove(&token);
+                                // let _ = client.get_socket_mut().shutdown(std::net::Shutdown::Both);
+                                // self._clients.remove(&token);
                                 #[cfg(feature = "log")]
                                 println!("Client {:?} disconnected (error)", token);
+                                to_disconnect.push(token);
                             }
                         }
                     }
@@ -405,7 +467,30 @@ impl Server {
                 self._game.last_update = time::Instant::now();
                 self._game.routine();
                 _command_manager.process_queue(self);
+
+                for client in self.get_clients_by_type_mut("player") {
+                    client.hunger_tick();
+                    #[cfg(feature = "debug")]
+                    println!("Client {:?} hunger: {}", client.get_token(), client.hunger);
+                    if client.hunger == 0 {
+                        let _ = client.get_socket_mut().write(b"mort\n");
+                        to_disconnect.push(client.get_token());
+                    }
+                }
+                for token in &to_disconnect {
+                    self.disconnect_client_by_token(&token);
+                }
+                to_disconnect.clear();
             }
         }
+    }
+
+    pub fn get_team_for_player(&self, token: &Token) -> String {
+        for (team_name, tokens) in &self.teams {
+            if tokens.contains(token) {
+                return team_name.clone();
+            }
+        }
+        return "unknown".to_string();
     }
 }

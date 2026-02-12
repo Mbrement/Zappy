@@ -1,4 +1,4 @@
-use crate::server::Server;
+use crate::server::{Server, define};
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
@@ -21,11 +21,20 @@ impl CommandManager {
     }
 
     pub fn add_to_queue(&mut self, name: String, token: mio::Token, arg: String) {
-        if self.order.entry(token).or_insert_with(VecDeque::new).len() <= 10 {
+        #[cfg(feature = "log")]
+        println!(
+            "Try to dded command '{}' to queue for token {:?} withargs: {}. queu len : {}",
+            name,
+            token,
+            arg.clone(),
+            self.order.entry(token).or_insert_with(VecDeque::new).len()
+        );
+
+        if self.order.entry(token).or_insert_with(VecDeque::new).len() < 10 {
             self.order
                 .entry(token)
                 .or_insert_with(VecDeque::new)
-                .push_back((name, token, arg));
+                .push_back((name.clone(), token, arg.clone()));
             if self.next_execute.entry(token).or_insert(0) == &0 {
                 self.next_execute.insert(token, 0);
             }
@@ -98,7 +107,9 @@ impl CommandManager {
                     server
                         ._game
                         .change_player_orientation(client, "droite".into());
-                    let _ = client.get_socket_mut().write(format!("ok\n").as_bytes());
+                    let _ = client
+                        .get_socket_mut()
+                        .write(format!("{}", define::R_OK).as_bytes());
                 }
             },
         );
@@ -117,7 +128,9 @@ impl CommandManager {
                     server
                         ._game
                         .change_player_orientation(client, "gauche".into());
-                    let _ = client.get_socket_mut().write(format!("ok\n").as_bytes());
+                    let _ = client
+                        .get_socket_mut()
+                        .write(format!("{}", define::R_OK).as_bytes());
                 }
             },
         );
@@ -142,6 +155,30 @@ impl CommandManager {
                     .write(format!("command {} recived {{{}}}\n", "inventaire", _arg).as_bytes());
                 #[cfg(feature = "log")]
                 println!("command {} recived {{{}}} {:?}", "inventaire", _arg, _c);
+            },
+        );
+        command_manager.register(
+            "avance",
+            |_c: mio::Token, server: &mut Server, _arg: &str| {
+                #[cfg(feature = "debug")]
+                let client = server._clients.get_mut(&_c).unwrap();
+                #[cfg(feature = "debug")]
+                let _ = client
+                    .get_socket_mut()
+                    .write(format!("command {} recived {{{}}}\n", "avance", _arg).as_bytes());
+                #[cfg(feature = "log")]
+                println!("command {} recived {{{}}} {:?}", "avance", _arg, _c);
+                let client = server._clients.get_mut(&_c).unwrap();
+                println!(
+                    "Player position before move: {:?}",
+                    server._game.get_player_position(_c)
+                );
+                server._game.move_player(client);
+                client.position = server._game.get_player_position(_c);
+                println!(
+                    "Player position after move: {:?}",
+                    server._game.get_player_position(_c)
+                );
             },
         );
         command_manager.register(
@@ -262,9 +299,12 @@ impl CommandManager {
                     .write(format!("command {} recived {{{}}}\n", "connect_nbr", _arg).as_bytes());
                 #[cfg(feature = "log")]
                 println!("command {} recived {{{}}} {:?}", "connect_nbr", _arg, _c);
+				let tmp = server.get_team_for_player(&_c);
+				let d = server._max_clients[&tmp] - server._game.team[&tmp].len() as u32;
+				let mut client = server._clients.get_mut(&_c).unwrap();
+				let _ = client.get_socket_mut().write( format!( "{}\n",d).as_bytes()); // TODO check error here
             },
         );
-
         command_manager
     }
 
