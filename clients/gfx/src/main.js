@@ -9,12 +9,12 @@ class Main {
         if (window.mainInstance) {
             return window.mainInstance
         }
+        window.mainInstance = this
 
         this.gameState = new GameState();
         this.eventManager = new EventManager();
         this.messageHandler = new MessageHandler();
 
-        window.mainInstance = this
     }
 
     /**

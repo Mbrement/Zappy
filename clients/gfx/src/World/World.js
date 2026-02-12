@@ -2,32 +2,35 @@ const THREE = require('three/webgpu');
 const {OrbitControls} = require('three/examples/jsm/controls/OrbitControls.js');
 const Renderer = require("./Renderer");
 const Camera = require("./Camera");
+const UpdateManager = require("./UpdateManager");
+const Time = require("./Utils/Time");
 
 class World {
     constructor() {
+        window.worldInstance = this
         this.main = window.mainInstance
         this.canvas = document.getElementById('webgpu')
-
-        this.scene = new THREE.Scene()
 
         this.sizes = {
             width: window.innerWidth,
             height: window.innerHeight
         }
 
-        window.addEventListener('resize', () =>
-        {
-            this.sizes.width = window.innerWidth
-            this.sizes.height = window.innerHeight
+        window.addEventListener('resize', this.resizeView.bind(this))
 
-            this.camera.instance.aspect = this.sizes.width / this.sizes.height
-            this.camera.instance.updateProjectionMatrix()
+        this.time = new Time()
+        this.scene = new THREE.Scene()
+    }
 
-            this.renderer.instance.setSize(this.sizes.width, this.sizes.height)
-            this.renderer.instance.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-        })
+    resizeView() {
+        this.sizes.width = window.innerWidth
+        this.sizes.height = window.innerHeight
 
-        window.worldInstance = this
+        this.camera.instance.aspect = this.sizes.width / this.sizes.height
+        this.camera.instance.updateProjectionMatrix()
+
+        this.renderer.instance.setSize(this.sizes.width, this.sizes.height)
+        this.renderer.instance.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     }
 
     /**
@@ -46,16 +49,9 @@ class World {
 
         this.controls = new OrbitControls(this.camera.instance, this.canvas)
 
-        const tick = () =>
-        {
-            this.controls.update()
+        this.updateManager = new UpdateManager()
 
-            this.renderer.update()
-
-            window.requestAnimationFrame(tick)
-        }
-
-        tick()
+        this.updateManager.add(this.renderer, 'renderers')
     }
 }
 
