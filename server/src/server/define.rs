@@ -7,6 +7,15 @@ pub const T4_MAT: &str = "mendiane";
 pub const T5_MAT: &str = "phiras";
 pub const T6_MAT: &str = "thystame";
 
+// INVANTORY CONST
+pub const FOOD_INV: usize = 0;
+pub const T1_MAT_INV: usize = 1;
+pub const T2_MAT_INV: usize = 2;
+pub const T3_MAT_INV: usize = 3;
+pub const T4_MAT_INV: usize = 4;
+pub const T5_MAT_INV: usize = 5;
+pub const T6_MAT_INV: usize = 6;
+
 //SERVER CONSTANT
 pub const GRAPHICAL_CLIENT: &str = "GRAPHICAL_CLIENT";
 pub const R_OK: &str = "ok\n";

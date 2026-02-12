@@ -99,9 +99,9 @@ impl Server {
     }
 
     pub fn set_clients_number(&mut self, clients: u32) {
-       for team in self.teams.keys() {
-           self._max_clients.insert(team.clone(), clients);
-       }
+        for team in self.teams.keys() {
+            self._max_clients.insert(team.clone(), clients);
+        }
     }
 
     // ________________Getters
@@ -192,56 +192,55 @@ impl Server {
             }
             for event in self._events.iter() {
                 if event.token() == self._client_token {
-                    loop {
-                        match self._socket.accept() {
-                            Ok((mut client_stream, _)) => {
-                                let token = Token(self._next_token as usize);
-                                if self._clients.contains_key(&token) {
-                                    eprintln!("Client with token {:?} already exists", token);
-                                    break;
-                                }
-                                self._next_token += 1;
-                                self._clients
-                                    .insert(token, Client::new(client_stream, token));
-                                let tmp = self._clients.get_mut(&token);
-                                if tmp.is_none() {
-                                    eprintln!("Failed to get client socket");
-                                    self._clients.remove(&token);
-                                    break;
-                                }
-                                let check = self._poll.registry().register(
-                                    tmp.unwrap().get_socket_mut(),
-                                    token,
-                                    Interest::READABLE,
-                                );
-                                if check.is_err() {
-                                    eprintln!("Failed to register client");
-                                    self._clients.remove(&token);
-                                    break;
-                                }
-                                let response = format!("Bienvenue\n");
-                                if self
-                                    ._clients
-                                    .get_mut(&token)
-                                    .unwrap()
-                                    .get_socket_mut()
-                                    .write(response.as_bytes())
-                                    .is_err()
-                                {
-                                    self._clients.remove(&token);
-                                    break;
-                                }
-                                self._clients.get_mut(&token).unwrap().r#type =
-                                    "welcomed".to_string();
-                            }
-                            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => break,
-                            Err(e) => {
-                                eprintln!("Error accepting connection: {}", e);
+                    // loop {
+                    match self._socket.accept() {
+                        Ok((mut client_stream, _)) => {
+                            let token = Token(self._next_token as usize);
+                            if self._clients.contains_key(&token) {
+                                eprintln!("Client with token {:?} already exists", token);
                                 break;
                             }
+                            self._next_token += 1;
+                            self._clients
+                                .insert(token, Client::new(client_stream, token));
+                            let tmp = self._clients.get_mut(&token);
+                            if tmp.is_none() {
+                                eprintln!("Failed to get client socket");
+                                self._clients.remove(&token);
+                                break;
+                            }
+                            let check = self._poll.registry().register(
+                                tmp.unwrap().get_socket_mut(),
+                                token,
+                                Interest::READABLE,
+                            );
+                            if check.is_err() {
+                                eprintln!("Failed to register client");
+                                self._clients.remove(&token);
+                                break;
+                            }
+                            let response = format!("Bienvenue\n");
+                            if self
+                                ._clients
+                                .get_mut(&token)
+                                .unwrap()
+                                .get_socket_mut()
+                                .write(response.as_bytes())
+                                .is_err()
+                            {
+                                self._clients.remove(&token);
+                                break;
+                            }
+                            self._clients.get_mut(&token).unwrap().r#type = "welcomed".to_string();
                         }
-                        break;
+                        Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => break,
+                        Err(e) => {
+                            eprintln!("Error accepting connection: {}", e);
+                            break;
+                        }
                     }
+                    // break;
+                    // }
                 } else {
                     let token = event.token();
                     if let Some(client) = self._clients.get_mut(&token) {
@@ -287,7 +286,23 @@ impl Server {
                                             self._clients.remove(&token);
                                         }
                                     } else if self.teams.contains_key(&cmd) {
-                                        if self.teams[&cmd].len() < self._max_clients[&cmd] as usize {
+                                        println!(
+                                            "Client {:?} wants to join team '{}' = cmd",
+                                            token, cmd
+                                        );
+                                        println!("Current teams: {:?}", self.teams);
+                                        println!(
+                                            "Max clients for team '{}': {:?}",
+                                            cmd,
+                                            self._max_clients.get(&cmd)
+                                        );
+                                        println!(
+                                            "Current clients in team '{}': {:?}",
+                                            cmd,
+                                            self.teams.get(&cmd)
+                                        );
+                                        if self.teams[&cmd].len() < self._max_clients[&cmd] as usize
+                                        {
                                             self.teams.get_mut(&cmd).unwrap().push(token);
                                             client.r#type = define::ROLE_PLAYER.to_string();
                                             client.position = (if !self._game.starting {
@@ -312,7 +327,8 @@ impl Server {
                                             self._game.team.get_mut(&cmd).unwrap().push(token); //push the client token into the team
                                             let response = format!(
                                                 "{}\n{} {}\n",
-                                                self._max_clients[&cmd] as usize - self.teams[&cmd].len()
+                                                self._max_clients[&cmd] as usize
+                                                    - self.teams[&cmd].len()
                                                     + 1,
                                                 self._game.map.get_height(),
                                                 self._game.map.get_width()

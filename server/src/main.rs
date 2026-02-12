@@ -138,11 +138,11 @@ fn main() -> std::io::Result<()> {
         if clients.parse::<u32>().is_ok() {
             server.set_clients_number(clients.parse().unwrap());
         } else {
-            eprintln!(
-                "Invalid client value, keeping default value of {}",
-                10
-            );
+            eprintln!("Invalid client value, keeping default value of {}", 10);
         }
+    } else {
+        server.set_clients_number(10);
+        eprintln!("No client number provided, keeping default value of {}", 10);
     }
     server.run();
 
