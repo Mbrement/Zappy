@@ -37,6 +37,7 @@ class Main {
         this.networkClient.send("GRAPHIC\n")
         this.world = new World()
         this.world.createWorld()
+        this.messageHandler.gameMap = window.worldInstance.gameMap
     }
 }
 

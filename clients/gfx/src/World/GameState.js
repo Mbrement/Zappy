@@ -41,7 +41,7 @@ class GameState {
             })
         })
 
-        console.log("Initialized map with size", x, y, this.map)
+        // console.log("Initialized map with size", x, y, this.map)
     }
 
     /**

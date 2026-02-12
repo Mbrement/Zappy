@@ -5,6 +5,7 @@ class MessageHandler {
 
         this.networkClient = null
         this.gameState = null
+        this.gameMap = null
 
         this.commands = {}
         const allMethods = Object.getOwnPropertyNames(Object.getPrototypeOf(this))
@@ -57,7 +58,6 @@ class MessageHandler {
      */
     cmd_BIENVENUE() {
         window.mainInstance.startVisualisation()
-        console.log("Received welcome message from server, starting visualisation")
     }
 
     /**
@@ -75,6 +75,8 @@ class MessageHandler {
         }
 
         this.gameState.setMapSize(parseInt(command[1]), parseInt(command[2]))
+
+        this.gameMap.createTiles()
     }
 
     /**

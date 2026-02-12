@@ -4,6 +4,7 @@ const Renderer = require("./Renderer");
 const Camera = require("./Camera");
 const UpdateManager = require("./UpdateManager");
 const Time = require("./Utils/Time");
+const GameMap = require("./Map/GameMap");
 
 class World {
     constructor() {
@@ -20,6 +21,7 @@ class World {
 
         this.time = new Time()
         this.scene = new THREE.Scene()
+        this.gameMap = new GameMap()
     }
 
     resizeView() {
@@ -38,11 +40,6 @@ class World {
      * @description Creates the world
      */
     async createWorld() {
-        const material = new THREE.MeshBasicNodeMaterial()
-        const geometry = new THREE.BoxGeometry(1, 1)
-        const mesh = new THREE.Mesh(geometry, material)
-        this.scene.add(mesh)
-
         this.camera = new Camera(this.scene)
         this.renderer = new Renderer(this.scene)
         await this.renderer.setInstance()
