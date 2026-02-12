@@ -1,4 +1,5 @@
 import process from 'node:process'
+import {randomUUID} from 'node:crypto'
 import {ARGV_ERROR, DEFAULT_HOSTNAME, ONLY_NUMBER_REGEX} from "./constant.js";
 
 let singleton = null
@@ -14,6 +15,7 @@ class Main {
             teamName: null,
             port: null,
             hostname: DEFAULT_HOSTNAME,
+            broadcastID: randomUUID().replaceAll('-', '').substring(0, 12)
         }
 
         const argv = process.argv.slice(2);
