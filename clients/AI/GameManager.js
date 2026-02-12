@@ -104,6 +104,10 @@ class GameManager {
 
         console.log('Broadcast', parsedBroadcast)
 
+        if (!parsedBroadcast || parsedBroadcast.teamName !== this.teamName) {
+            return
+        }
+
         //TODO: TAKE Action with the parsed Broadcast
     }
 }
