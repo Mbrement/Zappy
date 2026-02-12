@@ -334,7 +334,7 @@ impl CommandManager {
                     if self.next_execute.get(&token).unwrap() == &server._game._tick
                         || self.next_execute.get(&token).unwrap() == &0
                     {
-                        self.execute(&command, *tkn, &arg, server);
+
                         let res = match command.as_str() {
                             "voir" | "prend" | "pose" | "droite" | "gauche" | "avance"
                             | "expulse" | "broadcast" => {
@@ -348,6 +348,7 @@ impl CommandManager {
                             "connect_nbr" => self.next_execute.insert(token, server._game._tick),
                             _ => None,
                         };
+						self.execute(&command, *tkn, &arg, server); 
                         if res.is_some() {
                             // Only pop the command if it was not handled by the match arms above
                             self.order.get_mut(&token).unwrap().pop_front();
