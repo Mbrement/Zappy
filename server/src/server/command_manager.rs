@@ -287,6 +287,7 @@ impl CommandManager {
                 .write(format!("command {} recived {{{}}}\n", "fork", _arg).as_bytes());
             #[cfg(feature = "log")]
             println!("command {} recived {{{}}} {:?}", "fork", _arg, _c);
+            server._game.fork_player(_c);
         });
         command_manager.register(
             "connect_nbr",
@@ -299,10 +300,10 @@ impl CommandManager {
                     .write(format!("command {} recived {{{}}}\n", "connect_nbr", _arg).as_bytes());
                 #[cfg(feature = "log")]
                 println!("command {} recived {{{}}} {:?}", "connect_nbr", _arg, _c);
-				let tmp = server.get_team_for_player(&_c);
-				let d = server._max_clients[&tmp] - server._game.team[&tmp].len() as u32;
-				let mut client = server._clients.get_mut(&_c).unwrap();
-				let _ = client.get_socket_mut().write( format!( "{}\n",d).as_bytes()); // TODO check error here
+                let tmp = server.get_team_for_player(&_c);
+                let d = server._max_clients[&tmp] - server._game.team[&tmp].len() as u32;
+                let mut client = server._clients.get_mut(&_c).unwrap();
+                let _ = client.get_socket_mut().write(format!("{}\n", d).as_bytes()); // TODO check error here
             },
         );
         command_manager
@@ -314,17 +315,27 @@ impl CommandManager {
             if self.order.contains_key(&token) && self.next_execute.contains_key(&token) {
                 // println!("Processing command queue: {:?}", "here");
 
-                if self.next_execute.get(&token).unwrap() <= &server._game._tick {
-                    // println!(
-                    //     "Executing command for token {:?}: {:?}",
-                    //     token,
-                    //     self.order.get(&token)
-                    // );
-                    if let Some((command, tkn, arg)) =
-                        self.order.get_mut(&token).unwrap().pop_front()
+                // println!(
+                //     "Executing command for token {:?}: {:?}",
+                //     token,
+                //     self.order.get(&token)
+                // );
+                if let Some((command, tkn, arg)) =
+                    self.order.get(&token).and_then(|queue| queue.front())
+                {
+                    println!(
+                        "current tick: {}, next execute for token {:?}: {}, command queue length: {}",
+                        server._game._tick,
+                        token,
+                        self.next_execute.get(&token).unwrap_or(&0),
+                        self.order.get(&token).unwrap_or(&VecDeque::new()).len()
+                    );
+
+                    if self.next_execute.get(&token).unwrap() == &server._game._tick
+                        || self.next_execute.get(&token).unwrap() == &0
                     {
-                        self.execute(&command, tkn, &arg, server);
-                        match command.as_str() {
+                        self.execute(&command, *tkn, &arg, server);
+                        let res = match command.as_str() {
                             "voir" | "prend" | "pose" | "droite" | "gauche" | "avance"
                             | "expulse" | "broadcast" => {
                                 self.next_execute.insert(token, server._game._tick + 7)
@@ -334,9 +345,13 @@ impl CommandManager {
                             "incantation" => {
                                 self.next_execute.insert(token, server._game._tick + 300)
                             }
-                            // "connect_nbr" => self.next_execute.insert(token, server._game._tick + 0) ==> useless
-                            _ => self.next_execute.insert(token, server._game._tick + 1),
+                            "connect_nbr" => self.next_execute.insert(token, server._game._tick),
+                            _ => None,
                         };
+                        if res.is_some() {
+                            // Only pop the command if it was not handled by the match arms above
+                            self.order.get_mut(&token).unwrap().pop_front();
+                        }
                     }
                 }
             }
