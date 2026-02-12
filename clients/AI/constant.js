@@ -128,3 +128,14 @@ export const BROADCAST_MSG_OBJECT = {
     action: null,
     argument: null
 }
+
+export const SOUND_MAPPING = {
+    1: [ADVANCE],
+    2: [ADVANCE],
+    3: [LEFT, ADVANCE],
+    4: [LEFT, ADVANCE],
+    5: [LEFT, LEFT, ADVANCE],
+    6: [RIGHT, ADVANCE],
+    7: [RIGHT, ADVANCE],
+    8: [ADVANCE]
+}

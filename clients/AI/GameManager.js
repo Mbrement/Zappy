@@ -1,5 +1,5 @@
 import Main from "./Main.js";
-import {COMMAND_COST, ONLY_NUMBER_REGEX} from "./constant.js";
+import {BROAD_WITH_PLAYER, BROADCAST, COMMAND_COST, ONLY_NUMBER_REGEX, SOUND_MAPPING} from "./constant.js";
 
 class GameManager {
     constructor() {
@@ -113,7 +113,29 @@ class GameManager {
             return
         }
 
-        //TODO: TAKE Action with the parsed Broadcast
+        if (parsedBroadcast.action === 'NEED' && parsedBroadcast.direction === 0) {
+            this.commandManager.sendCommand(this.buildBroadcastMessage(BROAD_WITH_PLAYER))
+            return
+        }
+
+        for (const message of SOUND_MAPPING[parsedBroadcast.direction]) {
+            console.log(message)
+            this.commandManager.sendCommand(message)
+        }
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
+     * @param action {String} - The Action to put in the message.
+     * @param argument=null {String|null} - The argument of the action to put in the message.
+     * @returns {string} - The built message.
+     */
+    buildBroadcastMessage(action, argument = null ) {
+        if (argument === null) {
+            return `${BROADCAST} ${this.teamName} ${this.main.config.broadcastID} ${action}\n`
+        }
+
+        return `${BROADCAST} ${this.teamName} ${this.main.config.broadcastID} ${action} ${argument}\n`
     }
 }
 
