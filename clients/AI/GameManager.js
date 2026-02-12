@@ -21,6 +21,11 @@ class GameManager {
         this.vision = []
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Await main class is fully declared to get some class from it
+     * @returns {Promise<void>}
+     */
     async awaitRessourcesAvailableFromMain() {
         while(!this.main.commandManager && !this.main.responseParser) {
             await new Promise((resolve) => {setTimeout(resolve, 100)})

@@ -7,10 +7,12 @@ class ProcessManager {
         this.teamName = teamName;
         this.port = port;
         this.hostname = hostname;
-
-        this.spawnErrorBind = this.spawnError.bind(this)
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Create a fork of this process with logging information into file.
+     */
     fork() {
         if (!fs.existsSync('./logs')) {
             fs.mkdirSync('./logs');
@@ -25,10 +27,6 @@ class ProcessManager {
         });
 
         subprocess.unref();
-    }
-
-    spawnError(event) {
-        console.log('Error occured while spawning child AI', event.message)
     }
 }
 
