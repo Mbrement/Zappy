@@ -76,7 +76,7 @@ class MessageHandler {
 
         this.gameState.setMapSize(parseInt(command[1]), parseInt(command[2]))
 
-        this.gameMap.createTiles()
+        this.gameMap.createMap()
     }
 
     /**
@@ -91,9 +91,18 @@ class MessageHandler {
             return
         }
 
+        let x = parseInt(command[1])
+        let y = parseInt(command[2])
+
+        if (!this.gameState.isCorrectCoordinates(x, y)) {
+            return;
+        }
+
         const integerArguments = command.slice(3).map(Number)
 
-        this.gameState.setTileContent(parseInt(command[1]), parseInt(command[2]), integerArguments)
+        this.gameState.setTileContent(x, y, integerArguments)
+
+        this.gameMap.loadTileResources(x, y)
     }
 
     /**

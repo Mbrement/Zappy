@@ -56,10 +56,10 @@ class GameState {
             return
         }
 
-        const [food, linemate, deraumere, sibur, mendiane, phiras, thystame] = content
+        const [nourriture, linemate, deraumere, sibur, mendiane, phiras, thystame] = content
 
         this.map[y][x].resources = {
-            food,
+            nourriture,
             linemate,
             deraumere,
             sibur,
@@ -68,7 +68,7 @@ class GameState {
             thystame
         }
 
-        console.log("Updated tile", x, y, "with content", this.map[y][x].resources, "Map", this.map)
+        // console.log("Updated tile", x, y, "with content", this.map[y][x].resources, "Map", this.map)
     }
 
     /**
@@ -139,7 +139,7 @@ class GameState {
         player.y = y
         player.orientation = orientation
         player.inventory = {
-            food: 0,
+            nourriture: 0,
             linemate: 0,
             deraumere: 0,
             sibur: 0,
@@ -177,7 +177,7 @@ class GameState {
      * @param {Array} playerInfo - an array containing the player's id and inventory information
      */
     updatePlayerInventory(playerInfo) {
-        const [id, x, y, food, linemate, deraumere, sibur, mendiane, phiras, thystame] = playerInfo
+        const [id, x, y, nourriture, linemate, deraumere, sibur, mendiane, phiras, thystame] = playerInfo
 
         if (!this.players.has(id)) {
             return
@@ -189,7 +189,7 @@ class GameState {
 
         const player = this.players.get(id)
         player.inventory = {
-            food,
+            nourriture,
             linemate,
             deraumere,
             sibur,
