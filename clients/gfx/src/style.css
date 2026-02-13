@@ -2,16 +2,29 @@
 {
     margin: 0;
     padding: 0;
+    font-family: monospace;
 }
 
 html,
 body
 {
+    position: fixed;
+    display: block;
     overflow: hidden;
+    min-height: 100vh !important;
+    min-width: 100vw !important;
 }
 
-h3 {
-    color: white;
+.hidden {
+    display: none !important;
+}
+
+#title {
+    color: whitesmoke;
+    font-size: 5rem;
+    margin-top: -5%;
+    margin-bottom: 5%;
+    user-select: none;
 }
 
 #connectMenu {
@@ -30,35 +43,139 @@ h3 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: 25vh;
-    min-width: 25vw;
-    background: #444444;
+    justify-content: flex-start;
+    min-height: 300px;
+    min-width: 300px;
+    background: rgba(206, 130, 192, 0.5);
     z-index: 6;
+    border-radius: 2rem/2rem;
+    -webkit-box-shadow: 0 6px 12px 2px #EBB8EB81;
+    box-shadow: 0 6px 12px 2px #EBB8EB81;
+}
+
+#connectInputContainer:before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    backdrop-filter: blur(2px);
+    z-index: -1;
+    border-radius: 2rem/2rem;
+}
+
+#connectTitle {
+    font-size: 1.5rem;
+    color: whitesmoke;
+    margin-top: 10%;
+    font-weight: bold;
+    user-select: none;
+}
+
+#formContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5%;
+    width: 100%;
+}
+
+.inputContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5%;
+    width: 100%;
+}
+
+.inputContainer label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: white;
+    user-select: none;
+}
+
+.inputDesign {
+    display: flex;
+    height: 30px;
+    width: 75%;
+    align-items: center;
+    justify-content: center;
+
+    background: #D9D9D9;
+    border-radius: 0.8rem/0.8rem;
+
+    -webkit-box-shadow: 0 6px 10px 0 rgba(0,0,0,0.4);
+    box-shadow: 0 6px 10px 0 rgba(0,0,0,0.4);
+    transition: all 0.25s ease;
+
+}
+
+.inputDesign:hover{
+    -webkit-box-shadow: 0 6px 10px 2px rgba(0,0,0,0.65);
+    box-shadow: 0 6px 10px 2px rgba(0,0,0,0.65);
+}
+
+.inputDesign:has(:focus) {
+    -webkit-box-shadow: 0 6px 8px 0 #EBB8EB81;
+    box-shadow: 0 6px 8px 0 #EBB8EB81;
+}
+
+.inputContainer input {
+    border: none;
+    width: 90%;
+    height: 90%;
+    outline: none;
+    background: transparent;
+    user-select: none;
+    font-weight: bold;
+}
+
+.inputContainer::selection {
+    background: rgba(235, 184, 235, 0.75);
 }
 
 #connectButton {
     display: flex;
-    background: #00bb00;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(47, 4, 64, 0.65);
+
     color: white;
-    line-height: 2.5;
+    font-size: 1.2rem;
     padding: 0 20px;
-    margin-bottom: 10px;
+    margin-top: 10px;
+    height: 40px;
+    border: none;
+    border-radius: 1rem/1rem;
+
+    -webkit-box-shadow: 0 5px 5px 0 rgba(126, 11, 171, 0.25);
+    box-shadow: 0 5px 5px 0 rgba(126, 11, 171, 0.25);
+    transition: all 0.25s ease;
+    user-select: none;
 }
 
-.errorText {
+#connectButton:hover {
+    -webkit-box-shadow: 0 6px 5px 0 rgba(156, 14, 211, 0.45);
+    box-shadow: 0 6px 5px 0 rgba(156, 14, 211, 0.45);
+}
+
+#connectButton:active {
+    -webkit-box-shadow: 0 6px 5px 0 rgba(156, 14, 211, 0.45), inset 0 0 5px 2px rgba(0, 0, 0, 0.55);
+    box-shadow: 0 6px 5px 0 rgba(156, 14, 211, 0.45), inset 0 0 5px 2px rgba(0, 0, 0, 0.55);
+}
+
+#errorText {
     color: red;
-    font-size: 1rem;
-    margin-top: 4px;
+    font-weight: bold;
+    font-size: 1.25rem;
+    margin-top: 15px;
     margin-bottom: 2px;
+    user-select: none;
 }
 
-label {
-    color: white;
-}
-
-.webgpu
-{
+.webgpu {
     position: fixed;
     top: 0;
     left: 0;

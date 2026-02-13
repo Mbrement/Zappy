@@ -8,19 +8,25 @@
 </head>
 <body>
     <div id="connectMenu" data-module="ConnectMenu">
+        <h1 id="title">Zappy</h1>
         <div id="connectInputContainer">
-            <h3>Connect to server</h3>
-            <br />
-            <label for="address">Ip address of the server</label>
-            <p id="addressError" class="errorText"></p>
-            <input type="text" id="address" name="address" placeholder="localhost" required/>
-            <br />
-            <label for="port">Port</label>
-            <p id="portError" class="errorText"></p>
-            <input type="text" id="port" name="port" placeholder="4242" required/>
-            <br />
-            <p id="connectionError" class="errorText"></p>
-            <button id="connectButton" data-action="connect">Connect</button>
+            <p id="connectTitle">Connect to a server</p>
+            <div id="formContainer">
+                <div class="inputContainer">
+                    <label for="address">Address</label>
+                    <div class="inputDesign">
+                        <input type="text" id="address" name="address" placeholder="localhost" required/>
+                    </div>
+                </div>
+                <div class="inputContainer">
+                    <label for="port">Port</label>
+                    <div class="inputDesign">
+                        <input type="text" id="port" name="port" placeholder="4242" required/>
+                    </div>
+                </div>
+                <p id="errorText">I am special</p>
+                <button id="connectButton" data-action="connect">Connect</button>
+            </div>
         </div>
     </div>
     <canvas id="webgpu" class="webgpu"></canvas>

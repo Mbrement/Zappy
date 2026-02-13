@@ -102,7 +102,7 @@ class ConnectMenu {
      * @description Shows connectMenu
      */
     showConnectMenu() {
-        this.instance.style.visibility = 'visible';
+        this.instance.classList.remove('hidden');
     }
 
     /**
@@ -110,7 +110,7 @@ class ConnectMenu {
      * @description Hides connectMenu
      */
     hideConnectMenu() {
-        this.instance.style.visibility = 'hidden';
+        this.instance.classList.add('hidden');
     }
 
 }
