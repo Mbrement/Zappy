@@ -74,6 +74,13 @@ impl Map {
             _ => (),
         }
     }
+	pub fn get_tile_content(&self, x: u32, y: u32) -> Option<&Vec<String>> {
+		if x < self.width && y < self.height {
+			Some(&self.tiles[y as usize][x as usize].strings)
+		} else {
+			None
+		}
+	}
 
     pub fn fill_start(&mut self) {
         for row in &mut self.tiles {
