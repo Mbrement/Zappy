@@ -36,7 +36,6 @@ body
     min-width: 100vw;
     background: #222222;
     z-index: 5;
-    visibility: hidden;
 }
 
 #connectInputContainer {

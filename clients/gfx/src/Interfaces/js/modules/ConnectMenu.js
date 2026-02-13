@@ -1,6 +1,7 @@
 class ConnectMenu {
     constructor() {
         this.instance = document.getElementById("connectMenu");
+        this.hideConnectMenu()
         this.address = "";
         this.port = "";
     }
@@ -34,9 +35,9 @@ class ConnectMenu {
      * @description Removes errors from the connectMenu
      */
     resetErrors() {
-        document.getElementById('addressError').innerHTML = ""
-        document.getElementById('portError').innerHTML = ""
-        document.getElementById('connectionError').innerHTML = ""
+        // document.getElementById('addressError').innerHTML = ""
+        // document.getElementById('portError').innerHTML = ""
+        // document.getElementById('connectionError').innerHTML = ""
     }
 
     /**
@@ -45,7 +46,7 @@ class ConnectMenu {
      * @param error - the error message
      */
     showPortError(error) {
-        document.getElementById('portError').innerHTML = error
+        // document.getElementById('portError').innerHTML = error
     }
 
     /**
@@ -54,7 +55,7 @@ class ConnectMenu {
      * @param error - the error message
      */
     showAddressError(error) {
-        document.getElementById('addressError').innerHTML = error
+        // document.getElementById('addressError').innerHTML = error
     }
 
     /**
@@ -63,7 +64,7 @@ class ConnectMenu {
      * @param error - the error message
      */
     showConnectionError(error) {
-        document.getElementById('connectionError').innerHTML = error
+        // document.getElementById('connectionError').innerHTML = error
     }
 
 
