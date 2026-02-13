@@ -6,6 +6,7 @@ mod client;
 pub mod command_manager;
 pub mod define;
 pub mod utils;
+pub mod graphic;
 mod game;
 mod map;
 use crate::server::client::Client;
