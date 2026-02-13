@@ -30,7 +30,9 @@ impl CommandManager {
             arg.clone(),
             self.order.entry(token).or_insert_with(VecDeque::new).len()
         );
-
+        if !define::COMMANDLIST.contains(&name.as_str()) {
+            return;
+        }
         if self.order.entry(token).or_insert_with(VecDeque::new).len() < 10 {
             self.order
                 .entry(token)
@@ -118,23 +120,10 @@ impl CommandManager {
         command_manager.register("voir", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             debug_manager_register("voir", _c, server, _arg);
-            debug_manager_register("voir", true);
             let mut client = server._clients.get_mut(&_c).unwrap();
             let visible_cells = server._game.get_visible_cells(client.position, client.orientation);
 			println!("{:?}", visible_cells);
-			// let mut response = String::new();
-			// for cell in visible_cells {
-			// 	let content = server._game.map.get_tile_content(cell.0, cell.1);
-			// 	if let Some(items) = content {
-			// 		response.push_str(&items.join(" "));
-			// 	}
-			// 	response.push_str(", ");
-			// }
-			// // Remove the last comma and space
-			// if response.len() >= 2 {
-			// 	response.truncate(response.len() - 2);
-			// }
-			// let _ = client.get_socket_mut().write(response.as_bytes());
+			let _ = client.get_socket_mut().write(visible_cells.join(", ").as_bytes());
         });
         command_manager.register(
             "inventaire",
@@ -275,13 +264,13 @@ impl CommandManager {
                 if let Some((command, tkn, arg)) =
                     self.order.get(&token).and_then(|queue| queue.front())
                 {
-                    println!(
-                        "current tick: {}, next execute for token {:?}: {}, command queue length: {}",
-                        server._game._tick,
-                        token,
-                        self.next_execute.get(&token).unwrap_or(&0),
-                        self.order.get(&token).unwrap_or(&VecDeque::new()).len()
-                    );
+                    // println!(
+                    //     "current tick: {}, next execute for token {:?}: {}, command queue length: {}",
+                    //     server._game._tick,
+                    //     token,
+                    //     self.next_execute.get(&token).unwrap_or(&0),
+                    //     self.order.get(&token).unwrap_or(&VecDeque::new()).len()
+                    // );
 
                     if self.next_execute.get(&token).unwrap() <= &server._game._tick
                     {
@@ -300,10 +289,8 @@ impl CommandManager {
                         };
                         self.execute(&command, *tkn, &arg, server);
                         //TODO-mrozniec: recup command
-
-                        if res.is_some() {
-                            // Only pop the command if it was not handled by the match arms above
-                            self.order.get_mut(&token).unwrap().pop_front();
+						// Only pop the command if it was not handled by the match arms above
+                        self.order.get_mut(&token).unwrap().pop_front();
                         }
                     }
                 }

@@ -20,6 +20,20 @@ pub const T6_MAT_INV: usize = 6;
 pub const GRAPHICAL_CLIENT: &str = "GRAPHIC";
 pub const R_OK: &str = "ok\n";
 pub const R_KO: &str = "ko\n";
+pub const COMMANDLIST: [&str; 12] = [
+	"avance",
+	"droite",
+	"gauche",
+	"voir",
+	"inventaire",
+	"prend",
+	"pose",
+	"expulse",
+	"broadcast",
+	"incantation",
+	"fork",
+	"connect_nbr",
+];
 
 // Client constants
 pub const ROLE_PLAYER: &str = "player";
