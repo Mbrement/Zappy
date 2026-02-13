@@ -155,6 +155,25 @@ impl CommandManager {
                     .write(format!("command {} recived {{{}}}\n", "inventaire", _arg).as_bytes());
                 #[cfg(feature = "log")]
                 println!("command {} recived {{{}}} {:?}", "inventaire", _arg, _c);
+                let mut client = server._clients.get_mut(&_c).unwrap();
+				let inventory = client.get_inventory();
+                client.get_socket_mut().write(format!(
+                    "{} {}, {} {}, {} {}, {} {}, {} {}, {} {}, {} {}",
+                    define::FOOD,
+                    inventory[define::FOOD_INV],
+                    define::T1_MAT,
+                    inventory[define::T1_MAT_INV],
+                    define::T2_MAT,
+                    inventory[define::T2_MAT_INV],
+                    define::T3_MAT,
+                    inventory[define::T3_MAT_INV],
+                    define::T4_MAT,
+                    inventory[define::T4_MAT_INV],
+                    define::T5_MAT,
+                    inventory[define::T5_MAT_INV],
+                    define::T6_MAT,
+                    inventory[define::T6_MAT_INV]
+				).as_bytes());
             },
         );
         command_manager.register(
@@ -334,7 +353,6 @@ impl CommandManager {
                     if self.next_execute.get(&token).unwrap() == &server._game._tick
                         || self.next_execute.get(&token).unwrap() == &0
                     {
-
                         let res = match command.as_str() {
                             "voir" | "prend" | "pose" | "droite" | "gauche" | "avance"
                             | "expulse" | "broadcast" => {
@@ -348,7 +366,7 @@ impl CommandManager {
                             "connect_nbr" => self.next_execute.insert(token, server._game._tick),
                             _ => None,
                         };
-						self.execute(&command, *tkn, &arg, server); 
+                        self.execute(&command, *tkn, &arg, server);
                         if res.is_some() {
                             // Only pop the command if it was not handled by the match arms above
                             self.order.get_mut(&token).unwrap().pop_front();
