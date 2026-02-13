@@ -20,7 +20,7 @@ impl client::Client {
             token,
             r#type: String::from("unknown"),
             inventory: [0, 0, 0, 0, 0, 0, 0],
-            level: 0,
+            level: 1,
             hunger: 1260,
             position: (0, 0),
             orientation: ('N'),
@@ -28,7 +28,9 @@ impl client::Client {
     }
 
     pub fn get_inventory(&self) -> [u32; 7] {
-        self.inventory
+        let mut tmp = self.inventory;
+        tmp[0] = self.hunger as u32;
+        tmp
     }
     pub fn get_socket(&self) -> &TcpStream {
         &self.socket

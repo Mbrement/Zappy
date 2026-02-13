@@ -1,7 +1,7 @@
-use crate::server::client;
+use crate::server::client::{self, Client};
 use crate::server::command_manager::CommandManager;
 use crate::server::map::Map;
-use crate::server::{self};
+use crate::server::{self, define};
 use mio::Token;
 use rand::RngExt;
 use std::collections::HashMap;
@@ -145,22 +145,55 @@ impl Game {
         (x, y)
     }
 
-    pub fn get_visible_cells(&self, position: (u32, u32), orientation: char) -> Vec<String> {
+    pub fn put_item_on_cell(&mut self, client: &mut Client, item: &str) -> bool {
+        let idx: Option<usize> = match item {
+            define::FOOD => Some(0),
+            define::T1_MAT => Some(1),
+            define::T2_MAT => Some(2),
+            define::T3_MAT => Some(3),
+            define::T4_MAT => Some(4),
+            define::T5_MAT => Some(5),
+            define::T6_MAT => Some(6),
+            _ => None, // If the item is not recognized, we disallow putting it on the cell
+        };
+        let idx = match idx {
+            Some(i) => i,
+            None => return false,
+        };
+        if client.inventory[idx] == 0 {
+            return false; // The client doesn't have the item in their inventory
+        }
+        let (x, y) = client.position;
+        self.map.get_tile_content_mut(x, y).push(item.to_string());
+        client.inventory[idx] = client.inventory[idx].saturating_sub(1);
+        true
+    }
+
+    pub fn get_visible_cells(
+        &self,
+        position: (u32, u32),
+        orientation: char,
+        level: u8,
+    ) -> Vec<String> {
         let mut visible_cells = Vec::new();
         let directions = match orientation {
-            'N' => vec![(0, -1), (1, -1), (-1, -1)],
-            'E' => vec![(1, 0), (1, -1), (1, 1)],
-            'S' => vec![(0, 1), (1, 1), (-1, 1)],
-            'W' => vec![(-1, 0), (-1, -1), (-1, 1)],
-            _ => vec![],
+            'N' => define::SEE_TAB_N,
+            'E' => define::SEE_TAB_E,
+            'S' => define::SEE_TAB_S,
+            'W' => define::SEE_TAB_W,
+            _ => [(0, 0); 81],
         };
+
+        let mut max_index = (level + 1).pow(2) as usize;
         for (dx, dy) in directions {
             let cell_x = (position.0 as i32 + dx).rem_euclid(self.map.get_width() as i32) as u32;
             let cell_y = (position.1 as i32 + dy).rem_euclid(self.map.get_height() as i32) as u32;
             if let Some(cell) = self.map.get_tile_content(cell_x, cell_y) {
-                println!("Visible cell at ({}, {}): {:?}", cell_x, cell_y, cell);
-                println!();
                 visible_cells.push(cell.iter().cloned().collect::<Vec<String>>().join(" "));
+                max_index -= 1;
+                if max_index == 0 {
+                    break;
+                }
             }
         }
         visible_cells
@@ -168,5 +201,23 @@ impl Game {
 
     pub fn fork_player(&mut self, token: Token) {
         println!("Player {:?} is trying to fork", token); // if let Some(client) = self._clients.get(&token) { if client.r#type == define::ROLE_PLAYER { let team_name = self.get_team_for_player(&token); let new_token = Token(self._next_token as usize); self._next_token += 1; self._clients.insert(new_token, Client::new(client.get_socket().try_clone().unwrap(), new_token)); self.teams.get_mut(&team_name).unwrap().push(new_token); self._game.spawn_player(new_token, &team_name); println!("Player {:?} forked successfully as {:?}", token, new_token); } else { println!("Client {:?} is not a player and cannot fork", token); } } else { println!("Client {:?} not found for forking", token); }
+    }
+
+    pub fn take_item_from_cell(&mut self, client: &mut Client, item: &str) -> bool {
+        let position = self.get_player_position(client.get_token());
+        if self.map.remove_item_from_cell(position.0, position.1, item) {
+            match item {
+                define::FOOD => client.set_hunger(client.hunger + define::FOOD_VALUE), // Assuming 126 is the hunger value for food
+                define::T1_MAT => client.inventory[define::T1_MAT_INV] += 1,
+                define::T2_MAT => client.inventory[define::T2_MAT_INV] += 1,
+                define::T3_MAT => client.inventory[define::T3_MAT_INV] += 1,
+                define::T4_MAT => client.inventory[define::T4_MAT_INV] += 1,
+                define::T5_MAT => client.inventory[define::T5_MAT_INV] += 1,
+                define::T6_MAT => client.inventory[define::T6_MAT_INV] += 1,
+                _ => (),
+            }
+            return true;
+        }
+        return false;
     }
 }

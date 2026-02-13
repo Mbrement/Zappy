@@ -62,6 +62,7 @@ fn main() -> std::io::Result<()> {
             );
         }
     }
+
     if matches.opt_present("y") {
         let height = matches.opt_str("y").unwrap();
         if height.parse::<u32>().is_ok() {
@@ -78,7 +79,10 @@ fn main() -> std::io::Result<()> {
         let tick = matches.opt_str("t").unwrap();
         #[cfg(feature = "log")]
         println!("Tick per second: {}", tick);
-        if tick.parse::<u32>().is_ok() && tick.parse::<u32>().unwrap() != 0 {
+        if tick.parse::<u32>().is_ok()
+            && tick.parse::<u32>().unwrap() != 0
+            && tick.parse::<u32>().unwrap() <= 120
+        {
             server.set_ticks(tick.parse().unwrap());
         } else {
             eprintln!(

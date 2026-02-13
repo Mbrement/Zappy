@@ -74,12 +74,30 @@ impl Map {
             _ => (),
         }
     }
+
     pub fn get_tile_content(&self, x: u32, y: u32) -> Option<&Vec<String>> {
+        let mut rtn;
         if x < self.width && y < self.height {
-            Some(&self.tiles[y as usize][x as usize].strings)
+            rtn = Some(&self.tiles[y as usize][x as usize].strings);
         } else {
-            None
+            rtn = None
         }
+        rtn
+    }
+    pub fn get_tile_content_mut(&mut self, x: u32, y: u32) -> &mut Vec<String> {
+        &mut self.tiles[y as usize][x as usize].strings
+    }
+
+    pub fn remove_item_from_cell(&mut self, x: u32, y: u32, item: &str) -> bool {
+        if let Some(pos) = self.tiles[y as usize][x as usize]
+            .strings
+            .iter()
+            .position(|s| s == item)
+        {
+            self.tiles[y as usize][x as usize].strings.remove(pos);
+            return true;
+        }
+        false
     }
 
     pub fn fill_start(&mut self) {

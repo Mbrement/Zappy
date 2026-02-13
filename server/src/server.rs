@@ -33,7 +33,7 @@ pub struct Server {
 
 impl Server {
     pub fn new(port: u16) -> Self {
-        let tmp_socket = TcpListener::bind(format!("{}:{}", "127.0.0.1", port).parse().unwrap());
+        let tmp_socket = TcpListener::bind(format!("{}:{}", "0.0.0.0", port).parse().unwrap());
         if tmp_socket.is_err() {
             eprintln!("Failed to bind to address");
             process::exit(1);
@@ -44,7 +44,7 @@ impl Server {
             process::exit(1);
         }
         let tmp = Server {
-            _address: "127.0.0.1".to_string(),
+            _address: "0.0.0.0".to_string(),
             _port: port,
             _client_token: Token(0),
             _poll: tmp_poll.unwrap(),
