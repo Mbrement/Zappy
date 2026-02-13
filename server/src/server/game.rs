@@ -145,6 +145,25 @@ impl Game {
         (x, y)
     }
 
+	pub fn get_visible_cells(&self, position : (u32, u32), orientation: char) -> Vec<String> {
+		let mut visible_cells = Vec::new();
+		let directions = match orientation {
+			'N' => vec![(0, -1), (1, -1), (-1, -1)],
+			'E' => vec![(1, 0), (1, -1), (1, 1)],
+			'S' => vec![(0, 1), (1, 1), (-1, 1)],
+			'W' => vec![(-1, 0), (-1, -1), (-1, 1)],
+			_ => vec![],
+		};
+		for (dx, dy) in directions {
+			let cell_x = (position.0 as i32 + dx).rem_euclid(self.map.get_width() as i32) as u32;
+			let cell_y = (position.1 as i32 + dy).rem_euclid(self.map.get_height() as i32) as u32;
+			if let Some(cell) = self.map.get_tile_content(cell_x, cell_y) {
+				visible_cells.push(format!("{:?}, ", cell));
+			}
+		}
+		visible_cells
+	}
+
     pub fn fork_player(&mut self, token: Token) {
         println!("Player {:?} is trying to fork", token); // if let Some(client) = self._clients.get(&token) { if client.r#type == define::ROLE_PLAYER { let team_name = self.get_team_for_player(&token); let new_token = Token(self._next_token as usize); self._next_token += 1; self._clients.insert(new_token, Client::new(client.get_socket().try_clone().unwrap(), new_token)); self.teams.get_mut(&team_name).unwrap().push(new_token); self._game.spawn_player(new_token, &team_name); println!("Player {:?} forked successfully as {:?}", token, new_token); } else { println!("Client {:?} is not a player and cannot fork", token); } } else { println!("Client {:?} not found for forking", token); }
     }
