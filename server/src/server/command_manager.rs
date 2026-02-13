@@ -2,6 +2,7 @@ use crate::server::Server;
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
+use crate::server::utils::*;
 
 pub type CommandFn = Box<dyn Fn(mio::Token, &mut Server, &str)>;
 pub type CommandArgs = (String, mio::Token, String);
@@ -52,13 +53,11 @@ impl CommandManager {
     // default configuration of commande for a server
     pub fn new_server(server: &mut Server) -> Self {
         let mut command_manager = CommandManager::new();
-        #[cfg(feature = "log")]
+        #[cfg(feature = "debug")]
         command_manager.register(
             "position",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                #[cfg(feature = "debug")]
                 let client = server._clients.get_mut(&_c).unwrap();
-                #[cfg(feature = "debug")]
                 let _ = client.get_socket().write(
                     format!(
                         "command {} recived {{{}}}\n{} {}",
@@ -73,112 +72,58 @@ impl CommandManager {
         command_manager.register(
             "death",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                let client = server._clients.get_mut(&_c).unwrap();
-                #[cfg(feature = "debug")]
-                let _ = client
-                    .get_socket_mut()
-                    .write(format!("command {} recived {{{}}}\n", "death", _arg).as_bytes());
-                println!("command {} recived {{{}}} {:?}", "death", _arg, _c);
-                client.get_socket().shutdown(std::net::Shutdown::Both);
+                debug_manager_register("death", false);
             },
         );
         command_manager.register(
             "droite",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 // _game.change_player_orientation(_c, "droite".into());
-                #[cfg(feature = "debug")]
-                let client = server._clients.get_mut(&_c).unwrap();
-                #[cfg(feature = "debug")]
-                let _ = client
-                    .get_socket_mut()
-                    .write(format!("command {} recived {{{}}}\n", "droite", _arg).as_bytes());
                 #[cfg(feature = "log")]
-                println!("command {} recived {{{}}} {:?}", "droite", _arg, _c);
+                debug_manager_register("droite", true);
             },
         );
         command_manager.register(
             "gauche",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                #[cfg(feature = "debug")]
-                let client = server._clients.get_mut(&_c).unwrap();
-                #[cfg(feature = "debug")]
-                let _ = client
-                    .get_socket_mut()
-                    .write(format!("command {} recived {{{}}}\n", "gauche", _arg).as_bytes());
                 #[cfg(feature = "log")]
-                println!("command {} recived {{{}}} {:?}", "gauche", _arg, _c);
+                debug_manager_register("gauche", true);
             },
         );
         command_manager.register("voir", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
-            let client = server._clients.get_mut(&_c).unwrap();
-            #[cfg(feature = "log")]
-            let _ = client
-                .get_socket_mut()
-                .write(format!("command {} recived {{{}}}\n", "voir", _arg).as_bytes());
-            #[cfg(feature = "log")]
-            println!("command {} recived {{{}}} {:?}", "voir", _arg, _c);
+            debug_manager_register("voir", true);
         });
         command_manager.register(
             "inventaire",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                #[cfg(feature = "debug")]
-                let client = server._clients.get_mut(&_c).unwrap();
-                #[cfg(feature = "debug")]
-                let _ = client
-                    .get_socket_mut()
-                    .write(format!("command {} recived {{{}}}\n", "inventaire", _arg).as_bytes());
                 #[cfg(feature = "log")]
-                println!("command {} recived {{{}}} {:?}", "inventaire", _arg, _c);
+                debug_manager_register("inventaire", true);
             },
         );
         command_manager.register(
             "prend",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                #[cfg(feature = "debug")]
-                let client = server._clients.get_mut(&_c).unwrap();
-                #[cfg(feature = "debug")]
-                let _ = client
-                    .get_socket_mut()
-                    .write(format!("command {} recived {{{}}}\n", "prend", _arg).as_bytes());
                 #[cfg(feature = "log")]
-                println!("command {} recived {{{}}} {:?}", "prend", _arg, _c);
+                debug_manager_register("prend", true);
             },
         );
         command_manager.register("pose", |_c: mio::Token, server: &mut Server, _arg: &str| {
-            #[cfg(feature = "debug")]
-            let client = server._clients.get_mut(&_c).unwrap();
-            #[cfg(feature = "debug")]
-            let _ = client
-                .get_socket_mut()
-                .write(format!("command {} recived {{{}}}\n", "pose", _arg).as_bytes());
             #[cfg(feature = "log")]
-            println!("command {} recived {{{}}} {:?}", "pose", _arg, _c);
+            debug_manager_register("pose", true);
         });
         command_manager.register(
             "expluse",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                #[cfg(feature = "debug")]
-                let client = server._clients.get_mut(&_c).unwrap();
-                #[cfg(feature = "debug")]
-                let _ = client
-                    .get_socket_mut()
-                    .write(format!("command {} recived {{{}}}\n", "expluse", _arg).as_bytes());
                 #[cfg(feature = "log")]
-                println!("command {} recived {{{}}} {:?}", "expluse", _arg, _c);
+                debug_manager_register("expluse", true);
             },
         );
         command_manager.register(
             "broadcast",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                #[cfg(feature = "debug")]
-                let client = server._clients.get_mut(&_c).unwrap();
-                #[cfg(feature = "debug")]
-                let _ = client
-                    .get_socket_mut()
-                    .write(format!("command {} recived {{{}}}\n", "broadcast", _arg).as_bytes());
                 #[cfg(feature = "log")]
-                println!("command {} recived {{{}}} {:?}", "broadcast", _arg, _c);
+                debug_manager_register("broadcast", true);
                 // Broadcast the message to all clients
 
                 let tmp = server._game.map.player_position.get(&_c);
@@ -219,37 +164,19 @@ impl CommandManager {
         command_manager.register(
             "incantation",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                #[cfg(feature = "debug")]
-                let client = server._clients.get_mut(&_c).unwrap();
-                #[cfg(feature = "debug")]
-                let _ = client
-                    .get_socket_mut()
-                    .write(format!("command {} recived {{{}}}\n", "incantation", _arg).as_bytes());
                 #[cfg(feature = "log")]
-                println!("command {} recived {{{}}} {:?}", "incantation", _arg, _c);
+                debug_manager_register("incantation", true);
             },
         );
         command_manager.register("fork", |_c: mio::Token, server: &mut Server, _arg: &str| {
-            #[cfg(feature = "debug")]
-            let client = server._clients.get_mut(&_c).unwrap();
-            #[cfg(feature = "debug")]
-            let _ = client
-                .get_socket_mut()
-                .write(format!("command {} recived {{{}}}\n", "fork", _arg).as_bytes());
             #[cfg(feature = "log")]
-            println!("command {} recived {{{}}} {:?}", "fork", _arg, _c);
+            debug_manager_register("fork", true);
         });
         command_manager.register(
             "connect_nbr",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                #[cfg(feature = "debug")]
-                let client = server._clients.get_mut(&_c).unwrap();
-                #[cfg(feature = "debug")]
-                let _ = client
-                    .get_socket_mut()
-                    .write(format!("command {} recived {{{}}}\n", "connect_nbr", _arg).as_bytes());
                 #[cfg(feature = "log")]
-                println!("command {} recived {{{}}} {:?}", "connect_nbr", _arg, _c);
+                debug_manager_register("connect_nbr", true);
             },
         );
 
@@ -272,10 +199,12 @@ impl CommandManager {
                         self.order.get_mut(&token).unwrap().pop_front()
                     {
                         self.execute(&command, tkn, &arg, server);
+                        //TODO-mrozniec: recup command
                     }
                 }
             }
         }
+        //TODO-mrozniec: send all graph client
     }
 }
 
