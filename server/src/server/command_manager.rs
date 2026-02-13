@@ -200,11 +200,31 @@ impl CommandManager {
                     {
                         self.execute(&command, tkn, &arg, server);
                         //TODO-mrozniec: recup command
+                        match command.as_str() {
+                            "voir" | "prend" | "pose" | "droite" | "gauche" | "avance"
+                            | "expulse" | "broadcast" => {
+                                self.next_execute.insert(token, server._game._tick + 7)
+                            }
+                            "inventaire" => self.next_execute.insert(token, server._game._tick + 1),
+                            "fork" => self.next_execute.insert(token, server._game._tick + 42),
+                            "incantation" => {
+                                self.next_execute.insert(token, server._game._tick + 300)
+                            }
+                            // "connect_nbr" => self.next_execute.insert(token, server._game._tick + 0) ==> useless
+                            _ => self.next_execute.insert(token, server._game._tick + 1),
+                        };
                     }
                 }
             }
         }
         //TODO-mrozniec: send all graph client
+    }
+
+    pub fn next_command_time(&self, token: &Token) -> Option<u128> {
+        self.next_execute.get(token).cloned()
+    }
+    pub fn set_next_command_time(&mut self, token: Token, time: u128) {
+        self.next_execute.insert(token, time);
     }
 }
 
