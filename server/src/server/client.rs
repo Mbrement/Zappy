@@ -6,7 +6,7 @@ pub struct Client {
     socket: TcpStream,
     pub(crate) token: Token,
     pub(crate) r#type: String,
-    pub(crate) inventory: (u32, u32, u32, u32, u32, u32),
+    pub(crate) inventory: [u32; 7],
     pub(crate) level: u8,
     pub(crate) hunger: u128,
     pub(crate) position: (u32, u32),
@@ -19,7 +19,7 @@ impl client::Client {
             socket,
             token,
             r#type: String::from("unknown"),
-            inventory: (0, 0, 0, 0, 0, 0),
+            inventory: [0, 0, 0, 0, 0, 0, 0],
             level: 0,
             hunger: 1260,
             position: (0, 0),
@@ -27,6 +27,9 @@ impl client::Client {
         }
     }
 
+	pub fn get_inventory(&self) ->[u32; 7] {
+		self.inventory
+	}
     pub fn get_socket(&self) -> &TcpStream {
         &self.socket
     }

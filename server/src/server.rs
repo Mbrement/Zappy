@@ -5,6 +5,7 @@ use std::io::{Read, Write};
 mod client;
 pub mod command_manager;
 pub mod define;
+pub mod utils;
 mod game;
 mod map;
 use crate::server::client::Client;
