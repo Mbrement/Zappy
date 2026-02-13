@@ -7,6 +7,6 @@ fn debug_manager_register(s: String, option: bool) {
     let _ = client
         .get_socket_mut()
         .write(format!("command {} recived {{{}}}\n", s, _arg).as_bytes());
-	#[cfg(feature = "debug")]
+    #[cfg(feature = "debug")]
     println!("command {} recived {{{}}} {:?}", s, _arg, _c);
 }

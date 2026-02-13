@@ -27,9 +27,9 @@ impl client::Client {
         }
     }
 
-	pub fn get_inventory(&self) ->[u32; 7] {
-		self.inventory
-	}
+    pub fn get_inventory(&self) -> [u32; 7] {
+        self.inventory
+    }
     pub fn get_socket(&self) -> &TcpStream {
         &self.socket
     }

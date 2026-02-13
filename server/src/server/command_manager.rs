@@ -1,8 +1,8 @@
+use crate::server::utils::*;
 use crate::server::{Server, define};
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
-use crate::server::utils::*;
 
 pub type CommandFn = Box<dyn Fn(mio::Token, &mut Server, &str)>;
 pub type CommandArgs = (String, mio::Token, String);
@@ -118,6 +118,22 @@ impl CommandManager {
         command_manager.register("voir", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             debug_manager_register("voir", true);
+            let mut client = server._clients.get_mut(&_c).unwrap();
+            let visible_cells = server._game.get_visible_cells(client.position, client.orientation);
+			println!("{:?}", visible_cells);
+			// let mut response = String::new();
+			// for cell in visible_cells {
+			// 	let content = server._game.map.get_tile_content(cell.0, cell.1);
+			// 	if let Some(items) = content {
+			// 		response.push_str(&items.join(" "));
+			// 	}
+			// 	response.push_str(", ");
+			// }
+			// // Remove the last comma and space
+			// if response.len() >= 2 {
+			// 	response.truncate(response.len() - 2);
+			// }
+			// let _ = client.get_socket_mut().write(response.as_bytes());
         });
         command_manager.register(
             "inventaire",
@@ -125,24 +141,27 @@ impl CommandManager {
                 #[cfg(feature = "log")]
                 debug_manager_register("inventaire", true);
                 let mut client = server._clients.get_mut(&_c).unwrap();
-				let inventory = client.get_inventory();
-                client.get_socket_mut().write(format!(
-                    "{} {}, {} {}, {} {}, {} {}, {} {}, {} {}, {} {}",
-                    define::FOOD,
-                    inventory[define::FOOD_INV],
-                    define::T1_MAT,
-                    inventory[define::T1_MAT_INV],
-                    define::T2_MAT,
-                    inventory[define::T2_MAT_INV],
-                    define::T3_MAT,
-                    inventory[define::T3_MAT_INV],
-                    define::T4_MAT,
-                    inventory[define::T4_MAT_INV],
-                    define::T5_MAT,
-                    inventory[define::T5_MAT_INV],
-                    define::T6_MAT,
-                    inventory[define::T6_MAT_INV]
-				).as_bytes());
+                let inventory = client.get_inventory();
+                client.get_socket_mut().write(
+                    format!(
+                        "{} {}, {} {}, {} {}, {} {}, {} {}, {} {}, {} {}",
+                        define::FOOD,
+                        inventory[define::FOOD_INV],
+                        define::T1_MAT,
+                        inventory[define::T1_MAT_INV],
+                        define::T2_MAT,
+                        inventory[define::T2_MAT_INV],
+                        define::T3_MAT,
+                        inventory[define::T3_MAT_INV],
+                        define::T4_MAT,
+                        inventory[define::T4_MAT_INV],
+                        define::T5_MAT,
+                        inventory[define::T5_MAT_INV],
+                        define::T6_MAT,
+                        inventory[define::T6_MAT_INV]
+                    )
+                    .as_bytes(),
+                );
             },
         );
         command_manager.register(
@@ -263,8 +282,7 @@ impl CommandManager {
                         self.order.get(&token).unwrap_or(&VecDeque::new()).len()
                     );
 
-                    if self.next_execute.get(&token).unwrap() == &server._game._tick
-                        || self.next_execute.get(&token).unwrap() == &0
+                    if self.next_execute.get(&token).unwrap() <= &server._game._tick
                     {
                         let res = match command.as_str() {
                             "voir" | "prend" | "pose" | "droite" | "gauche" | "avance"
@@ -280,7 +298,7 @@ impl CommandManager {
                             _ => None,
                         };
                         self.execute(&command, *tkn, &arg, server);
-						//TODO-mrozniec: recup command
+                        //TODO-mrozniec: recup command
 
                         if res.is_some() {
                             // Only pop the command if it was not handled by the match arms above
