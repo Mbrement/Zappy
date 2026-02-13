@@ -1,4 +1,4 @@
-use crate::server::Server;
+use crate::server::{Server, define};
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
@@ -22,11 +22,20 @@ impl CommandManager {
     }
 
     pub fn add_to_queue(&mut self, name: String, token: mio::Token, arg: String) {
-        if self.order.entry(token).or_insert_with(VecDeque::new).len() <= 10 {
+        #[cfg(feature = "log")]
+        println!(
+            "Try to dded command '{}' to queue for token {:?} withargs: {}. queu len : {}",
+            name,
+            token,
+            arg.clone(),
+            self.order.entry(token).or_insert_with(VecDeque::new).len()
+        );
+
+        if self.order.entry(token).or_insert_with(VecDeque::new).len() < 10 {
             self.order
                 .entry(token)
                 .or_insert_with(VecDeque::new)
-                .push_back((name, token, arg));
+                .push_back((name.clone(), token, arg.clone()));
             if self.next_execute.entry(token).or_insert(0) == &0 {
                 self.next_execute.insert(token, 0);
             }
@@ -81,6 +90,15 @@ impl CommandManager {
                 // _game.change_player_orientation(_c, "droite".into());
                 #[cfg(feature = "log")]
                 debug_manager_register("droite", true);
+                println!("command {} recived {{{}}} {:?}", "droite", _arg, _c);
+                if let Some(client) = server._clients.get_mut(&_c) {
+                    server
+                        ._game
+                        .change_player_orientation(client, "droite".into());
+                    let _ = client
+                        .get_socket_mut()
+                        .write(format!("{}", define::R_OK).as_bytes());
+                }
             },
         );
         command_manager.register(
@@ -88,6 +106,15 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("gauche", true);
+                println!("command {} recived {{{}}} {:?}", "gauche", _arg, _c);
+                if let Some(client) = server._clients.get_mut(&_c) {
+                    server
+                        ._game
+                        .change_player_orientation(client, "gauche".into());
+                    let _ = client
+                        .get_socket_mut()
+                        .write(format!("{}", define::R_OK).as_bytes());
+                }
             },
         );
         command_manager.register("voir", |_c: mio::Token, server: &mut Server, _arg: &str| {
@@ -99,6 +126,30 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("inventaire", true);
+            },
+        );
+        command_manager.register(
+            "avance",
+            |_c: mio::Token, server: &mut Server, _arg: &str| {
+                #[cfg(feature = "debug")]
+                let client = server._clients.get_mut(&_c).unwrap();
+                #[cfg(feature = "debug")]
+                let _ = client
+                    .get_socket_mut()
+                    .write(format!("command {} recived {{{}}}\n", "avance", _arg).as_bytes());
+                #[cfg(feature = "log")]
+                println!("command {} recived {{{}}} {:?}", "avance", _arg, _c);
+                let client = server._clients.get_mut(&_c).unwrap();
+                println!(
+                    "Player position before move: {:?}",
+                    server._game.get_player_position(_c)
+                );
+                server._game.move_player(client);
+                client.position = server._game.get_player_position(_c);
+                println!(
+                    "Player position after move: {:?}",
+                    server._game.get_player_position(_c)
+                );
             },
         );
         command_manager.register(
@@ -171,15 +222,21 @@ impl CommandManager {
         command_manager.register("fork", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             debug_manager_register("fork", true);
+            println!("command {} recived {{{}}} {:?}", "fork", _arg, _c);
+            server._game.fork_player(_c);
         });
         command_manager.register(
             "connect_nbr",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("connect_nbr", true);
+                println!("command {} recived {{{}}} {:?}", "connect_nbr", _arg, _c);
+                let tmp = server.get_team_for_player(&_c);
+                let d = server._max_clients[&tmp] - server._game.team[&tmp].len() as u32;
+                let mut client = server._clients.get_mut(&_c).unwrap();
+                let _ = client.get_socket_mut().write(format!("{}\n", d).as_bytes()); // TODO check error here
             },
         );
-
         command_manager
     }
 
@@ -189,18 +246,30 @@ impl CommandManager {
             if self.order.contains_key(&token) && self.next_execute.contains_key(&token) {
                 // println!("Processing command queue: {:?}", "here");
 
-                if self.next_execute.get(&token).unwrap() <= &server._game._tick {
-                    // println!(
-                    //     "Executing command for token {:?}: {:?}",
-                    //     token,
-                    //     self.order.get(&token)
-                    // );
-                    if let Some((command, tkn, arg)) =
-                        self.order.get_mut(&token).unwrap().pop_front()
+                // println!(
+                //     "Executing command for token {:?}: {:?}",
+                //     token,
+                //     self.order.get(&token)
+                // );
+                if let Some((command, tkn, arg)) =
+                    self.order.get(&token).and_then(|queue| queue.front())
+                {
+                    println!(
+                        "current tick: {}, next execute for token {:?}: {}, command queue length: {}",
+                        server._game._tick,
+                        token,
+                        self.next_execute.get(&token).unwrap_or(&0),
+                        self.order.get(&token).unwrap_or(&VecDeque::new()).len()
+                    );
+
+                    if self.next_execute.get(&token).unwrap() == &server._game._tick
+                        || self.next_execute.get(&token).unwrap() == &0
                     {
                         self.execute(&command, tkn, &arg, server);
                         //TODO-mrozniec: recup command
                         match command.as_str() {
+
+                        let res = match command.as_str() {
                             "voir" | "prend" | "pose" | "droite" | "gauche" | "avance"
                             | "expulse" | "broadcast" => {
                                 self.next_execute.insert(token, server._game._tick + 7)
@@ -210,9 +279,14 @@ impl CommandManager {
                             "incantation" => {
                                 self.next_execute.insert(token, server._game._tick + 300)
                             }
-                            // "connect_nbr" => self.next_execute.insert(token, server._game._tick + 0) ==> useless
-                            _ => self.next_execute.insert(token, server._game._tick + 1),
+                            "connect_nbr" => self.next_execute.insert(token, server._game._tick),
+                            _ => None,
                         };
+						self.execute(&command, *tkn, &arg, server); 
+                        if res.is_some() {
+                            // Only pop the command if it was not handled by the match arms above
+                            self.order.get_mut(&token).unwrap().pop_front();
+                        }
                     }
                 }
             }
@@ -284,7 +358,15 @@ fn get_message_transmission_direction(
             return (4);
         }
         return (6);
-    }
+    }ine::T3_MAT_INV],
+                    define::T4_MAT,
+                    inventory[define::T4_MAT_INV],
+                    define::T5_MAT,
+                    inventory[define::T5_MAT_INV],
+                    define::T6_MAT,
+                    inventory[define::T6_MAT_INV]
+				).as_bytes());
+            },
     if (larger_delta == dx) {
         if (dy > 0) {
             return (3);

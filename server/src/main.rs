@@ -78,7 +78,7 @@ fn main() -> std::io::Result<()> {
         let tick = matches.opt_str("t").unwrap();
         #[cfg(feature = "log")]
         println!("Tick per second: {}", tick);
-        if tick.parse::<u32>().is_ok() {
+        if tick.parse::<u32>().is_ok() && tick.parse::<u32>().unwrap() != 0 {
             server.set_ticks(tick.parse().unwrap());
         } else {
             eprintln!(

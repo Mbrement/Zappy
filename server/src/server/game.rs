@@ -101,20 +101,38 @@ impl Game {
         // Move the player on the map
         match player.orientation {
             'N' => {
-                self.map
-                    .move_player(&player.get_token(), (position.0, position.1 - 1));
+                if position.1 > 0 {
+                    self.map
+                        .move_player(&player.get_token(), (position.0, position.1 - 1));
+                } else {
+                    self.map
+                        .move_player(&player.get_token(), (position.0, self.map.get_height()));
+                }
             }
             'E' => {
-                self.map
-                    .move_player(&player.get_token(), (position.0 + 1, position.1));
+                if self.map.get_width() > position.0 {
+                    self.map
+                        .move_player(&player.get_token(), (position.0 + 1, position.1));
+                } else {
+                    self.map.move_player(&player.get_token(), (0, position.1));
+                }
             }
             'S' => {
-                self.map
-                    .move_player(&player.get_token(), (position.0, position.1 + 1));
+                if self.map.get_height() > position.1 {
+                    self.map
+                        .move_player(&player.get_token(), (position.0, position.1 + 1));
+                } else {
+                    self.map.move_player(&player.get_token(), (position.0, 0));
+                }
             }
             'W' => {
-                self.map
-                    .move_player(&player.get_token(), (position.0 - 1, position.1));
+                if position.0 > 0 {
+                    self.map
+                        .move_player(&player.get_token(), (position.0 - 1, position.1));
+                } else {
+                    self.map
+                        .move_player(&player.get_token(), (self.map.get_width(), position.1));
+                }
             }
             _ => {}
         }
@@ -125,5 +143,9 @@ impl Game {
         let y = self.map.rng.random_range((0..self.map.get_height()));
         self.map.player_position.insert(token, (x, y));
         (x, y)
+    }
+
+    pub fn fork_player(&mut self, token: Token) {
+        println!("Player {:?} is trying to fork", token); // if let Some(client) = self._clients.get(&token) { if client.r#type == define::ROLE_PLAYER { let team_name = self.get_team_for_player(&token); let new_token = Token(self._next_token as usize); self._next_token += 1; self._clients.insert(new_token, Client::new(client.get_socket().try_clone().unwrap(), new_token)); self.teams.get_mut(&team_name).unwrap().push(new_token); self._game.spawn_player(new_token, &team_name); println!("Player {:?} forked successfully as {:?}", token, new_token); } else { println!("Client {:?} is not a player and cannot fork", token); } } else { println!("Client {:?} not found for forking", token); }
     }
 }

@@ -38,4 +38,13 @@ impl client::Client {
     pub fn get_token(&self) -> Token {
         self.token
     }
+
+    pub fn set_hunger(&mut self, hunger: u128) {
+        self.hunger = hunger;
+    }
+    pub fn hunger_tick(&mut self) {
+        if self.hunger > 0 {
+            self.hunger -= 1;
+        }
+    }
 }
