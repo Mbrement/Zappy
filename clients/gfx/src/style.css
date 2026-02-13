@@ -139,30 +139,31 @@ body
     align-items: center;
     justify-content: center;
 
-    background: rgba(47, 4, 64, 0.65);
+    background: rgba(88, 6, 121, 0.62);
 
     color: white;
     font-size: 1.2rem;
     padding: 0 20px;
     margin-top: 10px;
     height: 40px;
-    border: none;
+    border: 2px white solid;
     border-radius: 1rem/1rem;
 
-    -webkit-box-shadow: 0 5px 5px 0 rgba(126, 11, 171, 0.25);
-    box-shadow: 0 5px 5px 0 rgba(126, 11, 171, 0.25);
+    -webkit-box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.25);
+    box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.25);
     transition: all 0.25s ease;
     user-select: none;
 }
 
 #connectButton:hover {
-    -webkit-box-shadow: 0 6px 5px 0 rgba(156, 14, 211, 0.45);
-    box-shadow: 0 6px 5px 0 rgba(156, 14, 211, 0.45);
+    -webkit-box-shadow: 0 6px 5px 0 rgba(0, 0, 0, 0.45);
+    box-shadow: 0 6px 5px 0 rgba(0, 0, 0, 0.45);
 }
 
 #connectButton:active {
-    -webkit-box-shadow: 0 6px 5px 0 rgba(156, 14, 211, 0.45), inset 0 0 5px 2px rgba(0, 0, 0, 0.55);
-    box-shadow: 0 6px 5px 0 rgba(156, 14, 211, 0.45), inset 0 0 5px 2px rgba(0, 0, 0, 0.55);
+    -webkit-box-shadow: 0 6px 5px 0 rgba(0, 0, 0, 0.45), inset 0 0 5px 2px rgba(0, 0, 0, 0.75);
+    box-shadow: 0 6px 5px 0 rgba(0, 0, 0, 0.45), inset 0 0 5px 2px rgba(0, 0, 0, 0.75);
+    border: 0 #000 solid;
 }
 
 #errorText {
