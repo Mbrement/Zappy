@@ -90,7 +90,6 @@ impl CommandManager {
                 // _game.change_player_orientation(_c, "droite".into());
                 #[cfg(feature = "log")]
                 debug_manager_register("droite", true);
-                println!("command {} recived {{{}}} {:?}", "droite", _arg, _c);
                 if let Some(client) = server._clients.get_mut(&_c) {
                     server
                         ._game
@@ -106,7 +105,6 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("gauche", true);
-                println!("command {} recived {{{}}} {:?}", "gauche", _arg, _c);
                 if let Some(client) = server._clients.get_mut(&_c) {
                     server
                         ._game
@@ -150,25 +148,11 @@ impl CommandManager {
         command_manager.register(
             "avance",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                #[cfg(feature = "debug")]
-                let client = server._clients.get_mut(&_c).unwrap();
-                #[cfg(feature = "debug")]
-                let _ = client
-                    .get_socket_mut()
-                    .write(format!("command {} recived {{{}}}\n", "avance", _arg).as_bytes());
                 #[cfg(feature = "log")]
-                println!("command {} recived {{{}}} {:?}", "avance", _arg, _c);
+                debug_manager_register("avance", true);
                 let client = server._clients.get_mut(&_c).unwrap();
-                println!(
-                    "Player position before move: {:?}",
-                    server._game.get_player_position(_c)
-                );
                 server._game.move_player(client);
                 client.position = server._game.get_player_position(_c);
-                println!(
-                    "Player position after move: {:?}",
-                    server._game.get_player_position(_c)
-                );
             },
         );
         command_manager.register(
@@ -241,7 +225,6 @@ impl CommandManager {
         command_manager.register("fork", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             debug_manager_register("fork", true);
-            println!("command {} recived {{{}}} {:?}", "fork", _arg, _c);
             server._game.fork_player(_c);
         });
         command_manager.register(
@@ -249,7 +232,6 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("connect_nbr", true);
-                println!("command {} recived {{{}}} {:?}", "connect_nbr", _arg, _c);
                 let tmp = server.get_team_for_player(&_c);
                 let d = server._max_clients[&tmp] - server._game.team[&tmp].len() as u32;
                 let mut client = server._clients.get_mut(&_c).unwrap();
@@ -375,15 +357,7 @@ fn get_message_transmission_direction(
             return (4);
         }
         return (6);
-    }ine::T3_MAT_INV],
-                    define::T4_MAT,
-                    inventory[define::T4_MAT_INV],
-                    define::T5_MAT,
-                    inventory[define::T5_MAT_INV],
-                    define::T6_MAT,
-                    inventory[define::T6_MAT_INV]
-				).as_bytes());
-            },
+    }
     if (larger_delta == dx) {
         if (dy > 0) {
             return (3);
