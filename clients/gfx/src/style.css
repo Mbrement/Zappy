@@ -1,3 +1,8 @@
+
+/***************
+ * GENERAL CSS *
+ ***************/
+
 *
 {
     margin: 0;
@@ -15,9 +20,32 @@ body
     min-width: 100vw !important;
 }
 
+.webgpu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    outline: none;
+    z-index: 1;
+}
+
 .hidden {
     display: none !important;
 }
+
+.noScrollBars::-webkit-scrollbar {
+    display: none;
+}
+
+.noScrollBars {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+
+/***************
+ * CONNECT CSS *
+ ***************/
+
 
 #title {
     color: whitesmoke;
@@ -175,10 +203,41 @@ body
     user-select: none;
 }
 
-.webgpu {
-    position: fixed;
-    top: 0;
-    left: 0;
-    outline: none;
-    z-index: 1;
+
+/*****************
+ * BROADCAST CSS *
+ *****************/
+
+#broadcastContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 25px;
+
+    position: absolute;
+    bottom: 1vh;
+    left: 1vw;
+
+    min-height: 225px;
+    max-height: 225px;
+
+    min-width: 350px;
+    max-width: 350px;
+
+    overflow-y: scroll;
+    overflow-x: hidden;
+
+
+    background: rgba(66, 40, 84, 0.6);
+    z-index: 2;
+
+    border-radius: 1.5rem/1.5rem;
+    border: 3px solid rgba(206, 130, 192, 0.5);
+}
+
+#broadcastContainer p {
+    color: whitesmoke;
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin: 5px 0;
 }
