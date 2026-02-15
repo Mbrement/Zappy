@@ -355,7 +355,7 @@ body
     border-radius: 1rem/1rem;
 }
 
-#tilesResourcesInfoContainer {
+.alignFlexNormal {
     align-items: normal !important;
 }
 
@@ -371,7 +371,6 @@ body
     font-weight: bold;
     color: whitesmoke;
 }
-
 
 .playerOnTile {
     display: flex;
@@ -430,3 +429,27 @@ body
  * PLAYER CSS *
  **************/
 
+#playerInfoContainer {
+    justify-content: normal !important;
+}
+
+
+#playerInformationContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    min-width: 95%;
+    max-width: 95%;
+
+    margin: 8% 0;
+}
+
+#playerInventoryContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    min-width: 95%;
+    max-width: 95%;
+}
