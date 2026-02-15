@@ -7,29 +7,29 @@
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-    <div id="connectMenu" data-module="ConnectMenu">
-        <h1 id="title">Zappy</h1>
-        <div id="connectInputContainer">
-            <p id="connectTitle">Connect to a server</p>
-            <div id="formContainer">
-                <div class="inputContainer">
-                    <label for="address">Address</label>
-                    <div class="inputDesign">
-                        <input type="text" id="address" name="address" placeholder="localhost" required/>
-                    </div>
-                </div>
-                <div class="inputContainer">
-                    <label for="port">Port</label>
-                    <div class="inputDesign">
-                        <input type="text" id="port" name="port" placeholder="4242" required/>
-                    </div>
-                </div>
-                <p id="errorText">I am special</p>
-                <button id="connectButton" data-action="connect">Connect</button>
-            </div>
-        </div>
-    </div>
-    <div id="broadcastContainer" class="noScrollBars">
+<!--    <div id="connectMenu" data-module="ConnectMenu">-->
+<!--        <h1 id="title">Zappy</h1>-->
+<!--        <div id="connectInputContainer">-->
+<!--            <p id="connectTitle">Connect to a server</p>-->
+<!--            <div id="formContainer">-->
+<!--                <div class="inputContainer">-->
+<!--                    <label for="address">Address</label>-->
+<!--                    <div class="inputDesign">-->
+<!--                        <input type="text" id="address" name="address" placeholder="localhost" required/>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="inputContainer">-->
+<!--                    <label for="port">Port</label>-->
+<!--                    <div class="inputDesign">-->
+<!--                        <input type="text" id="port" name="port" placeholder="4242" required/>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <p id="errorText">I am special</p>-->
+<!--                <button id="connectButton" data-action="connect">Connect</button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+    <div id="broadcastContainer" class="noScrollBars hidden">
         <p>#1 : y’a qq svp repondez moi TwT<p>
         <p>#3 : Oe chuis la bg<p>
         <p>#1 : On fait un pti date trkl<p>
@@ -39,7 +39,240 @@
         <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
         <p>#1 : y’a qq svp repondez moi TwT<p>
         <p>#1 : y’a qq svp repondez moi TwT<p>
-
+    </div>
+    <div id="tilesPlayerInfoContainer">
+        <div id="tilesPlayerInfoHeaderContainer">
+            <p id="tilesPlayerInfoTitle">Tiles Information</p>
+        </div>
+        <div id="tilesInfoContainer" class="mainInfoContainer noScrollBars">
+            <div id="tileResourcesContainer">
+                <p class="tilesPlayerInfoCategoryTitles">Resources</p>
+                <div class="informationContainer noScrollBars">
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText ressourcePlayerAlignLeft">Nourriture:</p>
+                        <p id="foodCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText ressourcePlayerAlignLeft">Linemate:</p>
+                        <p id="linemateCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText ressourcePlayerAlignLeft">Demraumère:</p>
+                        <p id="deraumereCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText ressourcePlayerAlignLeft">Sibur:</p>
+                        <p id="siburCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText ressourcePlayerAlignLeft">Mendiane:</p>
+                        <p id="mendianeCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText ressourcePlayerAlignLeft">Phiras:</p>
+                        <p id="phirasCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText ressourcePlayerAlignLeft">Thystame:</p>
+                        <p id="thystameCount" class="resourcePlayerText">0</p>
+                    </div>
+                </div>
+            </div>
+            <div id="playerOnTilesContainer">
+                <p class="tilesPlayerInfoCategoryTitles">Players on tile</p>
+                <div class="informationContainer noScrollBars">
+                    <div class="playerOnTile">
+                        <div class="playerTeamDot"></div>
+                        <div class="playerVerticalSeparator"></div>
+                        <div class="player"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="playerInfoContainer" class="hidden">
+            <div class="informationContainer noScrollBars">
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+            </div>
+            <div class="informationContainer noScrollBars">
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>        <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#3 : Oe chuis la bg<p>
+                <p>#1 : On fait un pti date trkl<p>
+                <p>#3 : En vrai le sang g pas le nv<p>
+                <p>#1 : Aah on fé ca la prochaine fois <p>
+                <p>#3 : Bien sur!<p>
+                <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+                <p>#1 : y’a qq svp repondez moi TwT<p>
+            </div>
+        </div>
     </div>
     <canvas id="webgpu" class="webgpu"></canvas>
     <script src="main.js"></script>
