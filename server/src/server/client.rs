@@ -11,6 +11,7 @@ pub struct Client {
     pub(crate) hunger: u128,
     pub(crate) position: (u32, u32),
     pub(crate) orientation: char,
+	pub(crate) is_incanting: bool,
 }
 
 impl client::Client {
@@ -20,15 +21,18 @@ impl client::Client {
             token,
             r#type: String::from("unknown"),
             inventory: [0, 0, 0, 0, 0, 0, 0],
-            level: 0,
+            level: 1,
             hunger: 1260,
             position: (0, 0),
             orientation: ('N'),
+			is_incanting: false,
         }
     }
 
     pub fn get_inventory(&self) -> [u32; 7] {
-        self.inventory
+        let mut tmp = self.inventory;
+        tmp[0] = self.hunger as u32;
+        tmp
     }
     pub fn get_socket(&self) -> &TcpStream {
         &self.socket

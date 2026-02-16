@@ -1,5 +1,5 @@
-use crate::server::utils::*;
-use crate::server::{Server, define};
+use crate::server::{client, utils::*};
+use crate::server::{Server, define, utils};
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
@@ -30,7 +30,9 @@ impl CommandManager {
             arg.clone(),
             self.order.entry(token).or_insert_with(VecDeque::new).len()
         );
-
+        if !define::COMMANDLIST.contains(&name.as_str()) {
+            return;
+        }
         if self.order.entry(token).or_insert_with(VecDeque::new).len() < 10 {
             self.order
                 .entry(token)
@@ -40,6 +42,32 @@ impl CommandManager {
                 self.next_execute.insert(token, 0);
             }
         }
+    }
+
+    // This function is used to add commands to the queue without checking if the command is valid. it pop the current command in the queue and replace it with the new one
+    fn add_to_queue_internal(&mut self, name: String, token: mio::Token, arg: String) {
+        // #[cfg(feature = "log")]
+        // println!(
+        //     "Try to dded command '{}' to queue for token {:?} withargs: {}. queu len : {}",
+        //     name,
+        //     token,
+        //     arg.clone(),
+        //     self.order.entry(token).or_insert_with(VecDeque::new).len()
+        // );
+        // if !define::COMMANDLIST.contains(&name.as_str()) {			//keep this commented
+        //     return;
+        // }
+        // if self.order.entry(token).or_insert_with(VecDeque::new).len() {
+
+        self.order
+            .entry(token)
+            .or_insert_with(VecDeque::new)
+            // .push_back((name.clone(), token, arg.clone()));
+            .push_front((name.clone(), token, arg.clone()));
+        // if self.next_execute.entry(token).or_insert(0) == &0 {
+        //     self.next_execute.insert(token, 0);
+        // }
+        // }
     }
 
     pub fn register<F>(&mut self, name: &str, func: F)
@@ -118,34 +146,37 @@ impl CommandManager {
         command_manager.register("voir", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             debug_manager_register("voir", _c, server, _arg);
-            debug_manager_register("voir", true);
-            let mut client = server._clients.get_mut(&_c).unwrap();
-            let visible_cells = server._game.get_visible_cells(client.position, client.orientation);
-			println!("{:?}", visible_cells);
-			// let mut response = String::new();
-			// for cell in visible_cells {
-			// 	let content = server._game.map.get_tile_content(cell.0, cell.1);
-			// 	if let Some(items) = content {
-			// 		response.push_str(&items.join(" "));
-			// 	}
-			// 	response.push_str(", ");
-			// }
-			// // Remove the last comma and space
-			// if response.len() >= 2 {
-			// 	response.truncate(response.len() - 2);
-			// }
-			// let _ = client.get_socket_mut().write(response.as_bytes());
+            let mut client = server._clients.get_mut(&_c);
+            if client.is_none() {
+                #[cfg(feature = "log")]
+                println!("No client found for token {:?}", _c);
+                return;
+            }
+            let client = client.unwrap();
+            let visible_cells =
+                server
+                    ._game
+                    .get_visible_cells(client.position, client.orientation, client.level);
+            println!("{:?}", visible_cells);
+            let response = format!("{{{}}}\n", visible_cells.join(", "));
+            let _ = client.get_socket_mut().write(response.as_bytes());
         });
         command_manager.register(
             "inventaire",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("inventaire", _c, server, _arg);
-                let mut client = server._clients.get_mut(&_c).unwrap();
+                let mut client = server._clients.get_mut(&_c);
+                if client.is_none() {
+                    #[cfg(feature = "log")]
+                    println!("No client found for token {:?}", _c);
+                    return;
+                }
+                let client = client.unwrap();
                 let inventory = client.get_inventory();
                 client.get_socket_mut().write(
                     format!(
-                        "{} {}, {} {}, {} {}, {} {}, {} {}, {} {}, {} {}",
+                        "{} {}, {} {}, {} {}, {} {}, {} {}, {} {}, {} {}\n",
                         define::FOOD,
                         inventory[define::FOOD_INV],
                         define::T1_MAT,
@@ -170,9 +201,18 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("avance", _c, server, _arg);
-                let client = server._clients.get_mut(&_c).unwrap();
+                let mut client = server._clients.get_mut(&_c);
+                if client.is_none() {
+                    #[cfg(feature = "log")]
+                    println!("No client found for token {:?}", _c);
+                    return;
+                }
+                let client = client.unwrap();
                 server._game.move_player(client);
                 client.position = server._game.get_player_position(_c);
+                let _ = client
+                    .get_socket_mut()
+                    .write(format!("{}", define::R_OK).as_bytes());
             },
         );
         command_manager.register(
@@ -180,11 +220,33 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("prend", _c, server, _arg);
+                if let Some(client) = server._clients.get_mut(&_c) {
+                    if server._game.take_item_from_cell(client, _arg) {
+                        let _ = client
+                            .get_socket_mut()
+                            .write(format!("{}", define::R_OK).as_bytes());
+                    } else {
+                        let _ = client
+                            .get_socket_mut()
+                            .write(format!("{}", define::R_KO).as_bytes());
+                    }
+                }
             },
         );
         command_manager.register("pose", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             debug_manager_register("pose", _c, server, _arg);
+            if let Some(client) = server._clients.get_mut(&_c) {
+                if server._game.put_item_on_cell(client, _arg) {
+                    let _ = client
+                        .get_socket_mut()
+                        .write(format!("{}", define::R_OK).as_bytes());
+                } else {
+                    let _ = client
+                        .get_socket_mut()
+                        .write(format!("{}", define::R_KO).as_bytes());
+                }
+            }
         });
         command_manager.register(
             "expluse",
@@ -207,6 +269,11 @@ impl CommandManager {
                     return;
                 }
                 let (position_x, position_y) = tmp.unwrap();
+                if tmp.is_none() {
+                    #[cfg(feature = "log")]
+                    println!("No player found for token {:?}", _c);
+                    return;
+                }
                 for (token, client) in &mut server._clients {
                     if token != &_c {
                         let tmp = server._game.map.player_position.get(token);
@@ -242,6 +309,48 @@ impl CommandManager {
                 debug_manager_register("incantation", _c, server, _arg);
             },
         );
+        command_manager.register(
+            "incantation_internal",
+            |_c: mio::Token, server: &mut Server, _arg: &str| {
+                #[cfg(feature = "log")]
+                debug_manager_register("incantation_internal", _c, server, _arg);
+				println!("\n\nincantation_internal for token {:?}\n\n", _c);
+				let org_player_level = server._clients.get(&_c).unwrap().level;
+				let sucess = server.incantation_success(_c);
+				if server._incantation_list.contains_key(&_c) {
+					for client in server._incantation_list.get(&_c).unwrap() {
+						let mut client = server._clients.get_mut(client);
+						if client.is_none() {
+							#[cfg(feature = "log")]
+							println!("No client found for token {:?}", _c);
+							return;
+						}
+						let client = client.unwrap();
+						client.is_incanting = false;
+						if sucess  && client.level < org_player_level {
+							client.level = org_player_level;
+							let _ = client
+								.get_socket_mut()
+								.write(format!("{}\n", org_player_level).as_bytes());
+						}
+					}
+				}
+				// else{
+					// let mut client = server._clients.get_mut(&_c);
+					// if client.is_none() {
+					// 	#[cfg(feature = "log")]
+					// 	println!("No client found for token {:?}", _c);
+					// 	return;
+					// }
+					// let client = client.unwrap();
+					// client.is_incanting = false;
+					// let _ = client
+					// 	.get_socket_mut()
+					// 	.write(format!("{}\n", "elevation terminee").as_bytes());
+				// }
+				
+            },
+        );
         command_manager.register("fork", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             debug_manager_register("fork", _c, server, _arg);
@@ -250,11 +359,17 @@ impl CommandManager {
         command_manager.register(
             "connect_nbr",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                #[cfg(feature = "log")]
+                // #[cfg(feature = "log")]
                 debug_manager_register("connect_nbr", _c, server, _arg);
                 let tmp = server.get_team_for_player(&_c);
                 let d = server._max_clients[&tmp] - server._game.team[&tmp].len() as u32;
-                let mut client = server._clients.get_mut(&_c).unwrap();
+                let mut client = server._clients.get_mut(&_c);
+                if client.is_none() {
+                    #[cfg(feature = "log")]
+                    println!("No client found for token {:?}", _c);
+                    return;
+                }
+                let client = client.unwrap();
                 let _ = client.get_socket_mut().write(format!("{}\n", d).as_bytes()); // TODO check error here
             },
         );
@@ -275,16 +390,15 @@ impl CommandManager {
                 if let Some((command, tkn, arg)) =
                     self.order.get(&token).and_then(|queue| queue.front())
                 {
-                    println!(
-                        "current tick: {}, next execute for token {:?}: {}, command queue length: {}",
-                        server._game._tick,
-                        token,
-                        self.next_execute.get(&token).unwrap_or(&0),
-                        self.order.get(&token).unwrap_or(&VecDeque::new()).len()
-                    );
+                    // println!(
+                    //     "current tick: {}, next execute for token {:?}: {}, command queue length: {}",
+                    //     server._game._tick,
+                    //     token,
+                    //     self.next_execute.get(&token).unwrap_or(&0),
+                    //     self.order.get(&token).unwrap_or(&VecDeque::new()).len()
+                    // );
 
-                    if self.next_execute.get(&token).unwrap() <= &server._game._tick
-                    {
+                    if self.next_execute.get(&token).unwrap() <= &server._game._tick {
                         let res = match command.as_str() {
                             "voir" | "prend" | "pose" | "droite" | "gauche" | "avance"
                             | "expulse" | "broadcast" => {
@@ -292,17 +406,65 @@ impl CommandManager {
                             }
                             "inventaire" => self.next_execute.insert(token, server._game._tick + 1),
                             "fork" => self.next_execute.insert(token, server._game._tick + 42),
-                            "incantation" => {
+                            "incantation_internal" => {
                                 self.next_execute.insert(token, server._game._tick + 300)
                             }
-                            "connect_nbr" => self.next_execute.insert(token, server._game._tick),
+                            "connect_nbr" | "incantation" => {
+                                self.next_execute.insert(token, server._game._tick)
+                            }
                             _ => None,
                         };
-                        self.execute(&command, *tkn, &arg, server);
+						if (!server._clients.get(&token).is_none()) {
+							self.execute(&command, *tkn, &arg, server);
+						}
                         //TODO-mrozniec: recup command
+                        // Only pop the command if it was not handled by the match arms above
+                        if command.as_str() == "incantation" {
+                            // can_incantation takes a Server by value; we can't move `server` here.
+                            // Instead compute the players on the same cell locally using the
+                            // available &mut Server reference (equivalent logic to can_incantation).
+                            if let Some(&(x, y)) = server._game.map.player_position.get(tkn) {
+								if (self.order.entry(token).or_insert_with(VecDeque::new)).is_empty() == false{
+									self.order.get_mut(&token).unwrap().pop_front();
+								}
+                                let player_incanting: Vec<Token> = server
+                                    ._game
+                                    .map
+                                    .player_position
+                                    .iter()
+                                    .filter(|(tok, pos)| *pos == &(x, y) && server._clients.get(tok).is_some() && !server._clients.get(tok).unwrap().is_incanting)
+                                    .map(|(tok, _)| *tok)
+                                    .collect();
+								for player in player_incanting {
+									if (self.next_execute.get(&player).is_none()) {
+										self.next_execute.insert(player, 0);
+									}
+									self.next_execute.insert(player, self.next_execute[&player] + 300);
+                                    self.add_to_queue_internal(
+                                        "incantation_internal".to_string(),
+                                        player,
+                                        "".to_string(),
+                                    );
+                                    let mut client = server._clients.get_mut(&player);
+                                    if client.is_none() {
+                                        #[cfg(feature = "log")]
+                                        println!("No client found for token {:?}", player);
+                                        return;
+                                    }
+                                    let client = client.unwrap();
+                                    let _ = client
+                                        .get_socket_mut()
+                                        .write(format!("{}\n", "elevation en cours").as_bytes());
+									client.is_incanting = true;
+                                }
 
-                        if res.is_some() {
-                            // Only pop the command if it was not handled by the match arms above
+							}
+                            // self.add_to_queue_internal(
+                            //     "incantation_internal".to_string(),
+                            //     *tkn,
+                            //     "".to_string(),
+                            // );
+                        } else {
                             self.order.get_mut(&token).unwrap().pop_front();
                         }
                     }
