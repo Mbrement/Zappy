@@ -17,7 +17,7 @@ pub const INCANTATION_REQ: [[u32; 7]; 7] = [
 ];
 
 pub const FOOD_VALUE: u128 = 126;
-pub const INCANTATION_PLAYERS_REQ: [u32; 8] = [1, 2, 2, 4, 4, 6, 6, 8];
+// pub const INCANTATION_PLAYERS_REQ: [u32; 8] = [1, 2, 2, 4, 4, 6, 6, 8];
 
 pub const SEE_TAB_N: [(i32, i32); 81] = [
     (0, 0),
@@ -278,6 +278,7 @@ pub const SEE_TAB_E: [(i32, i32); 81] = [
     (-8, -7),
     (-8, -8),
 ];
+
 //SERVER CONSTANT
 pub const GRAPHICAL_CLIENT: &str = "GRAPHIC";
 pub const R_OK: &str = "ok\n";

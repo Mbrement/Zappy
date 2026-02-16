@@ -11,6 +11,7 @@ pub struct Client {
     pub(crate) hunger: u128,
     pub(crate) position: (u32, u32),
     pub(crate) orientation: char,
+	pub(crate) is_incanting: bool,
 }
 
 impl client::Client {
@@ -24,6 +25,7 @@ impl client::Client {
             hunger: 1260,
             position: (0, 0),
             orientation: ('N'),
+			is_incanting: false,
         }
     }
 
