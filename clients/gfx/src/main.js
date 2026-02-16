@@ -18,6 +18,12 @@ class Main {
         this.messageHandler = new MessageHandler();
         this.resources = new Resources(textures);
 
+        // for (let i = 0; i < 50; i++) {
+        //     for (let j = 0; j < 50; j++) {
+        //         console.log(`bct ${j} ${i} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)}`)
+        //     }
+        // }
+
         this.world = new World()
         this.resources.once('loaded', () => {
             this.eventManager.modules.ConnectMenu.showConnectMenu()
