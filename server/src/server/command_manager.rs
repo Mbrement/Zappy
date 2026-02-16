@@ -3,6 +3,7 @@ use crate::server::{Server, define, utils};
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
+use std::process;
 
 pub type CommandFn = Box<dyn Fn(mio::Token, &mut Server, &str)>;
 pub type CommandArgs = (String, mio::Token, String);
@@ -318,6 +319,18 @@ impl CommandManager {
 				let org_player_level = server._clients.get(&_c).unwrap().level;
 				let sucess = server.incantation_success(_c);
 				if server._incantation_list.contains_key(&_c) {
+					if sucess && org_player_level + 1 == 8 {
+						for client in server.get_clients_by_type_mut("player"){
+							client.level = org_player_level;
+							let _ = client
+								.get_socket_mut()
+								.write(format!("{}\n", "mort").as_bytes());
+							
+							// TODO Mrozniec : send end game to graphical client
+
+						}
+						process::exit(0);
+					}
 					for client in server._incantation_list.get(&_c).unwrap() {
 						let mut client = server._clients.get_mut(client);
 						if client.is_none() {
@@ -355,6 +368,15 @@ impl CommandManager {
             #[cfg(feature = "log")]
             debug_manager_register("fork", _c, server, _arg);
             server._game.fork_player(_c);
+			
+			let mut client = server._clients.get_mut(&_c);
+			if client.is_none() {
+				#[cfg(feature = "log")]
+				println!("No client found for token {:?}", _c);
+				return;
+			}
+			let client = client.unwrap();
+			client.get_socket_mut().write(format!("{}", define::R_OK).as_bytes());
         });
         command_manager.register(
             "connect_nbr",
