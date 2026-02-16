@@ -5,9 +5,10 @@ use std::io::{Read, Write};
 mod client;
 pub mod command_manager;
 pub mod define;
+pub mod utils;
+pub mod graphic;
 mod game;
 mod map;
-pub mod utils;
 use crate::server::client::Client;
 use crate::server::command_manager::CommandManager;
 use rand::{rngs::SmallRng, *};
@@ -147,17 +148,31 @@ impl Server {
         &self._clients
     }
 
-    pub fn get_clients_by_type(&self, client_type: &str) -> Vec<&Client> {
+    pub fn get_clients_by_type(&self, clients_type: &str) -> Vec<&Client> {
         self._clients
             .values()
-            .filter(|client| client.r#type == client_type)
+            .filter(|client| client.r#type == clients_type)
             .collect()
     }
 
-    pub fn get_clients_by_type_mut(&mut self, client_type: &str) -> Vec<&mut Client> {
+    pub fn get_clients_by_type_mut(&mut self, clients_type: &str) -> Vec<&mut Client> {
         self._clients
             .values_mut()
-            .filter(|client| client.r#type == client_type)
+            .filter(|client| client.r#type == clients_type)
+            .collect()
+    }
+
+    pub fn get_clients_by_pos(&self, clients_pos: (u32, u32)) -> Vec<&Client> {
+        self._clients
+            .values()
+            .filter(|client| client.position == clients_pos)
+            .collect()
+    }
+
+    pub fn get_clients_by_pos_mut(&mut self, clients_pos: (u32, u32)) -> Vec<&mut Client> {
+        self._clients
+            .values_mut()
+            .filter(|client| client.position == clients_pos)
             .collect()
     }
     // pub fn get_clients_number(&self) -> u32 {
