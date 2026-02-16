@@ -259,8 +259,8 @@ body
     height: 88vh;
     max-height: 88vh;
 
-    min-width: max(300px, 25%);
-    max-width: 25%;
+    min-width: 300px;
+    max-width: 375px;
 
     overflow-y: scroll;
     overflow-x: hidden;
