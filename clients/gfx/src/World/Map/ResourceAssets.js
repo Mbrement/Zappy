@@ -1,4 +1,5 @@
 const THREE = require("three/webgpu")
+const { mergeGeometries } = require("three/addons/utils/BufferGeometryUtils.js");
 
 class ResourceAssets {
     constructor() {
@@ -12,32 +13,32 @@ class ResourceAssets {
 
         this.assetGroups = {
                 nourriture: {
-                    duo: new THREE.Group(),
-                    trio: new THREE.Group(),
+                    duo: null,
+                    trio: null,
                 },
                 linemate: {
-                    duo: new THREE.Group(),
-                    trio: new THREE.Group(),
+                    duo: null,
+                    trio: null,
                 },
                 deraumere: {
-                    duo: new THREE.Group(),
-                    trio: new THREE.Group(),
+                    duo: null,
+                    trio: null,
                 },
                 sibur: {
-                    duo: new THREE.Group(),
-                    trio: new THREE.Group(),
+                    duo: null,
+                    trio: null,
                 },
                 mendiane: {
-                    duo: new THREE.Group(),
-                    trio: new THREE.Group(),
+                    duo: null,
+                    trio: null,
                 },
                 phiras: {
-                    duo: new THREE.Group(),
-                    trio: new THREE.Group(),
+                    duo: null,
+                    trio: null,
                 },
                 thystame: {
-                    duo: new THREE.Group(),
-                    trio: new THREE.Group(),
+                    duo: null,
+                    trio: null,
                 }
         }
 
@@ -76,27 +77,37 @@ class ResourceAssets {
     }
 
     createResourceGroups() {
-        Object.entries(this.assetGroups).forEach(([name, groups]) => {
-            let mesh
-            mesh = new THREE.Mesh(this.resourceMeshInfo[name].geometry, this.resourceMeshInfo[name].material)
-            mesh.position.set(-this.defaultSize * 1.3, 0 , 0)
-            groups.duo.add(mesh)
+        let geometries, geometry
+        Object.entries(this.assetGroups).forEach(([name, meshes]) => {
+            // Duo
+            geometries = []
+            geometry = this.resourceMeshInfo[name].geometry.clone()
+            geometry.translate(-this.defaultSize * 1.15, 0 , 0)
+            geometries.push(geometry)
 
-            mesh = new THREE.Mesh(this.resourceMeshInfo[name].geometry, this.resourceMeshInfo[name].material)
-            mesh.position.set(this.defaultSize * 1.3, 0 , 0)
-            groups.duo.add(mesh)
+            geometry = this.resourceMeshInfo[name].geometry.clone()
+            geometry.translate(this.defaultSize * 1.15, 0 , 0)
+            geometries.push(geometry)
 
-            mesh = new THREE.Mesh(this.resourceMeshInfo[name].geometry, this.resourceMeshInfo[name].material)
-            mesh.position.set(-this.defaultSize * 1.3, 0 , 0)
-            groups.trio.add(mesh)
+            geometry = mergeGeometries(geometries)
+            meshes.duo = new THREE.Mesh(geometry, this.resourceMeshInfo[name].material)
 
-            mesh = new THREE.Mesh(this.resourceMeshInfo[name].geometry, this.resourceMeshInfo[name].material)
-            mesh.position.set(this.defaultSize * 1.3, 0 , 0)
-            groups.trio.add(mesh)
+            // Trio
+            geometries = []
+            geometry = this.resourceMeshInfo[name].geometry.clone()
+            geometry.translate(-this.defaultSize * 1.25, 0 , 0)
+            geometries.push(geometry)
 
-            mesh = new THREE.Mesh(this.resourceMeshInfo[name].geometry, this.resourceMeshInfo[name].material)
-            mesh.position.set(0, 0 , this.defaultSize * 1.3)
-            groups.trio.add(mesh)
+            geometry = this.resourceMeshInfo[name].geometry.clone()
+            geometry.translate(this.defaultSize * 1.25, 0 , 0)
+            geometries.push(geometry)
+
+            geometry = this.resourceMeshInfo[name].geometry.clone()
+            geometry.translate(0, 0 , this.defaultSize * 1.25)
+            geometries.push(geometry)
+
+            geometry = mergeGeometries(geometries)
+            meshes.trio = new THREE.Mesh(geometry, this.resourceMeshInfo[name].material)
         })
     }
 }

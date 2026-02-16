@@ -13,6 +13,8 @@ class GameMap {
 
         this.tileSize = 1
         this.tileHeight = 1
+
+        this.tileGeometry = new THREE.BoxGeometry(this.tileSize, this.tileHeight, this.tileSize)
     }
 
     /**
@@ -20,42 +22,57 @@ class GameMap {
      * @description Creates the 3D map
      */
     createMap() {
+        this.material1 = new THREE.MeshStandardNodeMaterial({
+            map: this.resources.items['default'].rockyGroundDiffTexture.file
+        })
+
+        this.material2 = new THREE.MeshStandardNodeMaterial({
+            map: this.resources.items['default'].grassGroundDiffTexture.file
+        })
+
         const mapSize = [this.gameState.map[0].length, this.gameState.map.length]
 
         this.mapTiles = new Array(mapSize[1]).fill().map(() => {
             return new Array(mapSize[0]).fill().map(() => {
                 return {
                     resourceGroup: null,
-                    tileMesh: null,
+                    tile: null
                 }
             })
         })
 
-        const material1 = new THREE.MeshStandardNodeMaterial({
-            map: this.resources.items['default'].rockyGroundDiffTexture.file
-        })
-
-        const material2 = new THREE.MeshStandardNodeMaterial({
-            map: this.resources.items['default'].grassGroundDiffTexture.file
-        })
-
-        const geometry = new THREE.BoxGeometry(this.tileSize, this.tileHeight, this.tileSize)
+        const oddInstanceQuantity = Math.ceil(mapSize[0] * mapSize[1] / 2)
+        const evenInstanceQuantity = Math.floor(mapSize[0] * mapSize[1] / 2)
+        this.oddInstance = new THREE.InstancedMesh(this.tileGeometry, this.material1, oddInstanceQuantity)
+        this.evenInstance = new THREE.InstancedMesh(this.tileGeometry, this.material2, evenInstanceQuantity)
 
         const start = [-(mapSize[0] - 1) * 0.5, -(mapSize[1] - 1) * 0.5]
 
-        let mesh, group
+        const matrix = new THREE.Matrix4()
+
+        let oddIndex = 0, evenIndex = 0, group
         for (let y = 0; y < mapSize[1]; y++) {
             for (let x = 0; x < mapSize[0]; x++) {
+                matrix.setPosition(start[0] + x, - this.tileHeight * 0.6, start[1] + y)
+
                 if ((x + y) % 2 === 0) {
-                    mesh = new THREE.Mesh(geometry, material1)
+                    this.oddInstance.setMatrixAt(oddIndex, matrix)
+
+                    this.mapTiles[y][x].tile = {
+                        instance: this.oddInstance,
+                        index: oddIndex
+                    }
+                    oddIndex++
                 }
                 else {
-                    mesh = new THREE.Mesh(geometry, material2)
-                }
-                mesh.position.set(start[0] + x, - this.tileHeight * 0.6, start[1] + y)
+                    this.evenInstance.setMatrixAt(evenIndex, matrix)
 
-                this.scene.add(mesh)
-                this.mapTiles[y][x].tileMesh = mesh
+                    this.mapTiles[y][x].tile = {
+                        instance: this.evenInstance,
+                        index: evenIndex
+                    }
+                    evenIndex++
+                }
 
                 group = new THREE.Group()
                 group.position.set(start[0] + x, 0, start[1] + y)
@@ -63,6 +80,8 @@ class GameMap {
                 this.mapTiles[y][x].resourceGroup = group
             }
         }
+
+        this.scene.add(this.oddInstance, this.evenInstance)
     }
 
     /**
