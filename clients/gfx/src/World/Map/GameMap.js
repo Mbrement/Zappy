@@ -92,11 +92,16 @@ class GameMap {
         const tileResources = this.gameState.map[y][x].resources
         const matrix = new THREE.Matrix4()
 
+        const availableSlots = Array.from({ length: 9 }, (_, i) => i)
+        availableSlots.sort(() => Math.random() - 0.5);
+
+        let cellIndex = 0
         for (let i = 0; i <= 6; i++) {
             this.resetTileResources(x, y, i, matrix)
             let quantity = tileResources[this.resourceTypes[i]]
             if (quantity > 0) {
-                this.spawnResource(x, y, i, quantity, matrix)
+                cellIndex = availableSlots.pop()
+                this.spawnResource(x, y, cellIndex, i, quantity, matrix)
             }
         }
     }
@@ -116,7 +121,7 @@ class GameMap {
         resourceData.trioInstance.instanceMatrix.needsUpdate = true
     }
 
-    spawnResource(x, y, type, quantity, matrix) {
+    spawnResource(x, y, cellIndex, type, quantity, matrix) {
         const index = y * this.mapSize[1] + x
         const resourceData = this.resourceAssets.resourceInstances[this.resourceTypes[type]]
 
@@ -133,9 +138,9 @@ class GameMap {
 
         const start = [-(this.mapSize[0] - 1) * 0.5, -(this.mapSize[1] - 1) * 0.5]
 
-        const finalX = start[0] + x + (Math.random() - 0.5) * 0.75
+        const finalX = start[0] + x - 0.33 + (cellIndex % 3 / 3)
         const finalY = 0
-        const finalZ = start[1] + y + (Math.random() - 0.5) * 0.75
+        const finalZ = start[1] + y - 0.35  + (Math.floor(cellIndex / 3) / 3)
 
         matrix.setPosition(finalX, finalY, finalZ)
         resourceInstance.setMatrixAt(index, matrix)
