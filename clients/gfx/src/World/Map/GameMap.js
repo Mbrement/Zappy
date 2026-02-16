@@ -30,33 +30,35 @@ class GameMap {
             map: this.resources.items['default'].grassGroundDiffTexture.file
         })
 
-        const mapSize = [this.gameState.map[0].length, this.gameState.map.length]
+        this.mapSize = [this.gameState.map[0].length, this.gameState.map.length]
 
-        this.mapTiles = new Array(mapSize[1]).fill().map(() => {
-            return new Array(mapSize[0]).fill().map(() => {
+        this.mapTiles = new Array(this.mapSize[1]).fill().map(() => {
+            return new Array(this.mapSize[0]).fill().map(() => {
                 return {
-                    resourceGroup: null,
                     tile: null
                 }
             })
         })
 
-        const oddInstanceQuantity = Math.ceil(mapSize[0] * mapSize[1] / 2)
-        const evenInstanceQuantity = Math.floor(mapSize[0] * mapSize[1] / 2)
+        this.resourceAssets.createResourceInstances(this.mapSize)
+
+        const oddInstanceQuantity = Math.ceil(this.mapSize[0] * this.mapSize[1] / 2)
+        const evenInstanceQuantity = Math.floor(this.mapSize[0] * this.mapSize[1] / 2)
         this.oddInstance = new THREE.InstancedMesh(this.tileGeometry, this.material1, oddInstanceQuantity)
         this.evenInstance = new THREE.InstancedMesh(this.tileGeometry, this.material2, evenInstanceQuantity)
 
-        const start = [-(mapSize[0] - 1) * 0.5, -(mapSize[1] - 1) * 0.5]
+        const start = [-(this.mapSize[0] - 1) * 0.5, -(this.mapSize[1] - 1) * 0.5]
 
         const matrix = new THREE.Matrix4()
 
-        let oddIndex = 0, evenIndex = 0, group
-        for (let y = 0; y < mapSize[1]; y++) {
-            for (let x = 0; x < mapSize[0]; x++) {
+        let oddIndex = 0, evenIndex = 0
+        for (let y = 0; y < this.mapSize[1]; y++) {
+            for (let x = 0; x < this.mapSize[0]; x++) {
                 matrix.setPosition(start[0] + x, - this.tileHeight * 0.6, start[1] + y)
 
                 if ((x + y) % 2 === 0) {
                     this.oddInstance.setMatrixAt(oddIndex, matrix)
+                    this.oddInstance.instanceMatrix.needsUpdate = true
 
                     this.mapTiles[y][x].tile = {
                         instance: this.oddInstance,
@@ -66,6 +68,7 @@ class GameMap {
                 }
                 else {
                     this.evenInstance.setMatrixAt(evenIndex, matrix)
+                    this.evenInstance.instanceMatrix.needsUpdate = true
 
                     this.mapTiles[y][x].tile = {
                         instance: this.evenInstance,
@@ -73,11 +76,6 @@ class GameMap {
                     }
                     evenIndex++
                 }
-
-                group = new THREE.Group()
-                group.position.set(start[0] + x, 0, start[1] + y)
-                this.scene.add(group)
-                this.mapTiles[y][x].resourceGroup = group
             }
         }
 
@@ -91,56 +89,57 @@ class GameMap {
      * @param y - the y coordinate of the tile
      */
     loadTileResources(x, y) {
-        for (let i = this.mapTiles[y][x].resourceGroup.children.length - 1; i >= 0; i--) {
-            this.mapTiles[y][x].resourceGroup.remove(this.mapTiles[y][x].resourceGroup.children[i])
-        }
-
         const tileResources = this.gameState.map[y][x].resources
+        const matrix = new THREE.Matrix4()
 
         for (let i = 0; i <= 6; i++) {
+            this.resetTileResources(x, y, i, matrix)
             let quantity = tileResources[this.resourceTypes[i]]
             if (quantity > 0) {
-                this.spawnResource(x, y, i, quantity)
+                this.spawnResource(x, y, i, quantity, matrix)
             }
         }
     }
 
-    spawnResource(x, y, type, quantity) {
-        const resourceData = this.resourceAssets.resourceMeshInfo[this.resourceTypes[type]]
+    resetTileResources(x, y, type, matrix) {
+        const index = y * this.mapSize[1] + x
+        const resourceData = this.resourceAssets.resourceInstances[this.resourceTypes[type]]
 
-        let resourceMesh
+        matrix.setPosition(9999, 9999, 9999)
+        resourceData.singleInstance.setMatrixAt(index, matrix)
+        resourceData.singleInstance.instanceMatrix.needsUpdate = true
 
+        resourceData.duoInstance.setMatrixAt(index, matrix)
+        resourceData.duoInstance.instanceMatrix.needsUpdate = true
+
+        resourceData.trioInstance.setMatrixAt(index, matrix)
+        resourceData.trioInstance.instanceMatrix.needsUpdate = true
+    }
+
+    spawnResource(x, y, type, quantity, matrix) {
+        const index = y * this.mapSize[1] + x
+        const resourceData = this.resourceAssets.resourceInstances[this.resourceTypes[type]]
+
+        let resourceInstance
         if (quantity === 1) {
-            resourceMesh = new THREE.Mesh(resourceData.geometry, resourceData.material)
+            resourceInstance = resourceData.singleInstance
         }
         else if (quantity === 2) {
-            resourceMesh = this.resourceAssets.assetGroups[this.resourceTypes[type]].duo.clone()
+            resourceInstance = resourceData.duoInstance
         }
         else {
-            resourceMesh = this.resourceAssets.assetGroups[this.resourceTypes[type]].trio.clone()
+            resourceInstance = resourceData.trioInstance
         }
-        this.mapTiles[y][x].resourceGroup.add(resourceMesh)
 
-        resourceMesh.position.set(
-            (Math.random() - 0.5) * 0.75,
-            0,
-            (Math.random() - 0.5) * 0.75
-        )
+        const start = [-(this.mapSize[0] - 1) * 0.5, -(this.mapSize[1] - 1) * 0.5]
 
-        const children = this.mapTiles[y][x].resourceGroup.children
+        const finalX = start[0] + x + (Math.random() - 0.5) * 0.75
+        const finalY = 0
+        const finalZ = start[1] + y + (Math.random() - 0.5) * 0.75
 
-        let limit = children.length * 5
-        for (let i = 0; i < children.length && limit > 0; i++) {
-            if (children[i] !== resourceMesh && children[i].position.distanceTo(resourceMesh.position) < 0.6) {
-                resourceMesh.position.set(
-                    (Math.random() - 0.5) * 0.75,
-                    0,
-                    (Math.random() - 0.5) * 0.75
-                )
-                i = 0
-            }
-            limit--
-        }
+        matrix.setPosition(finalX, finalY, finalZ)
+        resourceInstance.setMatrixAt(index, matrix)
+        resourceInstance.instanceMatrix.needsUpdate = true
     }
 }
 

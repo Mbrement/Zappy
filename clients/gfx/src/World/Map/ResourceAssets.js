@@ -3,6 +3,9 @@ const { mergeGeometries } = require("three/addons/utils/BufferGeometryUtils.js")
 
 class ResourceAssets {
     constructor() {
+        this.world = window.worldInstance
+        this.scene = this.world.scene
+
         this.defaultSize = 0.05
 
         this.sphereGeometry = new THREE.SphereGeometry(this.defaultSize * 0.75, 16, 16)
@@ -11,35 +14,35 @@ class ResourceAssets {
         this.cylinderGeometry = new THREE.CylinderGeometry(this.defaultSize * 0.75, this.defaultSize * 0.75, 0.07, 10)
         this.dodecahedronGeometry = new THREE.DodecahedronGeometry(this.defaultSize * 0.75)
 
-        this.assetGroups = {
-                nourriture: {
-                    duo: null,
-                    trio: null,
-                },
-                linemate: {
-                    duo: null,
-                    trio: null,
-                },
-                deraumere: {
-                    duo: null,
-                    trio: null,
-                },
-                sibur: {
-                    duo: null,
-                    trio: null,
-                },
-                mendiane: {
-                    duo: null,
-                    trio: null,
-                },
-                phiras: {
-                    duo: null,
-                    trio: null,
-                },
-                thystame: {
-                    duo: null,
-                    trio: null,
-                }
+        this.assetGeometries = {
+            nourriture: {
+                duo: null,
+                trio: null,
+            },
+            linemate: {
+                duo: null,
+                trio: null,
+            },
+            deraumere: {
+                duo: null,
+                trio: null,
+            },
+            sibur: {
+                duo: null,
+                trio: null,
+            },
+            mendiane: {
+                duo: null,
+                trio: null,
+            },
+            phiras: {
+                duo: null,
+                trio: null,
+            },
+            thystame: {
+                duo: null,
+                trio: null,
+            }
         }
 
         this.resourceMeshInfo = {
@@ -73,12 +76,22 @@ class ResourceAssets {
             }
         }
 
-        this.createResourceGroups()
+        this.resourceInstances = {
+            nourriture: {},
+            linemate: {},
+            deraumere: {},
+            sibur: {},
+            mendiane: {},
+            phiras: {},
+            thystame: {}
+        }
+
+        this.createResourceGeometries()
     }
 
-    createResourceGroups() {
+    createResourceGeometries() {
         let geometries, geometry
-        Object.entries(this.assetGroups).forEach(([name, meshes]) => {
+        Object.entries(this.assetGeometries).forEach(([name, meshes]) => {
             // Duo
             geometries = []
             geometry = this.resourceMeshInfo[name].geometry.clone()
@@ -89,8 +102,7 @@ class ResourceAssets {
             geometry.translate(this.defaultSize * 1.15, 0 , 0)
             geometries.push(geometry)
 
-            geometry = mergeGeometries(geometries)
-            meshes.duo = new THREE.Mesh(geometry, this.resourceMeshInfo[name].material)
+            meshes.duo = mergeGeometries(geometries)
 
             // Trio
             geometries = []
@@ -106,9 +118,38 @@ class ResourceAssets {
             geometry.translate(0, 0 , this.defaultSize * 1.25)
             geometries.push(geometry)
 
-            geometry = mergeGeometries(geometries)
-            meshes.trio = new THREE.Mesh(geometry, this.resourceMeshInfo[name].material)
+            meshes.trio = mergeGeometries(geometries)
         })
+    }
+
+    createResourceInstances(mapSize) {
+        const matrix = new THREE.Matrix4().setPosition(9999, 9999, 9999)
+        const quantity = mapSize[0] * mapSize[1]
+        Object.entries(this.resourceInstances).forEach(([name, resource]) => {
+            resource.singleQuantity = quantity
+            resource.duoQuantity = quantity
+            resource.trioQuantity = quantity
+
+            resource.singleInstance = this.createInstance(name, this.resourceMeshInfo[name].geometry, matrix, quantity)
+            resource.duoInstance = this.createInstance(name, this.assetGeometries[name].duo, matrix, quantity)
+            resource.trioInstance = this.createInstance(name, this.assetGeometries[name].trio, matrix, quantity)
+
+            this.scene.add(resource.singleInstance, resource.duoInstance, resource.trioInstance)
+        })
+    }
+
+    createInstance(name, geometry, matrix, quantity) {
+        const instance = new THREE.InstancedMesh(geometry, this.resourceMeshInfo[name].material, quantity)
+        instance.position.set(0, 0, 0)
+        instance.frustumCulled = false
+        instance.matrixAutoUpdate = false
+        instance.matrixWorldAutoUpdate = false
+
+        for (let i = 0; i < quantity; i++) {
+            instance.setMatrixAt(i, matrix)
+        }
+        instance.instanceMatrix.needsUpdate = true
+        return instance
     }
 }
 
