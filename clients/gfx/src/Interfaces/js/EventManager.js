@@ -1,13 +1,16 @@
 
 class EventManager {
     constructor() {
-
         const ConnectMenu = require('./modules/ConnectMenu')
+        const TileInfoManager = require('./modules/TileInfoManager')
+
         this.modules = {
-            ConnectMenu: new ConnectMenu()
+            ConnectMenu: new ConnectMenu(),
+            TileInfoManager: new TileInfoManager()
         }
         this.authorizedFunctions = {
-            ConnectMenu: new Set(['connect'])
+            ConnectMenu: new Set(['connect']),
+            TileInfoManager: new Set(['displayPlayerInfo'])
         }
 
         this.onClickbind = this.onClick.bind(this)
