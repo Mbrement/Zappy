@@ -5,10 +5,10 @@ use std::io::{Read, Write};
 mod client;
 pub mod command_manager;
 pub mod define;
-pub mod utils;
-pub mod graphic;
 mod game;
+pub mod graphic;
 mod map;
+pub mod utils;
 use crate::server::client::Client;
 use crate::server::command_manager::CommandManager;
 use rand::{rngs::SmallRng, *};
@@ -512,26 +512,28 @@ impl Server {
         return "unknown".to_string();
     }
 
-	pub fn incantation_success(&mut self, token: Token) -> bool {
-		if !self._game.check_inventory(&token, self) {
-			if let Some(player) = self._clients.get_mut(&token) {
-				let player_level = player.level;
-				for i in 1..7 {
-					player.inventory[i] -= define::INCANTATION_REQ[player_level as usize - 1][i];
-				}
-			} else {
-				eprintln!("Player with token {:?} not found", token);
-			}
-			return false;
-		}
-		let player = match self._clients.get(&token) {
-			Some(p) => p,
-			None => return false,
-		};
-		let player_level = player.level;
-		if (self._incantation_list[&token].len() as u32 + 1) < define::INCANTATION_REQ[player_level as usize - 1][0] {
-			return false;
-		}
-		true
-	}
+    pub fn incantation_success(&mut self, token: Token) -> bool {
+        if !self._game.check_inventory(&token, self) {
+            if let Some(player) = self._clients.get_mut(&token) {
+                let player_level = player.level;
+                for i in 1..7 {
+                    player.inventory[i] -= define::INCANTATION_REQ[player_level as usize - 1][i];
+                }
+            } else {
+                eprintln!("Player with token {:?} not found", token);
+            }
+            return false;
+        }
+        let player = match self._clients.get(&token) {
+            Some(p) => p,
+            None => return false,
+        };
+        let player_level = player.level;
+        if (self._incantation_list[&token].len() as u32 + 1)
+            < define::INCANTATION_REQ[player_level as usize - 1][0]
+        {
+            return false;
+        }
+        true
+    }
 }

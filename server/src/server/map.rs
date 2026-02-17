@@ -13,13 +13,15 @@ pub struct Map {
 
 #[derive(Clone)]
 pub struct Tile {
-    strings: Vec<String>,
+    // strings: Vec<String>,
+    string_tab: [u32; 7],
 }
 
 impl Tile {
     pub fn new() -> Self {
         Tile {
-            strings: Vec::new(),
+            // strings: Vec::new(),
+            string_tab: [0; 7],
         }
     }
 }
@@ -46,11 +48,11 @@ impl Map {
         self.tiles = vec![vec![Tile::new(); self.width as usize]; height as usize];
     }
 
-    pub fn resize(&mut self, width: u32, height: u32) {
-        self.set_width(width);
-        self.set_height(height);
-        //TODO DO IT resize existe for the vec, check them tho
-    }
+    // pub fn resize(&mut self, width: u32, height: u32) {
+    //     self.set_width(width);
+    //     self.set_height(height);
+    //     //TODO DO IT resize existe for the vec, check them tho
+    // }
 
     pub fn get_width(&self) -> u32 {
         self.width
@@ -64,40 +66,94 @@ impl Map {
     }
     pub fn fill_case(tile: &mut Tile, first_rng: i32) {
         match first_rng {
-            0..=100 => tile.strings.push(FOOD.into()),
-            100..=130 => tile.strings.push(T1_MAT.into()), //8 tot
-            131..=170 => tile.strings.push(T2_MAT.into()), //8 tot
-            171..=200 => tile.strings.push(T3_MAT.into()), //10 tot
-            201..=220 => tile.strings.push(T4_MAT.into()), //5
-            221..=240 => tile.strings.push(T5_MAT.into()), //6
-            298..=300 => tile.strings.push(T6_MAT.into()), //1 tot
+            // 0..=100 => tile.strings.push(FOOD.into()),
+            // 100..=130 => tile.strings.push(T1_MAT.into()), //8 tot
+            // 131..=170 => tile.strings.push(T2_MAT.into()), //8 tot
+            // 171..=200 => tile.strings.push(T3_MAT.into()), //10 tot
+            // 201..=220 => tile.strings.push(T4_MAT.into()), //5
+            // 221..=240 => tile.strings.push(T5_MAT.into()), //6
+            // 298..=300 => tile.strings.push(T6_MAT.into()), //1 tot
+            0..=100 => tile.string_tab[FOOD_INV] += 1,
+            100..=130 => tile.string_tab[T1_MAT_INV] += 1, //8 tot
+            131..=170 => tile.string_tab[T2_MAT_INV] += 1, //8 tot
+            171..=200 => tile.string_tab[T3_MAT_INV] += 1, //10 tot
+            201..=220 => tile.string_tab[T4_MAT_INV] += 1, //5
+            221..=240 => tile.string_tab[T5_MAT_INV] += 1, //6
+            298..=300 => tile.string_tab[T6_MAT_INV] += 1, //1 tot
             _ => (),
         }
     }
 
-    pub fn get_tile_content(&self, x: u32, y: u32) -> Option<&Vec<String>> {
-        let mut rtn;
+    pub fn get_tile_content(&self, x: u32, y: u32) -> Option<Vec<String>> {
         if x < self.width && y < self.height {
-            rtn = Some(&self.tiles[y as usize][x as usize].strings);
+            let mut rtn: Vec<String> = Vec::new();
+            for i in 0..7 {
+                let count = self.tiles[y as usize][x as usize].string_tab[i];
+                for _ in 0..count {
+                    let name = match i {
+                        FOOD_INV => FOOD,
+                        T1_MAT_INV => T1_MAT,
+                        T2_MAT_INV => T2_MAT,
+                        T3_MAT_INV => T3_MAT,
+                        T4_MAT_INV => T4_MAT,
+                        T5_MAT_INV => T5_MAT,
+                        T6_MAT_INV => T6_MAT,
+                        _ => continue,
+                    };
+                    rtn.push(name.to_string());
+                }
+            }
+            Some(rtn)
         } else {
-            rtn = None
+            None
         }
-        rtn
     }
-    pub fn get_tile_content_mut(&mut self, x: u32, y: u32) -> &mut Vec<String> {
-        &mut self.tiles[y as usize][x as usize].strings
+    pub fn get_tile_content_mut(&mut self, x: u32, y: u32) -> Vec<String> {
+        if x < self.width && y < self.height {
+            let mut rtn: Vec<String> = Vec::new();
+            for i in 0..7 {
+                let count = self.tiles[y as usize][x as usize].string_tab[i];
+                for _ in 0..count {
+                    let name = match i {
+                        FOOD_INV => FOOD,
+                        T1_MAT_INV => T1_MAT,
+                        T2_MAT_INV => T2_MAT,
+                        T3_MAT_INV => T3_MAT,
+                        T4_MAT_INV => T4_MAT,
+                        T5_MAT_INV => T5_MAT,
+                        T6_MAT_INV => T6_MAT,
+                        _ => continue,
+                    };
+                    rtn.push(name.to_string());
+                }
+            }
+            rtn
+        } else {
+            Vec::new()
+        }
     }
 
     pub fn remove_item_from_cell(&mut self, x: u32, y: u32, item: &str) -> bool {
-        if let Some(pos) = self.tiles[y as usize][x as usize]
-            .strings
-            .iter()
-            .position(|s| s == item)
-        {
-            self.tiles[y as usize][x as usize].strings.remove(pos);
-            return true;
+        if x >= self.width || y >= self.height {
+            return false;
         }
-        false
+        let idx = match item {
+            FOOD => FOOD_INV,
+            T1_MAT => T1_MAT_INV,
+            T2_MAT => T2_MAT_INV,
+            T3_MAT => T3_MAT_INV,
+            T4_MAT => T4_MAT_INV,
+            T5_MAT => T5_MAT_INV,
+            T6_MAT => T6_MAT_INV,
+            _ => return false,
+        };
+        let count = &mut self.tiles[y as usize][x as usize].string_tab[idx];
+        if *count > 0 {
+            *count -= 1;
+            true
+        } else {
+            false
+        }
     }
 
     pub fn fill_start(&mut self) {
@@ -108,7 +164,6 @@ impl Map {
             }
         }
     }
-
     pub fn partial_fill(&mut self, ticks: u8) {
         //TODO : optimize this with iterator on the 2nd loop
         let mut row_nb: u8 = 0;
@@ -131,7 +186,7 @@ impl Map {
     pub fn print_map(&self) {
         for row in &self.tiles {
             for tile in row {
-                print!("{:?} ,", tile.strings);
+                print!("{:?} ,", tile.string_tab);
             }
             println!();
         }

@@ -222,14 +222,14 @@ impl Game {
         // 	}
         // }
         let (x, y) = server._game.map.player_position[player_token];
-			let player_incanting: Vec<Token> = server
-				._game
-				.map
-				.player_position
-				.iter()
-				.filter(|(token, pos)| *pos == &(x, y) && *token != player_token)
-				.map(|(token, _)| *token)
-				.collect();
+        let player_incanting: Vec<Token> = server
+            ._game
+            .map
+            .player_position
+            .iter()
+            .filter(|(token, pos)| *pos == &(x, y) && *token != player_token)
+            .map(|(token, _)| *token)
+            .collect();
         player_incanting
         // if player_incanting.len() != define::INCANTATION_REQ[(server._clients[player_token].level - 1) as usize][0] as usize &&
         //     self.check_inventory(player_token, &*server) {
