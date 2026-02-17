@@ -250,10 +250,25 @@ impl CommandManager {
             }
         });
         command_manager.register(
-            "expluse",
+            "expulse",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
-                debug_manager_register("expluse", _c, server, _arg);
+                debug_manager_register("expulse", _c, server, _arg);
+                if expulse_player(server, _c) {
+                    let _ = server
+                        ._clients
+                        .get_mut(&_c)
+                        .unwrap()
+                        .get_socket_mut()
+                        .write(format!("{}", define::R_OK).as_bytes());
+                } else {
+                    let _ = server
+                        ._clients
+                        .get_mut(&_c)
+                        .unwrap()
+                        .get_socket_mut()
+                        .write(format!("{}", define::R_KO).as_bytes());
+                }
             },
         );
         command_manager.register(
@@ -534,7 +549,50 @@ fn point_to_greater_abs_value(a: i32, b: i32) -> i32 {
     }
 }
 
-fn get_message_transmission_direction(
+    fn expulse_player(server: &mut Server, token: Token) -> bool {
+        let position = server._game.get_player_position(token);
+        let mut expelled = false;
+        let next_pos = match server._clients.get(&token) {
+            Some(client) => match client.orientation {
+                'N' => (position.0, position.1.saturating_sub(1)),
+                'E' => (position.0 + 1, position.1),
+                'S' => (position.0, position.1 + 1),
+                'W' => (position.0.saturating_sub(1), position.1),
+                _ => position,
+            },
+            None => position,
+        };
+        let others: Vec<Token> = server
+            ._game
+            .map
+            .player_position
+            .iter()
+            .filter(|(other_token, other_pos)| *other_token != &token && *other_pos == &position)
+            .map(|(t, _)| *t)
+            .collect();
+
+		let dir = get_message_transmission_direction(
+                        position.0 as i32,
+                        position.1 as i32,
+                        next_pos.0 as i32,
+                        next_pos.1 as i32,
+                        server._game.map.get_width() as i32,
+                        server._game.map.get_height() as i32
+                    );
+        for other_token in others {
+			if let Some(other_client) = server._clients.get_mut(&other_token) {
+				other_client.position = next_pos;
+				let _ = other_client
+					.get_socket_mut()
+					.write(format!("message {},{}\n", dir, "expulse").as_bytes());
+			}
+            expelled = true;
+        }
+        expelled
+    }
+
+
+ fn get_message_transmission_direction(
     sourcex: i32,
     sourcey: i32,
     destx: i32,
