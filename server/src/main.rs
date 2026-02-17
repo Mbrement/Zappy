@@ -108,7 +108,7 @@ fn main() -> std::io::Result<()> {
             if arg.starts_with("-") {
                 tmp += 1;
             }
-            if arg == define::GRAPHICAL_CLIENT {
+            if arg == define::GRAPHICAL_CLIENT || arg == define::ADMIN_CLIENT {
                 eprintln!(
                     "Found graphical client as team argument, {}, please do not use this as a team name",
                     arg

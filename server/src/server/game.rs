@@ -202,8 +202,7 @@ impl Game {
 
     pub fn fork_player(&mut self, token: Token) {
         println!("Player {:?} is trying to fork", token); // if let Some(client) = self._clients.get(&token) { if client.r#type == define::ROLE_PLAYER { let team_name = self.get_team_for_player(&token); let new_token = Token(self._next_token as usize); self._next_token += 1; self._clients.insert(new_token, Client::new(client.get_socket().try_clone().unwrap(), new_token)); self.teams.get_mut(&team_name).unwrap().push(new_token); self._game.spawn_player(new_token, &team_name); println!("Player {:?} forked successfully as {:?}", token, new_token); } else { println!("Client {:?} is not a player and cannot fork", token); } } else { println!("Client {:?} not found for forking", token); }
-    }
-
+	}
     pub(crate) fn check_inventory(&self, player_token: &Token, server: &Server) -> bool {
         let player = server._clients.get(player_token).unwrap();
         let required_items = define::INCANTATION_REQ[(player.level - 1) as usize];

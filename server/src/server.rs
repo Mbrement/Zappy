@@ -24,7 +24,7 @@ pub struct Server {
     _events: Events,
     _clients: HashMap<Token, client::Client>,
     pub teams: HashMap<String, Vec<Token>>,
-    _max_clients: HashMap<String, u32>,
+    pub(crate)_max_clients: HashMap<String, u32>,
     pub _max_clients_per_team: u32,
     _socket: mio::net::TcpListener,
     _ticks: u64,

@@ -46,6 +46,15 @@ impl CommandManager {
     }
 
     // This function is used to add commands to the queue without checking if the command is valid. it pop the current command in the queue and replace it with the new one
+
+	fn add_to_queue_admin(&mut self, name: String, arg: String) {
+	let token: mio::Token = mio::Token(0); // Admin token
+	self.order
+            .entry(token)
+            .or_insert_with(VecDeque::new)
+            .push_back((name.clone(), token, arg.clone()));
+	}
+
     fn add_to_queue_internal(&mut self, name: String, token: mio::Token, arg: String) {
         // #[cfg(feature = "log")]
         // println!(
@@ -380,8 +389,7 @@ impl CommandManager {
         command_manager.register("fork", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             debug_manager_register("fork", _c, server, _arg);
-            server._game.fork_player(_c);
-
+            // server._game.fork_player(_c);
             let mut client = server._clients.get_mut(&_c);
             if client.is_none() {
                 #[cfg(feature = "log")]
@@ -389,9 +397,29 @@ impl CommandManager {
                 return;
             }
             let client = client.unwrap();
+			let (x, y) = client.position;
+			server._game.map.egg_position.insert(server._game._tick, (x, y, client.get_token()));
             client
                 .get_socket_mut()
                 .write(format!("{}", define::R_OK).as_bytes());
+        });
+        command_manager.register("fork_internal", |_c: mio::Token, server: &mut Server, _arg: &str| {
+            #[cfg(feature = "log")]
+            debug_manager_register("fork_internal", _c, server, _arg);
+			println!("here");
+            for (tick, (x, y, token)) in &server._game.map.egg_position {
+                if tick < &server._game._tick {
+                    let team_name = server.get_team_for_player(&token);
+                    let tmp = server._max_clients.get_mut(&team_name);
+                    if let Some(v) = tmp {
+                        *v += 1;
+
+                    } else {
+                        server._max_clients.insert(team_name.clone(), 1);
+                    }
+                }
+            }
+
         });
         command_manager.register(
             "connect_nbr",
@@ -414,9 +442,10 @@ impl CommandManager {
     }
 
     pub fn process_queue(&mut self, server: &mut Server) {
-        let tokens: Vec<Token> = self.order.keys().cloned().collect();
+        let mut tokens: Vec<Token> = self.order.keys().cloned().collect();
+		tokens.insert(0, mio::Token(0)); // Add the admin token to the list of tokens to process
         for token in tokens {
-            if self.order.contains_key(&token) && self.next_execute.contains_key(&token) {
+            if self.order.contains_key(&token) && self.next_execute.contains_key(&token) || token == mio::Token(0) {
                 // println!("Processing command queue: {:?}", "here");
 
                 // println!(
@@ -435,7 +464,7 @@ impl CommandManager {
                     //     self.order.get(&token).unwrap_or(&VecDeque::new()).len()
                     // );
 
-                    if self.next_execute.get(&token).unwrap() <= &server._game._tick {
+                    if token == mio::Token(0) || self.next_execute.get(&token).unwrap() <= &server._game._tick {
                         let res = match command.as_str() {
                             "voir" | "prend" | "pose" | "droite" | "gauche" | "avance"
                             | "expulse" | "broadcast" => {
@@ -445,13 +474,16 @@ impl CommandManager {
                             "fork" => self.next_execute.insert(token, server._game._tick + 42),
                             "incantation_internal" => {
                                 self.next_execute.insert(token, server._game._tick + 300)
+                            }                           
+							"fork_internal" => {
+                                self.next_execute.insert(token, server._game._tick + 600)
                             }
                             "connect_nbr" | "incantation" => {
                                 self.next_execute.insert(token, server._game._tick)
                             }
                             _ => None,
                         };
-                        if (!server._clients.get(&token).is_none()) {
+                        if (token == mio::Token(0) || !server._clients.get(&token).is_none()) {
                             self.execute(&command, *tkn, &arg, server);
                         }
                         //TODO-mrozniec: recup command
@@ -508,7 +540,16 @@ impl CommandManager {
                             //     *tkn,
                             //     "".to_string(),
                             // );
-                        } else {
+                        } else if command.as_str() == "fork" {
+							// For fork, we want to add the new command to the front of the queue, so we use add_to_queue_internal
+							self.add_to_queue_internal(
+								"fork_internal".to_string(),
+								mio::Token(0),
+								"".to_string(),
+							);
+						self.order.get_mut(&token).unwrap().pop_front();
+						}
+						else  {
                             self.order.get_mut(&token).unwrap().pop_front();
                         }
                     }
@@ -584,7 +625,7 @@ fn point_to_greater_abs_value(a: i32, b: i32) -> i32 {
 				other_client.position = next_pos;
 				let _ = other_client
 					.get_socket_mut()
-					.write(format!("message {},{}\n", dir, "expulse").as_bytes());
+					.write(format!("kick {}\n", dir).as_bytes());
 			}
             expelled = true;
         }
