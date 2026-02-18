@@ -370,10 +370,7 @@ impl CommandManager {
                                 .write(format!("{}\n", org_player_level).as_bytes());
                         }
                     }
-                    send_graphic_clients(
-                        event_incant_end(server, sucess, _c),
-                        server
-                    );
+                    event_incant_end(server, sucess, _c);
                 }
                 // else{
                 // let mut client = server._clients.get_mut(&_c);
@@ -607,6 +604,7 @@ fn point_to_greater_abs_value(a: i32, b: i32) -> i32 {
             },
             None => position,
         };
+        /*
         let others: Vec<Token> = server
             ._game
             .map
@@ -614,7 +612,7 @@ fn point_to_greater_abs_value(a: i32, b: i32) -> i32 {
             .iter()
             .filter(|(other_token, other_pos)| *other_token != &token && *other_pos == &position)
             .map(|(t, _)| *t)
-            .collect();
+            .collect();*/
 
 		let dir = get_message_transmission_direction(
                         position.0 as i32,
@@ -624,6 +622,7 @@ fn point_to_greater_abs_value(a: i32, b: i32) -> i32 {
                         server._game.map.get_width() as i32,
                         server._game.map.get_height() as i32
                     );
+        /*
         for other_token in others {
 			if let Some(other_client) = server._clients.get_mut(&other_token) {
 				other_client.position = next_pos;
@@ -632,7 +631,22 @@ fn point_to_greater_abs_value(a: i32, b: i32) -> i32 {
 					.write(format!("kick {}\n", dir).as_bytes());
 			}
             expelled = true;
+        }*/
+
+        // j'ai fait une fonction pour récupérer les clients en fonction de leur position, utilise la
+        let mut players = server.get_clients_by_pos_mut(position);
+        for player in players.iter_mut() {
+            if (player.token != token) {
+                player.position = next_pos;
+                player.get_socket_mut().write(format!("kick {}\n", dir).as_bytes());
+                expelled = true;
+            }
         }
+        send_graphic_clients(
+            event_fus_ro_dah(players, token),
+            server
+        );
+        
         expelled
     }
 

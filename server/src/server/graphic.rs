@@ -81,8 +81,8 @@ fn player_inventory(player: &Client) -> String {
 //    format!("hax {:?}\n", player.token)
 //}
 
-fn leonidas(player: &Client) -> String {
-    format!("pex {:?}\n", player.token)
+fn leonidas(token: &Token) -> String {
+    format!("pex {:?}\n", token)
 }
 
 fn player_broadcast(player: &Client, message: String) -> String {
@@ -178,19 +178,20 @@ fn event_drop_an_item(map: &Vec<Vec<Tile>>, player: &Client, item_num: u8) {
 }
 
 //TODO check après gestion par micka
-fn event_fus_ro_dah(server: Server, player: &Client) -> String {
+pub fn event_fus_ro_dah(players: Vec<&mut Client>, token: Token) -> String {
     let mut res = String::new();
 
-    res += &leonidas(player);
-    for kicked in server.get_clients_by_pos(player.position) {
-        if (kicked.token != player.token) {
-            res += &player_pos(kicked);
+    res += &leonidas(&token);
+    for player in players {
+        if (player.token != token) {
+            res += &player_pos(player);
         }
     }
     res
+    //send_graphic_clients(res, server);
 }
 
-pub fn event_incant_end(server: &mut Server, success: bool, token: Token) -> String {
+pub fn event_incant_end(server: &mut Server, success: bool, token: Token) {
     let mut res = String::new();
     let (x, y) = server._game.get_player_position(token);
     let tile: &Tile = &server.get_map().get_tiles()[y as usize][x as usize];
@@ -200,7 +201,7 @@ pub fn event_incant_end(server: &mut Server, success: bool, token: Token) -> Str
         res += &player_level(player);
     }
     res += &content_tile(x, y, tile);
-    res
+    send_graphic_clients(res, server);
 }
 
 pub fn send_graphic_clients(command: String, server: &mut Server) {
