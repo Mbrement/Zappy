@@ -16,6 +16,14 @@ class TileInfoManager {
     switchToTileInfoView(resources, players) {
         const tilesPlayerInfoContainer = document.getElementById('tilesPlayerInfoContainer')
         if (tilesPlayerInfoContainer) {
+            tilesPlayerInfoContainer.classList.remove('tilesPlayerInfoContainerHidden')
+
+            const nothingToSeeContainer = document.getElementById('nothingToSeeContainer')
+            nothingToSeeContainer.classList.add('hidden')
+
+            const tilesPlayerInfoHeaderContainer = document.getElementById('tilesPlayerInfoHeaderContainer')
+            tilesPlayerInfoHeaderContainer.classList.remove('hidden')
+
             const tilesPlayerInfoTitle = tilesPlayerInfoContainer.querySelector('#tilesPlayerInfoTitle')
             tilesPlayerInfoTitle.textContent = this.VIEW_TITLE
 
@@ -153,6 +161,40 @@ class TileInfoManager {
             const playerTeam = playerDiv.dataset.team
             console.log(`Player clicked: ID=${playerId}, Team=${playerTeam}`)
             // TODO: Focus player and display information about it
+        }
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Switch pane state between showed and hide
+     */
+    showHideTilesPlayerInfo() {
+        const tilesPlayerInfoContainer = document.getElementById('tilesPlayerInfoContainer')
+        if (tilesPlayerInfoContainer) {
+            if(tilesPlayerInfoContainer.classList.contains('tilesPlayerInfoContainerHidden')) {
+                tilesPlayerInfoContainer.classList.remove('tilesPlayerInfoContainerHidden')
+            } else {
+                tilesPlayerInfoContainer.classList.add('tilesPlayerInfoContainerHidden')
+
+                new Promise(resolve => {
+                    setTimeout(() => {
+                        const tilesPlayerInfoHeaderContainer = document.getElementById('tilesPlayerInfoHeaderContainer')
+                        tilesPlayerInfoHeaderContainer.classList.add('hidden')
+
+                        const tilesInfoContainer = document.getElementById('tilesInfoContainer')
+                        tilesInfoContainer.classList.add('hidden')
+
+                        const playerInfoContainer = document.getElementById('playerInfoContainer')
+                        playerInfoContainer.classList.add('hidden')
+
+                        const nothingToSeeContainer = document.getElementById('nothingToSeeContainer')
+                        nothingToSeeContainer.classList.remove('hidden')
+
+                        resolve()
+                    }, 350)
+                })
+                // TODO: call cancel rayvast function HERE
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 class ConnectMenu {
     constructor() {
         this.instance = document.getElementById("connectMenu");
-        this.hideConnectMenu()
+        // this.hideConnectMenu()
         this.address = "";
         this.port = "";
     }
@@ -104,6 +104,12 @@ class ConnectMenu {
      */
     showConnectMenu() {
         this.instance.classList.remove('hidden');
+
+        const broadcastContainer = document.getElementById("broadcastContainer")
+        broadcastContainer.classList.add("hidden")
+
+        const tilesPlayerInfoContainer = document.getElementById("tilesPlayerInfoContainer")
+        tilesPlayerInfoContainer.classList.add("hidden")
     }
 
     /**
@@ -112,6 +118,12 @@ class ConnectMenu {
      */
     hideConnectMenu() {
         this.instance.classList.add('hidden');
+
+        const broadcastContainer = document.getElementById("broadcastContainer")
+        broadcastContainer.classList.remove("hidden")
+
+        const tilesPlayerInfoContainer = document.getElementById("tilesPlayerInfoContainer")
+        tilesPlayerInfoContainer.classList.remove("hidden")
     }
 
 }

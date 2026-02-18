@@ -7,28 +7,28 @@
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-<!--    <div id="connectMenu" data-module="ConnectMenu">-->
-<!--        <h1 id="title">Zappy</h1>-->
-<!--        <div id="connectInputContainer">-->
-<!--            <p id="connectTitle">Connect to a server</p>-->
-<!--            <div id="formContainer">-->
-<!--                <div class="inputContainer">-->
-<!--                    <label for="address">Address</label>-->
-<!--                    <div class="inputDesign">-->
-<!--                        <input type="text" id="address" name="address" placeholder="localhost" required/>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <div class="inputContainer">-->
-<!--                    <label for="port">Port</label>-->
-<!--                    <div class="inputDesign">-->
-<!--                        <input type="text" id="port" name="port" placeholder="4242" required/>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <p id="errorText">I am special</p>-->
-<!--                <button id="connectButton" data-action="connect">Connect</button>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
+    <div id="connectMenu" data-module="ConnectMenu">
+        <h1 id="title">Zappy</h1>
+        <div id="connectInputContainer">
+            <p id="connectTitle">Connect to a server</p>
+            <div id="formContainer">
+                <div class="inputContainer">
+                    <label for="address">Address</label>
+                    <div class="inputDesign">
+                        <input type="text" id="address" name="address" placeholder="localhost" required/>
+                    </div>
+                </div>
+                <div class="inputContainer">
+                    <label for="port">Port</label>
+                    <div class="inputDesign">
+                        <input type="text" id="port" name="port" placeholder="4242" required/>
+                    </div>
+                </div>
+                <p id="errorText">I am special</p>
+                <button id="connectButton" data-action="connect">Connect</button>
+            </div>
+        </div>
+    </div>
     <div id="broadcastContainer" class="noScrollBars hidden">
         <p>#1 : y’a qq svp repondez moi TwT<p>
         <p>#3 : Oe chuis la bg<p>
@@ -40,9 +40,13 @@
         <p>#1 : y’a qq svp repondez moi TwT<p>
         <p>#1 : y’a qq svp repondez moi TwT<p>
     </div>
-    <div id="tilesPlayerInfoContainer" class="noScrollBars">
-        <div id="tilesPlayerInfoHeaderContainer">
-            <p id="tilesPlayerInfoTitle">Player Information</p>
+
+    <div id="tilesPlayerInfoContainer" class="noScrollBars tilesPlayerInfoContainerHidden hidden" data-module="TileInfoManager">
+        <div id="hideTilesPlayerInfoContainer" data-action="showHideTilesPlayerInfo">
+            <div id="hideTilesPlayerTick"></div>
+        </div>
+        <div id="tilesPlayerInfoHeaderContainer" class="hidden">
+            <p id="tilesPlayerInfoTitle"></p>
         </div>
         <div id="tilesInfoContainer" class="mainInfoContainer noScrollBars hidden">
             <div id="tileResourcesContainer">
@@ -80,8 +84,8 @@
             </div>
             <div id="playersOnTileContainer">
                 <p class="tilesPlayerInfoCategoryTitles">Players on tile</p>
-                <div class="informationContainer noScrollBars">
-                    <div class="playerOnTile">
+                <div id="playersOnTile" class="informationContainer noScrollBars">
+                    <div class="playerOnTile" data-action="displayPlayerInfo">
                         <div class="playerTeamDot"></div>
                         <div class="playerVerticalSeparator"></div>
                         <div class="playerContainer">
@@ -98,7 +102,7 @@
                 </div>
             </div>
         </div>
-        <div id="playerInfoContainer" class="mainInfoContainer noScrollBars">
+        <div id="playerInfoContainer" class="mainInfoContainer noScrollBars hidden">
             <div id="playerInformationContainer">
                 <p class="tilesPlayerInfoCategoryTitles">Information</p>
                 <div class="informationContainer alignFlexNormal noScrollBars">
@@ -150,6 +154,11 @@
                 </div>
             </div>
         </div>
+        <div id="nothingToSeeContainer">
+            <p class="nothingToSeeText">Nothing to see right now...</p>
+            <p class="nothingToSeeText">Select a tile or a player to see information about it.</p>
+        </div>
+
     </div>
     <canvas id="webgpu" class="webgpu"></canvas>
     <script src="main.js"></script>

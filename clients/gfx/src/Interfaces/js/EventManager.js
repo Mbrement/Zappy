@@ -10,7 +10,7 @@ class EventManager {
         }
         this.authorizedFunctions = {
             ConnectMenu: new Set(['connect']),
-            TileInfoManager: new Set(['displayPlayerInfo'])
+            TileInfoManager: new Set(['displayPlayerInfo', 'showHideTilesPlayerInfo'])
         }
 
         this.onClickbind = this.onClick.bind(this)

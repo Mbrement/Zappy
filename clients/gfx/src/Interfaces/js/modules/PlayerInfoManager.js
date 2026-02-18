@@ -12,6 +12,14 @@ class PlayerInfoManager  {
     switchToPlayerInfoView(info, inventory) {
         const tilesPlayerInfoContainer = document.getElementById('tilesPlayerInfoContainer')
         if(tilesPlayerInfoContainer) {
+            tilesPlayerInfoContainer.classList.remove('tilesPlayerInfoContainerHidden')
+
+            const nothingToSeeContainer = document.getElementById('nothingToSeeContainer')
+            nothingToSeeContainer.classList.add('hidden')
+
+            const tilesPlayerInfoHeaderContainer = document.getElementById('tilesPlayerInfoHeaderContainer')
+            tilesPlayerInfoHeaderContainer.classList.remove('hidden')
+
             const tilesPlayerInfoTitle = tilesPlayerInfoContainer.querySelector('#tilesPlayerInfoTitle')
             tilesPlayerInfoTitle.textContent = this.VIEW_TITLE
 
