@@ -1,5 +1,6 @@
 use crate::server::{Server, client::Client, game::Game, map::Tile, define};
 use std::collections::HashMap;
+use std::io::Write;
 
 fn map_size(width: u32, height: u32) -> String {
     format!("msz {} {}\n", width, height)
@@ -184,4 +185,10 @@ fn event_incant_end(server: Server, pos: (u32, u32), tile: &Tile) -> String {
     }
     res += &content_tile(x, y, tile);
     res
+}
+
+fn send_graphic_clients(command: String, server: &mut Server) {
+    for graph_client in server.get_clients_by_type_mut(define::GRAPHICAL_CLIENT) {
+        let _ = graph_client.get_socket_mut().write(command.as_bytes());
+    }
 }
