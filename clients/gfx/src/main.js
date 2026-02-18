@@ -49,7 +49,7 @@ class Main {
         this.eventManager.modules.ConnectMenu.hideConnectMenu()
         this.networkClient.send("GRAPHIC\n")
         this.world.createWorld()
-        this.messageHandler.gameMap = window.worldInstance.gameMap
+        this.messageHandler.world = window.worldInstance
     }
 }
 

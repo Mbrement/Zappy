@@ -5,7 +5,7 @@ class MessageHandler {
 
         this.networkClient = null
         this.gameState = null
-        this.gameMap = null
+        this.world = null
 
         this.commands = {}
         const allMethods = Object.getOwnPropertyNames(Object.getPrototypeOf(this))
@@ -76,7 +76,7 @@ class MessageHandler {
 
         this.gameState.setMapSize(parseInt(command[1]), parseInt(command[2]))
 
-        this.gameMap.createMap()
+        this.world.gameMap.createMap()
     }
 
     /**
@@ -102,7 +102,7 @@ class MessageHandler {
 
         this.gameState.setTileContent(x, y, integerArguments)
 
-        this.gameMap.loadTileResources(x, y)
+        this.world.gameMap.loadTileResources(x, y)
     }
 
     /**
@@ -135,6 +135,8 @@ class MessageHandler {
         const integerArguments = command.slice(1, 6).map(Number)
 
         this.gameState.addNewPlayer(integerArguments, command[6])
+
+        this.world.players.addPlayer(integerArguments.slice(0, 3), command[6])
     }
 
     /**
@@ -297,9 +299,13 @@ class MessageHandler {
             return
         }
 
+        const id = parseInt(command[1])
+
+        this.gameState.deletePlayer(id)
+
         // TODO : Animate player #n dying
 
-        this.gameState.deletePlayer(parseInt(command[1]))
+        this.world.players.removePlayer(id)
     }
 
     /**
@@ -318,6 +324,8 @@ class MessageHandler {
         // TODO : Animate egg #e being laid by player #n at position (x, y)
 
         this.gameState.addEgg(integerArguments)
+
+        this.world.players.addEgg(integerArguments)
     }
 
     /**
@@ -334,6 +342,8 @@ class MessageHandler {
         // TODO : Animate egg #e hatching
 
         this.gameState.removeEgg(parseInt(command[1]))
+
+        this.world.players.removeEgg(parseInt(command[1]))
     }
 
     /**

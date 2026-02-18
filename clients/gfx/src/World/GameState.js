@@ -1,11 +1,10 @@
 
 class GameState {
     constructor() {
-
         this.map = null
-        this.teams = []
-        this.players = new Map()
-        this.eggs = new Map()
+        this.teams = new Map()
+        this.playerInfo = new Map()
+        this.eggInfo = new Map()
     }
 
     /**
@@ -77,11 +76,11 @@ class GameState {
      * @param {String} teamName - the name of the team to add
      */
     addTeamName(teamName) {
-        if (this.teams.includes(teamName)) {
+        if (this.teams.has(teamName)) {
             return
         }
 
-        this.teams.push(teamName)
+        this.teams.set(teamName, `hsl(${this.teams.size * 137.508},100%,75%)`)
 
         console.log("Added team", teamName, "Total teams", this.teams)
     }
@@ -93,13 +92,13 @@ class GameState {
      * @param {String} playerTeam - the name of the team the player belongs to
      */
     addNewPlayer(playerInfo, playerTeam) {
-        if (!this.teams.includes(playerTeam)) {
+        if (!this.teams.has(playerTeam)) {
             return;
         }
 
         const [id, x, y, orientation, level] = playerInfo
 
-        if (this.players.has(id)) {
+        if (this.playerInfo.has(id)) {
             return
         }
 
@@ -107,7 +106,7 @@ class GameState {
             return
         }
 
-        this.players.set(id, {
+        this.playerInfo.set(id, {
             x,
             y,
             orientation,
@@ -115,7 +114,7 @@ class GameState {
             team: playerTeam
         })
 
-        console.log("Added player", id, "Total players are", this.players)
+        console.log("Added player", id, "Total players are", this.playerInfo)
     }
 
     /**
@@ -126,7 +125,7 @@ class GameState {
     updatePlayerPosition(playerInfo) {
         const [id, x, y, orientation] = playerInfo
 
-        if (!this.players.has(id)) {
+        if (!this.playerInfo.has(id)) {
             return
         }
 
@@ -134,7 +133,7 @@ class GameState {
             return
         }
 
-        const player = this.players.get(id)
+        const player = this.playerInfo.get(id)
         player.x = x
         player.y = y
         player.orientation = orientation
@@ -150,7 +149,7 @@ class GameState {
         player.incantation = { state: false, toLevel: null}
 
 
-        console.log("updated player position", id, "Total players are", this.players)
+        console.log("updated player position", id, "Total players are", this.playerInfo)
     }
 
     /**
@@ -161,14 +160,14 @@ class GameState {
     updatePlayerLevel(playerInfo) {
         const [id, level] = playerInfo
 
-        if (!this.players.has(id)) {
+        if (!this.playerInfo.has(id)) {
             return
         }
 
-        const player = this.players.get(id)
+        const player = this.playerInfo.get(id)
         player.level = level
 
-        console.log("updated player level", id, "Total players are", this.players)
+        console.log("updated player level", id, "Total players are", this.playerInfo)
     }
 
     /**
@@ -179,7 +178,7 @@ class GameState {
     updatePlayerInventory(playerInfo) {
         const [id, x, y, nourriture, linemate, deraumere, sibur, mendiane, phiras, thystame] = playerInfo
 
-        if (!this.players.has(id)) {
+        if (!this.playerInfo.has(id)) {
             return
         }
 
@@ -187,7 +186,7 @@ class GameState {
             return
         }
 
-        const player = this.players.get(id)
+        const player = this.playerInfo.get(id)
         player.inventory = {
             nourriture,
             linemate,
@@ -198,7 +197,7 @@ class GameState {
             thystame
         }
 
-        console.log("updated player inventory", id, "Total players are", this.players)
+        console.log("updated player inventory", id, "Total players are", this.playerInfo)
     }
 
     /**
@@ -217,8 +216,8 @@ class GameState {
         this.map[y][x].incantation = true
 
         for (let id of playerIds) {
-            if (this.players.has(id)) {
-                this.players.get(id).incantation = { state: true, toLevel: level }
+            if (this.playerInfo.has(id)) {
+                this.playerInfo.get(id).incantation = { state: true, toLevel: level }
             }
         }
 
@@ -243,9 +242,9 @@ class GameState {
     }
 
     deletePlayer(playerId) {
-        this.players.delete(playerId)
+        this.playerInfo.delete(playerId)
 
-        console.log("Deleted player", playerId, "Total players are", this.players)
+        console.log("Deleted player", playerId, "Total players are", this.playerInfo)
     }
 
     /**
@@ -257,12 +256,12 @@ class GameState {
     addEgg(eggInfo) {
         const [eggId, parentId, x, y] = eggInfo
 
-        if (!this.isCorrectCoordinates(x, y) || !this.players.has(parentId)) {
+        if (!this.isCorrectCoordinates(x, y) || !this.playerInfo.has(parentId)) {
             return
         }
 
         this.map[y][x].eggs.push({eggId, parentId})
-        this.eggs.set(eggId, {parentId, x, y})
+        this.eggInfo.set(eggId, {parentId, x, y})
 
         console.log("Added egg", eggId, "at", x, y, "by player", parentId, "Map", this.map)
     }
@@ -273,13 +272,13 @@ class GameState {
      * @param {Number} eggId - the id of the egg to remove
      */
     removeEgg(eggId) {
-        if (!this.eggs.has(eggId)) {
+        if (!this.eggInfo.has(eggId)) {
             return
         }
 
-        const egg = this.eggs.get(eggId)
+        const egg = this.eggInfo.get(eggId)
         this.map[egg.y][egg.x].eggs = this.map[egg.y][egg.x].eggs.filter(e => e.eggId !== eggId)
-        this.eggs.delete(eggId)
+        this.eggInfo.delete(eggId)
 
         console.log("Removed egg", eggId, "from", egg.x, egg.y, "Map", this.map)
     }

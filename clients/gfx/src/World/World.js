@@ -5,6 +5,7 @@ const Camera = require("./Camera");
 const UpdateManager = require("./UpdateManager");
 const Time = require("./Utils/Time");
 const GameMap = require("./Map/GameMap");
+const Players = require("./Map/Players")
 
 class World {
     constructor() {
@@ -23,6 +24,7 @@ class World {
         this.time = new Time()
         this.scene = new THREE.Scene()
         this.gameMap = new GameMap()
+        this.players = new Players()
 
         this.ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
         this.scene.add(this.ambientLight)
