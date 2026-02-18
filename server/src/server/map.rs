@@ -24,6 +24,9 @@ impl Tile {
             string_tab: [0; 7],
         }
     }
+    pub fn get_content(&self) -> [u32;7] {
+        self.string_tab
+    }
 }
 
 impl Map {
