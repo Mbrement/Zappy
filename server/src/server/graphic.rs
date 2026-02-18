@@ -34,17 +34,16 @@ fn team_names(teams: HashMap<String, Vec<mio::Token>>) -> String {
 
 fn new_player(team: String, player: &Client) -> String {
     let (x, y) = player.position;
-    format!(
-        "pnw {:?} {} {} {} {} {}\n",
-        player.token, x, y, player.orientation, player.level, team
+    format!("pnw {:?} {} {} {} {} {}\n",
+        player.token, x, y,
+        player.orientation,
+        player.level, team
     )
 }
 
 fn player_pos(player: &Client) -> String {
     let (x, y) = player.position;
-    format!(
-        "ppo {:?} {} {} {}\n",
-        player.token, x, y, player.orientation
+    format!("ppo {:?} {} {} {}\n", player.token, x, y, player.orientation
     )
 }
 
@@ -54,11 +53,8 @@ fn player_level(player: &Client) -> String {
 
 fn player_inventory(player: &Client) -> String {
     let (x, y) = player.position;
-    format!(
-        "pin {:?} {} {} {} {} {} {} {} {} {}\n",
-        player.token,
-        x,
-        y,
+    format!("pin {:?} {} {} {} {} {} {} {} {} {}\n",
+        player.token, x, y,
         player.inventory[0],
         player.inventory[1],
         player.inventory[2],
