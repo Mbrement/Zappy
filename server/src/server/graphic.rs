@@ -104,7 +104,7 @@ fn birth_egg(player: Client) -> String {
     format!("pfk {:?}\n", player.token)
 }
 
-fn player_drop_item(player: &Client, item_num: u8) -> String {
+fn player_drop_item(player: &Client, item_num: usize) -> String {
     format!("pdr {:?} {}\n", player.token, item_num)
 }
 
@@ -168,16 +168,17 @@ fn event_take_an_item(map: &Vec<Vec<Tile>>, player: &Client, item_num: u8) {
     res += &content_tile(x, y, &map[y as usize][x as usize])
 }
 
-fn event_drop_an_item(map: &Vec<Vec<Tile>>, player: &Client, item_num: u8) {
+pub fn event_drop_an_item(server: &mut Server, token: &Token, item_num: usize) {
     let mut res = String::new();
+    let player: &Client = server._clients.get(token).unwrap();
     let (x, y) = player.position;
 
     res += &player_drop_item(player, item_num);
     res += &player_inventory(player);
-    res += &content_tile(x, y, &map[y as usize][x as usize])
+    res += &content_tile(x, y, &server._game.map.get_tiles()[y as usize][x as usize]);
+    send_graphic_clients(res, server);
 }
 
-//TODO check après gestion par micka
 pub fn event_fus_ro_dah(players: Vec<&mut Client>, token: Token) -> String {
     let mut res = String::new();
 

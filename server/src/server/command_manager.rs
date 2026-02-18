@@ -1,4 +1,4 @@
-use crate::server::{Server, define, utils};
+use crate::server::{Server, define, utils, define::ITEMS_DICT};
 use crate::server::{client, utils::*, graphic::*};
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
@@ -246,16 +246,21 @@ impl CommandManager {
         command_manager.register("pose", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             debug_manager_register("pose", _c, server, _arg);
+            let mut sucess: bool = false;
             if let Some(client) = server._clients.get_mut(&_c) {
                 if server._game.put_item_on_cell(client, _arg) {
                     let _ = client
                         .get_socket_mut()
                         .write(format!("{}", define::R_OK).as_bytes());
+                    sucess = true;
                 } else {
                     let _ = client
                         .get_socket_mut()
                         .write(format!("{}", define::R_KO).as_bytes());
                 }
+            }
+            if sucess {
+                event_drop_an_item(server, &_c, ITEMS_DICT[_arg]);
             }
         });
         command_manager.register(
