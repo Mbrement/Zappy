@@ -25,10 +25,6 @@ class GameState {
      * @param {Number} y - height of the map
      */
     setMapSize(x, y) {
-        if (this.map) {
-            return
-        }
-
         this.map = new Array(y).fill().map(() => {
             return new Array(x).fill().map(() => {
                 return {
@@ -51,10 +47,6 @@ class GameState {
      * @param {Array} content - an array representing the quantity of each resource on the tile
      */
     setTileContent(x, y, content) {
-        if (!this.isCorrectCoordinates(x, y)) {
-            return
-        }
-
         const [nourriture, linemate, deraumere, sibur, mendiane, phiras, thystame] = content
 
         this.map[y][x].resources = {
@@ -76,13 +68,9 @@ class GameState {
      * @param {String} teamName - the name of the team to add
      */
     addTeamName(teamName) {
-        if (this.teams.has(teamName)) {
-            return
-        }
-
         this.teams.set(teamName, `hsl(${this.teams.size * 137.508},100%,75%)`)
 
-        console.log("Added team", teamName, "Total teams", this.teams)
+        // console.log("Added team", teamName, "Total teams", this.teams)
     }
 
     /**
@@ -92,19 +80,7 @@ class GameState {
      * @param {String} playerTeam - the name of the team the player belongs to
      */
     addNewPlayer(playerInfo, playerTeam) {
-        if (!this.teams.has(playerTeam)) {
-            return;
-        }
-
         const [id, x, y, orientation, level] = playerInfo
-
-        if (this.playerInfo.has(id)) {
-            return
-        }
-
-        if (!this.isCorrectCoordinates(x, y)) {
-            return
-        }
 
         this.playerInfo.set(id, {
             x,
@@ -124,14 +100,6 @@ class GameState {
      */
     updatePlayerPosition(playerInfo) {
         const [id, x, y, orientation] = playerInfo
-
-        if (!this.playerInfo.has(id)) {
-            return
-        }
-
-        if (!this.isCorrectCoordinates(x, y)) {
-            return
-        }
 
         const player = this.playerInfo.get(id)
         player.x = x
@@ -160,10 +128,6 @@ class GameState {
     updatePlayerLevel(playerInfo) {
         const [id, level] = playerInfo
 
-        if (!this.playerInfo.has(id)) {
-            return
-        }
-
         const player = this.playerInfo.get(id)
         player.level = level
 
@@ -177,14 +141,6 @@ class GameState {
      */
     updatePlayerInventory(playerInfo) {
         const [id, x, y, nourriture, linemate, deraumere, sibur, mendiane, phiras, thystame] = playerInfo
-
-        if (!this.playerInfo.has(id)) {
-            return
-        }
-
-        if (!this.isCorrectCoordinates(x, y)) {
-            return
-        }
 
         const player = this.playerInfo.get(id)
         player.inventory = {
@@ -209,10 +165,6 @@ class GameState {
     setIncantation(incantationInfo) {
         const [x, y, level, ...playerIds] = incantationInfo
 
-        if (!this.isCorrectCoordinates(x, y)) {
-            return
-        }
-
         this.map[y][x].incantation = true
 
         for (let id of playerIds) {
@@ -231,10 +183,6 @@ class GameState {
      */
     stopIncantation(incantationInfo) {
         const [x, y] = incantationInfo
-
-        if (!this.isCorrectCoordinates(x, y)) {
-            return
-        }
 
         this.map[y][x].incantation = false
 
@@ -256,10 +204,6 @@ class GameState {
     addEgg(eggInfo) {
         const [eggId, parentId, x, y] = eggInfo
 
-        if (!this.isCorrectCoordinates(x, y) || !this.playerInfo.has(parentId)) {
-            return
-        }
-
         this.map[y][x].eggs.push({eggId, parentId})
         this.eggInfo.set(eggId, {parentId, x, y})
 
@@ -272,10 +216,6 @@ class GameState {
      * @param {Number} eggId - the id of the egg to remove
      */
     removeEgg(eggId) {
-        if (!this.eggInfo.has(eggId)) {
-            return
-        }
-
         const egg = this.eggInfo.get(eggId)
         this.map[egg.y][egg.x].eggs = this.map[egg.y][egg.x].eggs.filter(e => e.eggId !== eggId)
         this.eggInfo.delete(eggId)

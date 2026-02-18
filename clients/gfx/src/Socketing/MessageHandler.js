@@ -74,7 +74,14 @@ class MessageHandler {
             return
         }
 
-        this.gameState.setMapSize(parseInt(command[1]), parseInt(command[2]))
+        let x = parseInt(command[1])
+        let y = parseInt(command[2])
+
+        if (this.gameState.isCorrectCoordinates(x, y)) {
+            return
+        }
+
+        this.gameState.setMapSize(x, y)
 
         this.world.gameMap.createMap()
     }
@@ -95,7 +102,7 @@ class MessageHandler {
         let y = parseInt(command[2])
 
         if (!this.gameState.isCorrectCoordinates(x, y)) {
-            return;
+            return
         }
 
         const integerArguments = command.slice(3).map(Number)
@@ -117,6 +124,10 @@ class MessageHandler {
             return
         }
 
+        if (this.gameState.teams.has(command[1])) {
+            return
+        }
+
         this.gameState.addTeamName(command[1])
     }
 
@@ -132,7 +143,19 @@ class MessageHandler {
             return
         }
 
+        if (!this.gameState.teams.has(command[6])) {
+            return
+        }
+
         const integerArguments = command.slice(1, 6).map(Number)
+
+        if (this.gameState.playerInfo.has(integerArguments[0])) {
+            return
+        }
+
+        if (!this.gameState.isCorrectCoordinates(integerArguments[1], integerArguments[2])) {
+            return
+        }
 
         this.gameState.addNewPlayer(integerArguments, command[6])
 
@@ -153,6 +176,13 @@ class MessageHandler {
 
         const integerArguments = command.slice(1).map(Number)
 
+        if (!this.gameState.playerInfo.has(integerArguments[0])) {
+            return
+        }
+
+        if (!this.gameState.isCorrectCoordinates(integerArguments[1], integerArguments[2])) {
+            return
+        }
 
         this.gameState.updatePlayerPosition(integerArguments)
     }
@@ -171,6 +201,10 @@ class MessageHandler {
 
         const integerArguments = command.slice(1).map(Number)
 
+        if (!this.gameState.playerInfo.has(integerArguments[0])) {
+            return
+        }
+
         this.gameState.updatePlayerLevel(integerArguments)
     }
 
@@ -186,6 +220,14 @@ class MessageHandler {
         }
 
         const integerArguments = command.slice(1).map(Number)
+
+        if (!this.gameState.playerInfo.has(integerArguments[0])) {
+            return
+        }
+
+        if (!this.gameState.isCorrectCoordinates(integerArguments[1], integerArguments[2])) {
+            return
+        }
 
         this.gameState.updatePlayerInventory(integerArguments)
     }
@@ -223,6 +265,10 @@ class MessageHandler {
 
         const integerArguments = command.slice(1).map(Number)
 
+        if (!this.gameState.isCorrectCoordinates(integerArguments[0], integerArguments[1])) {
+            return
+        }
+
         // TODO : Animate incantation start of players #n
 
         this.gameState.setIncantation(integerArguments)
@@ -240,6 +286,10 @@ class MessageHandler {
         }
 
         const integerArguments = command.slice(1).map(Number)
+
+        if (!this.gameState.isCorrectCoordinates(integerArguments[0], integerArguments[1])) {
+            return
+        }
 
         // TODO : Animate incantation end of players #n based on R
 
@@ -301,6 +351,10 @@ class MessageHandler {
 
         const id = parseInt(command[1])
 
+        if (!this.gameState.playerInfo.has(id)) {
+            return
+        }
+
         this.gameState.deletePlayer(id)
 
         // TODO : Animate player #n dying
@@ -321,6 +375,11 @@ class MessageHandler {
 
         const integerArguments = command.slice(1).map(Number)
 
+        if (!this.gameState.isCorrectCoordinates(integerArguments[2], integerArguments[3]) ||
+            !this.gameState.playerInfo.has(integerArguments[1]) ) {
+            return
+        }
+
         // TODO : Animate egg #e being laid by player #n at position (x, y)
 
         this.gameState.addEgg(integerArguments)
@@ -336,6 +395,10 @@ class MessageHandler {
      */
     cmd_eht(command) {
         if (command.length !== 2) {
+            return
+        }
+
+        if (!this.gameState.eggInfo.has(command[1])) {
             return
         }
 
