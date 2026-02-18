@@ -370,7 +370,10 @@ impl CommandManager {
                                 .write(format!("{}\n", org_player_level).as_bytes());
                         }
                     }
-                    event_incant_end(server, sucess, &_c);
+                    send_graphic_clients(
+                        event_incant_end(server, sucess, &_c),
+                        server
+                    );
                 }
                 // else{
                 // let mut client = server._clients.get_mut(&_c);

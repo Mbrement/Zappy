@@ -190,7 +190,6 @@ fn event_fus_ro_dah(server: Server, player: &Client) -> String {
     res
 }
 
-//TODO après gestion par micka
 pub fn event_incant_end(server: &mut Server, success: bool, token: &Token) -> String {
     let mut res = String::new();
     let client = server._clients.get(token).unwrap();
@@ -205,7 +204,7 @@ pub fn event_incant_end(server: &mut Server, success: bool, token: &Token) -> St
     res
 }
 
-fn send_graphic_clients(command: String, server: &mut Server) {
+pub fn send_graphic_clients(command: String, server: &mut Server) {
     for graph_client in server.get_clients_by_type_mut(define::GRAPHICAL_CLIENT) {
         let _ = graph_client.get_socket_mut().write(command.as_bytes());
     }
