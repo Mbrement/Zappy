@@ -8,7 +8,7 @@ class ResourceAssets {
 
         this.defaultSize = 0.05
 
-        this.sphereGeometry = new THREE.SphereGeometry(this.defaultSize * 0.75, 16, 16)
+        this.sphereGeometry = new THREE.SphereGeometry(this.defaultSize * 0.75, 6, 6)
         this.octahedronGeometry = new THREE.OctahedronGeometry(this.defaultSize)
         this.pyramidGeometry = new THREE.ConeGeometry(this.defaultSize, 0.07, 4)
         this.cylinderGeometry = new THREE.CylinderGeometry(this.defaultSize * 0.75, this.defaultSize * 0.75, 0.07, 10)
