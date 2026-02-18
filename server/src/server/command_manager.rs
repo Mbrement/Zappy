@@ -371,7 +371,7 @@ impl CommandManager {
                         }
                     }
                     send_graphic_clients(
-                        event_incant_end(server, sucess, &_c),
+                        event_incant_end(server, sucess, _c),
                         server
                     );
                 }

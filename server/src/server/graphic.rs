@@ -190,13 +190,12 @@ fn event_fus_ro_dah(server: Server, player: &Client) -> String {
     res
 }
 
-pub fn event_incant_end(server: &mut Server, success: bool, token: &Token) -> String {
+pub fn event_incant_end(server: &mut Server, success: bool, token: Token) -> String {
     let mut res = String::new();
-    let client = server._clients.get(token).unwrap();
-    let (x, y) = client.position;
+    let (x, y) = server._game.get_player_position(token);
     let tile: &Tile = &server.get_map().get_tiles()[y as usize][x as usize];
 
-    for player in server._incantation_list.get(token).unwrap() {
+    for player in server._incantation_list.get(&token).unwrap() {
         let player: &Client = server._clients.get(player).unwrap();
         res += &player_level(player);
     }
