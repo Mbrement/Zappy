@@ -7,9 +7,15 @@ fn map_size(width: u32, height: u32) -> String {
 }
 
 fn content_tile(col: u32, row: u32, tile: &Tile) -> String {
-    //format!("bct {} {} {} {} {} {} {} {} {}\n", col, row, )
-    // ToDo:: tmp string en attente du rework de Tile
-    format!("bct {} {}\n", col, row)
+    format!("bct {} {} {} {} {} {} {} {} {}\n",
+    col, row,
+    tile.get_content()[0],
+    tile.get_content()[1],
+    tile.get_content()[2],
+    tile.get_content()[3],
+    tile.get_content()[4],
+    tile.get_content()[5],
+    tile.get_content()[6])
 }
 
 fn map_content(map: &Vec<Vec<Tile>>) -> String {
