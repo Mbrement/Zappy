@@ -60,6 +60,9 @@ class GameMap {
                     this.oddInstance.setMatrixAt(oddIndex, matrix)
                     this.oddInstance.instanceMatrix.needsUpdate = true
 
+                    this.oddInstance.setColorAt(oddIndex, new THREE.Color())
+                    this.oddInstance.instanceColor.needsUpdate = true
+
                     this.mapTiles[y][x].tile = {
                         instance: this.oddInstance,
                         index: oddIndex
@@ -69,6 +72,9 @@ class GameMap {
                 else {
                     this.evenInstance.setMatrixAt(evenIndex, matrix)
                     this.evenInstance.instanceMatrix.needsUpdate = true
+
+                    this.evenInstance.setColorAt(oddIndex, new THREE.Color())
+                    this.evenInstance.instanceColor.needsUpdate = true
 
                     this.mapTiles[y][x].tile = {
                         instance: this.evenInstance,
