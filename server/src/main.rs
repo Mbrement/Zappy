@@ -53,7 +53,10 @@ fn main() -> std::io::Result<()> {
     }
     if matches.opt_present("x") {
         let width = matches.opt_str("x").unwrap();
-        if width.parse::<u32>().is_ok()  && width.parse::<u32>().unwrap() != 0 && width.parse::<u32>().unwrap() <= 100 {
+        if width.parse::<u32>().is_ok()
+            && width.parse::<u32>().unwrap() != 0
+            && width.parse::<u32>().unwrap() <= 100
+        {
             server.set_map_width(width.parse().unwrap());
         } else {
             eprintln!(
@@ -65,7 +68,10 @@ fn main() -> std::io::Result<()> {
 
     if matches.opt_present("y") {
         let height = matches.opt_str("y").unwrap();
-        if height.parse::<u32>().is_ok()  && height.parse::<u32>().unwrap() != 0 && height.parse::<u32>().unwrap() <= 50 {
+        if height.parse::<u32>().is_ok()
+            && height.parse::<u32>().unwrap() != 0
+            && height.parse::<u32>().unwrap() <= 50
+        {
             server.set_map_height(height.parse().unwrap());
         } else {
             eprintln!(
@@ -102,7 +108,7 @@ fn main() -> std::io::Result<()> {
             if arg.starts_with("-") {
                 tmp += 1;
             }
-            if arg == define::GRAPHICAL_CLIENT {
+            if arg == define::GRAPHICAL_CLIENT || arg == define::ADMIN_CLIENT {
                 eprintln!(
                     "Found graphical client as team argument, {}, please do not use this as a team name",
                     arg

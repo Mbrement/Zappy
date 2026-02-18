@@ -1,4 +1,4 @@
-use crate::server::{Server, client::Client, game::Game, map::Tile, define};
+use crate::server::{Server, client::Client, define, game::Game, map::Tile};
 use std::collections::HashMap;
 use std::io::Write;
 
@@ -19,7 +19,7 @@ fn map_content(map: &Vec<Vec<Tile>>) -> String {
         for (x, tile) in row.iter().enumerate() {
             res.push_str(&content_tile(x as u32, y as u32, tile));
         }
-    };
+    }
     res
 }
 
@@ -28,19 +28,24 @@ fn team_names(teams: HashMap<String, Vec<mio::Token>>) -> String {
 
     for team in teams.keys() {
         res += &format!("tna {}\n", team);
-    };
+    }
     res
 }
 
-
 fn new_player(team: String, player: &Client) -> String {
     let (x, y) = player.position;
-    format!("pnw {:?} {} {} {} {} {}\n", player.token, x, y, player.orientation, player.level, team)
+    format!(
+        "pnw {:?} {} {} {} {} {}\n",
+        player.token, x, y, player.orientation, player.level, team
+    )
 }
 
 fn player_pos(player: &Client) -> String {
     let (x, y) = player.position;
-    format!("ppo {:?} {} {} {}\n", player.token, x, y, player.orientation)
+    format!(
+        "ppo {:?} {} {} {}\n",
+        player.token, x, y, player.orientation
+    )
 }
 
 fn player_level(player: &Client) -> String {
@@ -49,15 +54,19 @@ fn player_level(player: &Client) -> String {
 
 fn player_inventory(player: &Client) -> String {
     let (x, y) = player.position;
-    format!("pin {:?} {} {} {} {} {} {} {} {} {}\n",
-    player.token, x, y,
-    player.inventory[0],
-    player.inventory[1],
-    player.inventory[2],
-    player.inventory[3],
-    player.inventory[4],
-    player.inventory[5],
-    player.inventory[6])
+    format!(
+        "pin {:?} {} {} {} {} {} {} {} {} {}\n",
+        player.token,
+        x,
+        y,
+        player.inventory[0],
+        player.inventory[1],
+        player.inventory[2],
+        player.inventory[3],
+        player.inventory[4],
+        player.inventory[5],
+        player.inventory[6]
+    )
 }
 
 //fn ban_hammer(player: Client) -> String {
@@ -132,11 +141,7 @@ fn event_graph_connect(server: Server, game: Game) -> String {
     res += &map_content(game.map.get_tiles());
     res += &team_names(game.team);
     for player in server.get_clients_by_type(define::ROLE_PLAYER) {
-        res += &new_player(
-            server.get_team_for_player(
-                &player.token
-            ), player
-        );
+        res += &new_player(server.get_team_for_player(&player.token), player);
     }
     //TODO après gestion par micka
     //res += &egg_laid()
