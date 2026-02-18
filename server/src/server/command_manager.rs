@@ -1,5 +1,5 @@
 use crate::server::{Server, define, utils};
-use crate::server::{client, utils::*};
+use crate::server::{client, utils::*, graphic::*};
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
@@ -370,6 +370,7 @@ impl CommandManager {
                                 .write(format!("{}\n", org_player_level).as_bytes());
                         }
                     }
+                    event_incant_end(server, sucess, &_c);
                 }
                 // else{
                 // let mut client = server._clients.get_mut(&_c);

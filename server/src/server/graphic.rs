@@ -1,3 +1,6 @@
+use mio::Token;
+
+use crate::server::client;
 use crate::server::{Server, client::Client, define, game::Game, map::Tile};
 use std::collections::HashMap;
 use std::io::Write;
@@ -71,6 +74,7 @@ fn player_inventory(player: &Client) -> String {
     )
 }
 
+//Todo:: Bonus
 //fn ban_hammer(player: Client) -> String {
 //    #[cfg(feature = "debug")]
 //    println!("get bonked\n");
@@ -88,8 +92,13 @@ fn player_broadcast(player: &Client, message: String) -> String {
 //TODO après gestion par micka
 //fn start_incant() -> String {}
 
-//TODO après gestion par micka
-//fn end_incant() -> String {}
+fn end_incant(x: u32, y: u32, success: bool) -> String {
+    if success {
+        format!("pie {} {} {}\n", x, y, 1)
+    } else {
+        format!("pie {} {} {}\n", x, y, 0)
+    }
+}
 
 fn birth_egg(player: Client) -> String {
     format!("pfk {:?}\n", player.token)
@@ -182,12 +191,14 @@ fn event_fus_ro_dah(server: Server, player: &Client) -> String {
 }
 
 //TODO après gestion par micka
-fn event_incant_end(server: Server, pos: (u32, u32), tile: &Tile) -> String {
+pub fn event_incant_end(server: &mut Server, success: bool, token: &Token) -> String {
     let mut res = String::new();
-    let (x, y) = pos;
+    let client = server._clients.get(token).unwrap();
+    let (x, y) = client.position;
+    let tile: &Tile = &server.get_map().get_tiles()[y as usize][x as usize];
 
-    //res += &end_incant();
-    for player in server.get_clients_by_pos(pos) {
+    for player in server._incantation_list.get(token).unwrap() {
+        let player: &Client = server._clients.get(player).unwrap();
         res += &player_level(player);
     }
     res += &content_tile(x, y, tile);
