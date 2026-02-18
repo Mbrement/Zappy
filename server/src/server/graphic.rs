@@ -108,7 +108,7 @@ fn player_drop_item(player: &Client, item_num: usize) -> String {
     format!("pdr {:?} {}\n", player.token, item_num)
 }
 
-fn player_pick_item(player: &Client, item_num: u8) -> String {
+fn player_pick_item(player: &Client, item_num: usize) -> String {
     format!("pgt {:?} {}\n", player.token, item_num)
 }
 
@@ -159,13 +159,15 @@ fn event_graph_connect(server: Server, game: Game) -> String {
     res
 }
 
-fn event_take_an_item(map: &Vec<Vec<Tile>>, player: &Client, item_num: u8) {
+pub fn event_take_an_item(server: &mut Server, token: &Token, item_num: usize) {
     let mut res = String::new();
+    let player: &Client = server._clients.get(token).unwrap();
     let (x, y) = player.position;
 
     res += &player_pick_item(player, item_num);
     res += &player_inventory(player);
-    res += &content_tile(x, y, &map[y as usize][x as usize])
+    res += &content_tile(x, y, &server._game.map.get_tiles()[y as usize][x as usize]);
+    send_graphic_clients(res, server);
 }
 
 pub fn event_drop_an_item(server: &mut Server, token: &Token, item_num: usize) {

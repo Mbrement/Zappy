@@ -230,16 +230,21 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("prend", _c, server, _arg);
+                let mut sucess: bool = false;
                 if let Some(client) = server._clients.get_mut(&_c) {
                     if server._game.take_item_from_cell(client, _arg) {
                         let _ = client
                             .get_socket_mut()
                             .write(format!("{}", define::R_OK).as_bytes());
+                        sucess = true;
                     } else {
                         let _ = client
                             .get_socket_mut()
                             .write(format!("{}", define::R_KO).as_bytes());
                     }
+                }
+                if sucess {
+                    event_take_an_item(server, &_c, ITEMS_DICT[_arg]);
                 }
             },
         );
