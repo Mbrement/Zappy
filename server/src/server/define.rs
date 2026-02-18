@@ -281,6 +281,7 @@ pub const SEE_TAB_E: [(i32, i32); 81] = [
 
 //SERVER CONSTANT
 pub const GRAPHICAL_CLIENT: &str = "GRAPHIC";
+pub const ADMIN_CLIENT: &str = "ADMIN";
 pub const R_OK: &str = "ok\n";
 pub const R_KO: &str = "ko\n";
 pub const COMMANDLIST: [&str; 12] = [
