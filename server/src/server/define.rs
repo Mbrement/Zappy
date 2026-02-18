@@ -1,3 +1,5 @@
+use phf::phf_map;
+
 // GAME CONSTANT
 pub const FOOD: &str = "nourriture";
 pub const T1_MAT: &str = "linemate";
@@ -6,6 +8,17 @@ pub const T3_MAT: &str = "sibur";
 pub const T4_MAT: &str = "mendiane";
 pub const T5_MAT: &str = "phiras";
 pub const T6_MAT: &str = "thystame";
+
+pub static ITEMS_DICT: phf::Map<&'static str, usize> = phf_map! {
+    "nourriture" => FOOD_INV,
+    "linemate" => T1_MAT_INV,
+    "deraumere" => T2_MAT_INV,
+    "sibur" => T3_MAT_INV,
+    "mendiane" => T4_MAT_INV,
+    "phiras" => T5_MAT_INV,
+    "thystame" => T6_MAT_INV,
+};
+
 pub const INCANTATION_REQ: [[u32; 7]; 7] = [
     [1, 0, 0, 0, 0, 0, 0],
     [2, 1, 1, 1, 0, 0, 0],
