@@ -1,7 +1,6 @@
 class TileInfoManager {
     constructor() {
         this.VIEW_TITLE = 'Tile Information'
-        console.log(document.getElementById('playersOnTile'), document.getElementById('playersOnTile').children)
         this.playerOnTileTemplate = document.getElementById('playersOnTile')?.
                                 removeChild(
                                     document.getElementById('playersOnTile').firstElementChild
