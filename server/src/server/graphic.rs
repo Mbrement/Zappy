@@ -144,13 +144,13 @@ fn bad_param() -> String {
     String::from("sbp\n")
 }
 
-fn event_graph_connect(server: Server, game: Game) -> String {
+pub fn event_graph_connect(server: &Server) -> String {
     let mut res = String::new();
 
-    res += &map_size(game.map.get_width(), game.map.get_height());
+    res += &map_size(server._game.map.get_width(), server._game.map.get_height());
     res += &get_time_unit(server.get_ticks());
-    res += &map_content(game.map.get_tiles());
-    res += &team_names(game.team);
+    res += &map_content(server._game.map.get_tiles());
+    res += &team_names(server._game.team.clone());
     for player in server.get_clients_by_type(define::ROLE_PLAYER) {
         res += &new_player(server.get_team_for_player(&player.token), player);
     }
