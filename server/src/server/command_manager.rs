@@ -1,4 +1,4 @@
-use crate::server::{self, client, graphic::*, utils::*};
+use crate::server::{self, client, command_manager, graphic::*, utils::*};
 use crate::server::{Server, define, define::ITEMS_DICT, utils};
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
@@ -10,6 +10,7 @@ pub type CommandArgs = (String, mio::Token, String);
 pub struct CommandManager {
     order: HashMap<Token, VecDeque<CommandArgs>>,
     next_execute: HashMap<Token, u128>,
+	egg_waiting: HashMap<String, Vec<u128>>,
     commands: HashMap<String, CommandFn>,
 }
 
@@ -19,6 +20,7 @@ impl CommandManager {
             order: HashMap::new(),
             next_execute: HashMap::new(),
             commands: HashMap::new(),
+			 egg_waiting: HashMap::new(),
         }
     }
 
@@ -578,8 +580,11 @@ impl CommandManager {
                                 self.next_execute.insert(token, server._game._tick + 300)
                             }
                             "egg_waiting" => {
-                                self.next_execute.insert(token, server._game._tick + 600)
+                                self.next_execute.insert(token, server._game._tick)
                             }
+							"egg_death" => {
+								self.next_execute.insert(token, server._game._tick)
+							}
                             "connect_nbr" | "incantation" => {
                                 self.next_execute.insert(token, server._game._tick)
                             }
@@ -646,6 +651,7 @@ impl CommandManager {
                                 mio::Token(0),
                                 "".to_string(),
                             );
+							self.egg_waiting.entry(server.get_team_for_player(&token)).or_insert_with(Vec::new).push(server._game._tick + 600);
                             self.order.get_mut(&token).unwrap().pop_front();
                         } else {
                             self.order.get_mut(&token).unwrap().pop_front();
@@ -656,6 +662,12 @@ impl CommandManager {
         }
 		// self.execute_admin_commands(server);
         //TODO-mrozniec: send all graph client
+		for (team, eggs) in self.egg_waiting.iter() {
+			for egg in eggs {
+				if *egg <= server._game._tick {
+					pritnln("here")
+			}
+		}
     }
 
 	// fn execute_admin_commands(&mut self, server: &mut Server) {
