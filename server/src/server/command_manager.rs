@@ -1,4 +1,4 @@
-use crate::server::{Server, define, utils, define::ITEMS_DICT};
+use crate::server::{Server, define, utils};
 use crate::server::{client, graphic};
 use crate::server;
 use mio::Token;
@@ -11,7 +11,7 @@ pub type CommandArgs = (String, mio::Token, String);
 pub struct CommandManager {
     order: HashMap<Token, VecDeque<CommandArgs>>,
     next_execute: HashMap<Token, u128>,
-	egg_waiting: HashMap<String, Vec<u128>>,
+    egg_waiting: HashMap<String, Vec<u128>>,
     commands: HashMap<String, CommandFn>,
 }
 
@@ -21,7 +21,7 @@ impl CommandManager {
             order: HashMap::new(),
             next_execute: HashMap::new(),
             commands: HashMap::new(),
-			 egg_waiting: HashMap::new(),
+             egg_waiting: HashMap::new(),
         }
     }
 
@@ -294,7 +294,7 @@ impl CommandManager {
                     }
                 }
                 if sucess {
-                    server.send_to_graph += &graphic::event_take_an_item(server, &_c, ITEMS_DICT[_arg]);
+                    server.send_to_graph += &graphic::event_take_an_item(server, &_c, define::ITEMS_DICT[_arg]);
                 }
             },
         );
@@ -318,7 +318,7 @@ impl CommandManager {
                 server.send_to_graph += &graphic::event_drop_an_item(
                     server,
                     &_c,
-                    ITEMS_DICT[_arg]
+                    define::ITEMS_DICT[_arg]
                 );
             }
         });
@@ -540,11 +540,11 @@ impl CommandManager {
                 debug_manager_register("status", _c, server, _arg);
                 // Collect immutable data before taking a mutable borrow of the client map
                 let len = server.get_clients_by_type(define::ROLE_PLAYER).len();
-				let graphics = server.get_clients_by_type(define::ROLE_GRAPHIC).len();
-				let admins = server.get_clients_by_type(define::ROLE_ADMIN).len();
+                let graphics = server.get_clients_by_type(define::ROLE_GRAPHIC).len();
+                let admins = server.get_clients_by_type(define::ROLE_ADMIN).len();
                 let teams = server.teams.keys().cloned().collect::<Vec<String>>();
                 let ticks = server._ticks;
-				let tick = server._game._tick;
+                let tick = server._game._tick;
                 let width = server._game.map.get_width();
                 let height = server._game.map.get_height();
 
@@ -552,9 +552,9 @@ impl CommandManager {
                     "Server status:\nTick/s: {}\nTicks since game started : {}\nPlayers: {}\nGraphics clients: {}\nAdmins: {}\nTeams: {:?}\nMap size: {}x{}\n",
                     ticks, tick, len, graphics, admins, teams, width, height
                 );
-				for client in server.get_clients_by_type_mut(define::ROLE_ADMIN) {
-					let _ = client.get_socket_mut().write(response.as_bytes());
-				}
+                for client in server.get_clients_by_type_mut(define::ROLE_ADMIN) {
+                    let _ = client.get_socket_mut().write(response.as_bytes());
+                }
             },
         );
         self.register("stop", |_c: mio::Token, server: &mut Server, _arg: &str| {
@@ -616,9 +616,9 @@ impl CommandManager {
                             "egg_waiting" => {
                                 self.next_execute.insert(token, server._game._tick)
                             }
-							"egg_death" => {
-								self.next_execute.insert(token, server._game._tick)
-							}
+                            "egg_death" => {
+                                self.next_execute.insert(token, server._game._tick)
+                            }
                             "connect_nbr" | "incantation" => {
                                 self.next_execute.insert(token, server._game._tick)
                             }
@@ -685,7 +685,7 @@ impl CommandManager {
                                 mio::Token(0),
                                 "".to_string(),
                             );
-							self.egg_waiting.entry(server.get_team_for_player(&token)).or_insert_with(Vec::new).push(server._game._tick + 600);
+                            self.egg_waiting.entry(server.get_team_for_player(&token)).or_insert_with(Vec::new).push(server._game._tick + 600);
                             self.order.get_mut(&token).unwrap().pop_front();
                         } else {
                             self.order.get_mut(&token).unwrap().pop_front();
@@ -694,26 +694,26 @@ impl CommandManager {
                 }
             }
         }
-		// self.execute_admin_commands(server);
+        // self.execute_admin_commands(server);
         //TODO-mrozniec: send all graph client
-    graphic::send_graphic_clients(server.send_to_graph.clone(), server);
-    server.send_to_graph.clear();
-		for (team, eggs) in self.egg_waiting.iter() {
-			for egg in eggs {
-				if *egg <= server._game._tick {
-					println!("here")
+        graphic::send_graphic_clients(server.send_to_graph.clone(), server);
+        server.send_to_graph.clear();
+        for (team, eggs) in self.egg_waiting.iter() {
+            for egg in eggs {
+                if *egg <= server._game._tick {
+                    println!("here")
                 }
-			}
-		}
+            }
+        }
     }
 
-	// fn execute_admin_commands(&mut self, server: &mut Server) {
-	// 	let token = mio::Token(0);
-	// 	for command in self.order[token]{}
+    // fn execute_admin_commands(&mut self, server: &mut Server) {
+    // 	let token = mio::Token(0);
+    // 	for command in self.order[token]{}
 
-	// 	}
+    // 	}
 
-	// }
+    // }
 
     pub fn next_command_time(&self, token: &Token) -> Option<u128> {
         self.next_execute.get(token).cloned()
