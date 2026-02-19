@@ -159,7 +159,7 @@ class MessageHandler {
 
         this.gameState.addNewPlayer(integerArguments, command[6])
 
-        this.world.players.addPlayer(integerArguments.slice(0, 3), command[6])
+        this.world.players.addPlayer(integerArguments.slice(0, 4), command[6])
     }
 
     /**

@@ -1,4 +1,5 @@
 const THREE = require('three/webgpu')
+const { mergeGeometries } = require("three/addons/utils/BufferGeometryUtils.js");
 
 class Players {
     constructor() {
@@ -18,13 +19,28 @@ class Players {
         this.nullifyMap(this.eggMeshes, 0, this.maxEggs)
 
         this.positionningMatrix = new THREE.Matrix4().setPosition(9999, 9999, 9999)
+        this.dummyObject = new THREE.Object3D()
 
-        this.playerGeometry = new THREE.CapsuleGeometry(0.05, 0.1, 1, 4, 1)
-        this.playerMaterial = new THREE.MeshBasicMaterial()
+        this.createInstances()
+    }
+
+
+    createInstances() {
+        this.bodyGeometry = new THREE.CapsuleGeometry(0.05, 0.1, 1, 4, 1)
+
+        this.orientationGeometry = new THREE.CircleGeometry(0.05, 3)
+        this.orientationGeometry.rotateX(-90 * Math.PI / 180)
+        this.orientationGeometry.rotateY(90 * Math.PI / 180)
+        this.orientationGeometry.translate(0, -0.03, -0.09)
+
+        this.playerGeometry = mergeGeometries([this.bodyGeometry, this.orientationGeometry])
+        this.playerMaterial = new THREE.MeshBasicMaterial({side: THREE.DoubleSide})
+
         this.playerInstance = this.createInstance(this.playerGeometry, this.playerMaterial, this.maxPlayers)
 
         this.eggGeometry = new THREE.CapsuleGeometry(0.05, 0.06, 1, 4, 1)
         this.eggMaterial = new THREE.MeshBasicMaterial()
+
         this.eggInstance = this.createInstance(this.eggGeometry, this.eggMaterial, this.maxEggs)
     }
 
@@ -101,7 +117,7 @@ class Players {
     }
 
     addPlayer(playerInfo, playerTeam) {
-        const [playerId, x, y] = playerInfo
+        const [playerId, x, y, orientation] = playerInfo
 
         if (!this.main.gameState.playerInfo.has(playerId)) {
             return
@@ -125,6 +141,7 @@ class Players {
         const start = [-(this.gameMap.mapSize[0] - 1) * 0.5, -(this.gameMap.mapSize[1] - 1) * 0.5]
         this.positionningMatrix.setPosition(start[0] + x, 1, start[1] + y)
         this.playerInstance.setMatrixAt(unusedIndex, this.positionningMatrix)
+        this.rotatePlayer(playerId, orientation)
         this.playerInstance.instanceMatrix.needsUpdate = true
 
         const color = new THREE.Color(this.main.gameState.teams.get(playerTeam))
@@ -139,6 +156,16 @@ class Players {
         this.positionningMatrix.setPosition(9999, 9999, 9999)
         this.playerInstance.setMatrixAt(index, this.positionningMatrix)
         this.playerInstance.instanceMatrix.needsUpdate = true
+    }
+
+    rotatePlayer(playerId, orientation) {
+        const index = this.getPlayerById(playerId)
+
+        this.playerInstance.getMatrixAt(index, this.positionningMatrix)
+        this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+        this.dummyObject.rotateY((orientation - 1) * -90 * (Math.PI / 180))
+        this.dummyObject.updateMatrix()
+        this.playerInstance.setMatrixAt(index, this.dummyObject.matrix)
     }
 
     addEgg(eggInfo) {
