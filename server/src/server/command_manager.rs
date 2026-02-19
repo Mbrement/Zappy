@@ -11,7 +11,7 @@ pub type CommandArgs = (String, mio::Token, String);
 pub struct CommandManager {
     order: HashMap<Token, VecDeque<CommandArgs>>,
     next_execute: HashMap<Token, u128>,
-	egg_waiting: HashMap<String, Vec<u128>>,
+    egg_waiting: HashMap<String, Vec<u128>>,
     commands: HashMap<String, CommandFn>,
 }
 
@@ -21,7 +21,7 @@ impl CommandManager {
             order: HashMap::new(),
             next_execute: HashMap::new(),
             commands: HashMap::new(),
-			 egg_waiting: HashMap::new(),
+             egg_waiting: HashMap::new(),
         }
     }
 
@@ -540,11 +540,11 @@ impl CommandManager {
                 debug_manager_register("status", _c, server, _arg);
                 // Collect immutable data before taking a mutable borrow of the client map
                 let len = server.get_clients_by_type(define::ROLE_PLAYER).len();
-				let graphics = server.get_clients_by_type(define::ROLE_GRAPHIC).len();
-				let admins = server.get_clients_by_type(define::ROLE_ADMIN).len();
+                let graphics = server.get_clients_by_type(define::ROLE_GRAPHIC).len();
+                let admins = server.get_clients_by_type(define::ROLE_ADMIN).len();
                 let teams = server.teams.keys().cloned().collect::<Vec<String>>();
                 let ticks = server._ticks;
-				let tick = server._game._tick;
+                let tick = server._game._tick;
                 let width = server._game.map.get_width();
                 let height = server._game.map.get_height();
 
@@ -552,9 +552,9 @@ impl CommandManager {
                     "Server status:\nTick/s: {}\nTicks since game started : {}\nPlayers: {}\nGraphics clients: {}\nAdmins: {}\nTeams: {:?}\nMap size: {}x{}\n",
                     ticks, tick, len, graphics, admins, teams, width, height
                 );
-				for client in server.get_clients_by_type_mut(define::ROLE_ADMIN) {
-					let _ = client.get_socket_mut().write(response.as_bytes());
-				}
+                for client in server.get_clients_by_type_mut(define::ROLE_ADMIN) {
+                    let _ = client.get_socket_mut().write(response.as_bytes());
+                }
             },
         );
         self.register("stop", |_c: mio::Token, server: &mut Server, _arg: &str| {
@@ -685,7 +685,7 @@ impl CommandManager {
                                 mio::Token(0),
                                 "".to_string(),
                             );
-							self.egg_waiting.entry(server.get_team_for_player(&token)).or_insert_with(Vec::new).push(server._game._tick + 600);
+                            self.egg_waiting.entry(server.get_team_for_player(&token)).or_insert_with(Vec::new).push(server._game._tick + 600);
                             self.order.get_mut(&token).unwrap().pop_front();
                         } else {
                             self.order.get_mut(&token).unwrap().pop_front();
