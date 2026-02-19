@@ -10,15 +10,18 @@ fn map_size(width: u32, height: u32) -> String {
 }
 
 fn content_tile(col: u32, row: u32, tile: &Tile) -> String {
-    format!("bct {} {} {} {} {} {} {} {} {}\n",
-    col, row,
-    tile.get_content()[0],
-    tile.get_content()[1],
-    tile.get_content()[2],
-    tile.get_content()[3],
-    tile.get_content()[4],
-    tile.get_content()[5],
-    tile.get_content()[6])
+    format!(
+        "bct {} {} {} {} {} {} {} {} {}\n",
+        col,
+        row,
+        tile.get_content()[0],
+        tile.get_content()[1],
+        tile.get_content()[2],
+        tile.get_content()[3],
+        tile.get_content()[4],
+        tile.get_content()[5],
+        tile.get_content()[6]
+    )
 }
 
 fn map_content(map: &Vec<Vec<Tile>>) -> String {
@@ -43,16 +46,17 @@ fn team_names(teams: HashMap<String, Vec<mio::Token>>) -> String {
 
 fn new_player(team: String, player: &Client) -> String {
     let (x, y) = player.position;
-    format!("pnw {:?} {} {} {} {} {}\n",
-        player.token, x, y,
-        player.orientation,
-        player.level, team
+    format!(
+        "pnw {:?} {} {} {} {} {}\n",
+        player.token, x, y, player.orientation, player.level, team
     )
 }
 
 pub(crate) fn player_pos(player: &Client) -> String {
     let (x, y) = player.position;
-    format!("ppo {:?} {} {} {}\n", player.token, x, y, player.orientation
+    format!(
+        "ppo {:?} {} {} {}\n",
+        player.token, x, y, player.orientation
     )
 }
 
@@ -62,8 +66,11 @@ fn player_level(player: &Client) -> String {
 
 fn player_inventory(player: &Client) -> String {
     let (x, y) = player.position;
-    format!("pin {:?} {} {} {} {} {} {} {} {} {}\n",
-        player.token, x, y,
+    format!(
+        "pin {:?} {} {} {} {} {} {} {} {} {}\n",
+        player.token,
+        x,
+        y,
         player.inventory[0],
         player.inventory[1],
         player.inventory[2],

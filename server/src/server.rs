@@ -23,9 +23,10 @@ pub struct Server {
     _next_token: u32,
     _poll: Poll,
     _events: Events,
+    __pass__: String,
     _clients: HashMap<Token, client::Client>,
     pub teams: HashMap<String, Vec<Token>>,
-    pub(crate)_max_clients: HashMap<String, u32>,
+    pub(crate) _max_clients: HashMap<String, u32>,
     pub _max_clients_per_team: u32,
     _socket: mio::net::TcpListener,
     _ticks: u64,
@@ -36,7 +37,7 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn new(port: u16) -> Self {
+    pub fn new(port: u16, passwd: String) -> Self {
         let tmp_socket = TcpListener::bind(format!("{}:{}", "0.0.0.0", port).parse().unwrap());
         if tmp_socket.is_err() {
             eprintln!("Failed to bind to address");
@@ -46,6 +47,12 @@ impl Server {
         if tmp_poll.is_err() {
             eprintln!("Poll created unsuccessfully");
             process::exit(1);
+        }
+        let pwd;
+        if passwd.is_empty() {
+            pwd = "ADMIN".to_string();
+        } else {
+            pwd = passwd.clone();
         }
         let tmp = Server {
             _address: "0.0.0.0".to_string(),
@@ -60,6 +67,7 @@ impl Server {
             _ticks: 100,
             _next_token: 1,
             _max_clients_per_team: 10,
+            __pass__: pwd,
             // _command_manager: CommandManager::new_server(),
             _game: game::Game::new(10, 10),
             _incantation_list: HashMap::new(),
@@ -69,6 +77,11 @@ impl Server {
     }
 
     // ________________Setters
+
+    fn set_passwd(&mut self, passwd: String) {
+        self.__pass__ = passwd;
+    }
+
     pub fn set_address(&mut self, addr: String) {
         self._address = format!("{}", addr);
         let tmp_socket =
@@ -447,6 +460,32 @@ impl Server {
                                             //     .shutdown(std::net::Shutdown::Both);
                                             to_disconnect.push(token);
                                         }
+                                    } else if cmd
+                                        == format!("{} {}", define::ADMIN_CLIENT, self.__pass__)
+                                    {
+                                        println!("Received command '{}' from {:?} 2", cmd, token);
+                                        client.r#type = define::ADMIN_CLIENT.to_string();
+                                        let response =
+                                            "Welcome to the admin client!\n\n".to_string();
+                                        if client
+                                            .get_socket_mut()
+                                            .write(response.as_bytes())
+                                            .is_err()
+                                        {
+                                            to_disconnect.push(token);
+                                        }
+                                        let response = format!(
+                                            "0\n{} {}\n\n",
+                                            self._game.map.get_height(),
+                                            self._game.map.get_width()
+                                        );
+                                        if client
+                                            .get_socket_mut()
+                                            .write(response.as_bytes())
+                                            .is_err()
+                                        {
+                                            to_disconnect.push(token);
+                                        }
                                     } else {
                                         let response = format!(
                                             "0\n{} {}\n",
@@ -464,6 +503,16 @@ impl Server {
                                             to_disconnect.push(token);
                                         }
                                     }
+                                } else if client.r#type == define::ADMIN_CLIENT {
+                                    let cmd = String::from_utf8_lossy(&buf[..n]).trim().to_string();
+                                    let mut parts = cmd.splitn(2, ' ');
+                                    let name = parts.next().unwrap_or("");
+                                    let arg = parts.next().unwrap_or("");
+                                    #[cfg(feature = "debug")]
+                                    println!("Received command '{}' from {:?} 3", cmd, token);
+                                    drop(client);
+                                    _command_manager
+                                        .add_to_queue_admin(name.to_string(), arg.to_string());
                                 }
                             }
                             Err(_) => {
@@ -489,7 +538,6 @@ impl Server {
                             self._clients.remove(&token);
                             to_disconnect.push(token);
                         }
-
                     }
                 }
             }
@@ -555,12 +603,50 @@ impl Server {
             None => return false,
         };
         let player_level = player.level;
-        if (self._incantation_list.contains_key(&token) && (self._incantation_list[&token].len() as u32 + 1)
-            < define::INCANTATION_REQ[player_level as usize - 1][0])
+        if (self._incantation_list.contains_key(&token)
+            && (self._incantation_list[&token].len() as u32 + 1)
+                < define::INCANTATION_REQ[player_level as usize - 1][0])
         {
             return false;
         }
         true
     }
 
+    pub fn check_win_condition(&self, token: &Token) -> bool {
+        let team_name = self.get_team_for_player(token);
+        if team_name == "unknown" {
+            return false;
+        }
+        let team_tokens = match self.teams.get(&team_name) {
+            Some(tokens) => tokens,
+            None => return false,
+        };
+        let mut max_level_players = 0;
+        for t in team_tokens {
+            if let Some(player) = self._clients.get(t) {
+                if player.level == 8 {
+                    max_level_players += 1;
+                }
+            } else {
+                #[cfg(feature = "log")]
+                eprintln!("Player with token {:?} not found", t);
+                return false;
+            }
+        }
+        if max_level_players >= 6 {
+            return true;
+        }
+        false
+    }
+}
+
+pub fn exit_game(server: &mut Server) {
+    for client in server.get_clients_by_type_mut("player") {
+        let _ = client
+            .get_socket_mut()
+            .write(format!("{}\n", "mort").as_bytes());
+
+        // TODO Mrozniec : send end game to graphical client
+    }
+    process::exit(0);
 }
