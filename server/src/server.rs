@@ -507,7 +507,7 @@ impl Server {
                 self._game.routine();
                 _command_manager.process_queue(self);
 
-                for client in self.get_clients_by_type_mut("player") {
+                for client in self.get_clients_by_type_mut(define::ROLE_PLAYER) {
                     client.hunger_tick();
                     #[cfg(feature = "debug")]
                     println!("Client {:?} hunger: {}", client.get_token(), client.hunger);
@@ -516,9 +516,12 @@ impl Server {
                         to_disconnect.push(client.get_token());
                     }
                 }
+                let mut graph_msg = String::new();
                 for token in &to_disconnect {
+                    graph_msg += &graphic::player_death(&token);
                     self.disconnect_client_by_token(&token);
                 }
+                graphic::send_graphic_clients(graph_msg, self);
                 to_disconnect.clear();
             }
         }
