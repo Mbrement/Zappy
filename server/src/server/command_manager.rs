@@ -32,10 +32,20 @@ impl CommandManager {
             self.order.entry(token).or_insert_with(VecDeque::new).len()
         );
         if !define::COMMANDLIST.contains(&name.as_str()) {
+            #[cfg(feature = "log")]
+            println!("Commande '{}' non reconnue.", name);
             return;
         }
         if self.order.entry(token).or_insert_with(VecDeque::new).len() < 10 {
-            self.order
+            #[cfg(feature = "log")]
+			println!(
+				"Adding command '{}' to queue for token {:?} with args: {}. queue len : {}",
+				name,
+				token,
+				arg.clone(),
+				self.order.entry(token).or_insert_with(VecDeque::new).len()
+			);
+			self.order
                 .entry(token)
                 .or_insert_with(VecDeque::new)
                 .push_back((name.clone(), token, arg.clone()));
@@ -169,7 +179,7 @@ impl CommandManager {
                     .get_visible_cells(client.position, client.orientation, client.level);
             println!("{:?}", visible_cells);
             let response = format!("{{{}}}\n", visible_cells.join(", "));
-            let _ = client.get_socket_mut().write(response.as_bytes());
+            let carrote = client.get_socket_mut().write(response.as_bytes());
         });
         command_manager.register(
             "inventaire",
@@ -349,7 +359,8 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("incantation_internal", _c, server, _arg);
-                println!("\n\nincantation_internal for token {:?}\n\n", _c);
+                #[cfg(feature = "log")]
+				println!("\n\nincantation_internal for token {:?}\n\n", _c);
                 let org_player_level = server._clients.get(&_c).unwrap().level;
                 let sucess = server.incantation_success(_c);
                 if server._incantation_list.contains_key(&_c) {
@@ -364,8 +375,14 @@ impl CommandManager {
                         }
                         process::exit(0);
                     }
-                    for client in server._incantation_list.get(&_c).unwrap() {
-                        let mut client = server._clients.get_mut(client);
+                    for client in server._incantation_list.get(&_c) {
+                        if !client.contains(&_c) {
+							#[cfg(feature = "log")]
+							println!("No client found for token {:?}", client);
+							continue;
+						}
+						let client = client.get(0).unwrap();
+						let mut client = server._clients.get_mut(client);
                         if client.is_none() {
                             #[cfg(feature = "log")]
                             println!("No client found for token {:?}", _c);

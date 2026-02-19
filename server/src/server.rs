@@ -302,7 +302,7 @@ impl Server {
                                 self._clients.remove(&token);
                                 break;
                             }
-                            let response = format!("Bienvenue\n");
+                            let response = format!("BIENVENUE\n");
                             if self
                                 ._clients
                                 .get_mut(&token)
@@ -550,8 +550,8 @@ impl Server {
             None => return false,
         };
         let player_level = player.level;
-        if (self._incantation_list[&token].len() as u32 + 1)
-            < define::INCANTATION_REQ[player_level as usize - 1][0]
+        if (self._incantation_list.contains_key(&token) && (self._incantation_list[&token].len() as u32 + 1)
+            < define::INCANTATION_REQ[player_level as usize - 1][0])
         {
             return false;
         }
