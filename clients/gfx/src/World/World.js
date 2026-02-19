@@ -22,9 +22,11 @@ class World {
         this.raycaster = new THREE.Raycaster()
         this.mouse = new THREE.Vector2( 1, 1 );
         this.hoverColor = new THREE.Color()
+        this.previousColor = new THREE.Color()
         this.previousHover = {
             index: null,
-            mesh: null
+            mesh: null,
+            color: null,
         }
 
         this.time = new Time()
@@ -84,13 +86,12 @@ class World {
             return
         }
 
-        const intersection = this.raycaster.intersectObjects( [this.gameMap.evenInstance, this.gameMap.oddInstance], false);
+        const intersection = this.raycaster.intersectObjects( [this.gameMap.evenInstance, this.gameMap.oddInstance, this.players.playerInstance], false);
 
         if ( intersection.length > 0 ) {
-            // console.log("Intersected", intersection)
 
             if (this.previousHover.mesh) {
-                this.previousHover.mesh.setColorAt(this.previousHover.index, this.hoverColor.set(1, 1, 1))
+                this.previousHover.mesh.setColorAt(this.previousHover.index, this.previousColor)
                 this.previousHover.mesh.instanceColor.needsUpdate = true;
             }
 
@@ -98,15 +99,26 @@ class World {
             const index = intersection[ 0 ].instanceId;
 
             instanceMesh.getColorAt( index, this.hoverColor );
-            instanceMesh.setColorAt( index, this.hoverColor.set(3, 3, 3) );
+            this.previousColor.copy(this.hoverColor)
+            if (instanceMesh === this.players.playerInstance) {
+                this.hoverColor.r += 0.2
+                this.hoverColor.g += 0.2
+                this.hoverColor.b += 0.2
+            }
+            else {
+                this.hoverColor.set(2, 2, 2)
+            }
+
+            instanceMesh.setColorAt( index, this.hoverColor);
             instanceMesh.instanceColor.needsUpdate = true;
 
             this.previousHover.mesh = instanceMesh
             this.previousHover.index = index
+            this.previousHover.color = this.previousColor
         }
         else {
             if (this.previousHover.mesh) {
-                this.previousHover.mesh.setColorAt(this.previousHover.index, this.hoverColor.set(1, 1, 1))
+                this.previousHover.mesh.setColorAt(this.previousHover.index, this.previousColor)
                 this.previousHover.mesh.instanceColor.needsUpdate = true;
             }
         }
