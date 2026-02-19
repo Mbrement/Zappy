@@ -1,4 +1,4 @@
-use crate::server::{Server, define, utils, define::ITEMS_DICT};
+use crate::server::{Server, define, utils};
 use crate::server::{client, graphic};
 use crate::server;
 use mio::Token;
@@ -294,7 +294,7 @@ impl CommandManager {
                     }
                 }
                 if sucess {
-                    server.send_to_graph += &graphic::event_take_an_item(server, &_c, ITEMS_DICT[_arg]);
+                    server.send_to_graph += &graphic::event_take_an_item(server, &_c, define::ITEMS_DICT[_arg]);
                 }
             },
         );
@@ -318,7 +318,7 @@ impl CommandManager {
                 server.send_to_graph += &graphic::event_drop_an_item(
                     server,
                     &_c,
-                    ITEMS_DICT[_arg]
+                    define::ITEMS_DICT[_arg]
                 );
             }
         });
