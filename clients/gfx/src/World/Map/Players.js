@@ -1,5 +1,6 @@
 const THREE = require('three/webgpu')
 const { mergeGeometries } = require("three/addons/utils/BufferGeometryUtils.js");
+const {actionTicks} = require("./constants")
 
 class Players {
     constructor() {
@@ -8,6 +9,10 @@ class Players {
         this.scene = this.world.scene
         this.main = window.mainInstance
         this.gameState = this.main.gameState
+
+        this.tickTime = 100 / 60
+        this.animatedPlayersMove = []
+        this.animatedPlayersRotate = []
 
         this.maxPlayers = 50
         this.maxEggs = 50
@@ -20,6 +25,8 @@ class Players {
 
         this.positionningMatrix = new THREE.Matrix4().setPosition(9999, 9999, 9999)
         this.dummyObject = new THREE.Object3D()
+        this.dummyVector = new THREE.Vector3()
+        this.dummyQuaternion = new THREE.Quaternion()
 
         this.createInstances()
     }
@@ -48,6 +55,10 @@ class Players {
         for (let i = start; i < end; i++) {
             map.set(i, null)
         }
+    }
+
+    setTimeUnit(newUnit) {
+        this.tickTime = newUnit * 0.001
     }
 
     getPlayerById(id) {
@@ -138,32 +149,157 @@ class Players {
 
         this.playerMeshes.set(unusedIndex, playerId)
 
-        this.changePlayerPosition([playerId, x, y, orientation])
+        this.movePlayer([playerId, x, y, orientation], true)
 
         const color = new THREE.Color(this.main.gameState.teams.get(playerTeam))
         this.playerInstance.setColorAt(unusedIndex, color)
         this.playerInstance.instanceColor.needsUpdate = true
     }
 
-    rotatePlayer(playerId, orientation) {
+    rotatePlayer(init, playerId, orientation) {
+
         const index = this.getPlayerById(playerId)
+        const totalTime = actionTicks.avance * this.tickTime
 
         this.playerInstance.getMatrixAt(index, this.positionningMatrix)
         this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
-        this.dummyObject.rotateY((orientation - 1) * -90 * (Math.PI / 180))
+        const startRotation = this.dummyObject.quaternion.clone()
+
+        this.dummyObject.rotation.set(this.dummyObject.rotation.x, (orientation - 1) * -90 * (Math.PI / 180), this.dummyObject.rotation.z)
         this.dummyObject.updateMatrix()
-        this.playerInstance.setMatrixAt(index, this.dummyObject.matrix)
+        const endRotation = this.dummyObject.quaternion.clone()
+
+        if (init) {
+            this.playerInstance.setMatrixAt(index, this.dummyObject.matrix)
+        }
+        else {
+            if (this.animatedPlayersRotate.length === 0) {
+                this.world.updateManager.add(this, "world", "animatePlayerRotate")
+            }
+
+            this.animatedPlayersRotate.push({
+                index,
+                    duration: totalTime,
+                    passedTime: 0,
+                    startRotation,
+                    endRotation,
+            })
+        }
     }
 
-    changePlayerPosition(playerInfo) {
-        const [playerId, x, y, orientation] = playerInfo
+    positionPlayer(init, playerId, x, y) {
         const index = this.getPlayerById(playerId)
-
+        const totalTime = actionTicks.avance * this.tickTime
         const start = [-(this.gameMap.mapSize[0] - 1) * 0.5, -(this.gameMap.mapSize[1] - 1) * 0.5]
+
+        this.playerInstance.getMatrixAt(index, this.positionningMatrix)
+        this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+        const startPosition = this.dummyObject.position.clone()
+
         this.positionningMatrix.setPosition(start[0] + x, 1, start[1] + y)
-        this.playerInstance.setMatrixAt(index, this.positionningMatrix)
-        this.rotatePlayer(playerId, orientation)
+        this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+        const endPosition = this.dummyObject.position.clone()
+
+        if (init) {
+            this.playerInstance.setMatrixAt(index, this.positionningMatrix)
+        }
+        else {
+            if (this.animatedPlayersMove.length === 0) {
+                this.world.updateManager.add(this, "world", "animatePlayerMove")
+            }
+
+            this.animatedPlayersMove.push({
+                index,
+                duration: totalTime,
+                passedTime: 0,
+                startPosition,
+                endPosition,
+            })
+        }
+    }
+
+    movePlayer(playerInfo, init=false) {
+        const [playerId, x, y, orientation] = playerInfo
+
+        const playerState = this.gameState.playerInfo.get(playerId)
+
+        if (init || playerState.x !== x || playerState.y !== y) {
+            this.positionPlayer(init, playerId, x, y)
+        }
+        if (init || playerState.orientation !== orientation) {
+            this.rotatePlayer(init, playerId, orientation)
+        }
         this.playerInstance.instanceMatrix.needsUpdate = true
+    }
+
+    animatePlayerMove() {
+        if (this.animatedPlayersMove.length < 1) {
+            this.world.updateManager.remove(this, "world", "animatePlayerMove")
+        }
+
+        const deltaTime = this.world.updateManager.time.deltaInSecond
+
+        let player
+        for (let i = 0; i < this.animatedPlayersMove.length; i++) {
+            player = this.animatedPlayersMove[i]
+
+            this.playerInstance.getMatrixAt(player.index, this.positionningMatrix)
+            this.dummyVector.lerpVectors(player.startPosition, player.endPosition, player.passedTime / player.duration)
+            this.positionningMatrix.setPosition(this.dummyVector)
+            this.playerInstance.setMatrixAt(player.index, this.positionningMatrix)
+
+            this.playerInstance.instanceMatrix.needsUpdate = true
+
+            player.passedTime += deltaTime
+        }
+
+        this.animatedPlayersMove = this.animatedPlayersMove.filter((player) => {
+            const remove = player.passedTime > player.duration
+            if (remove) {
+                this.positionningMatrix.setPosition(player.endPosition)
+                this.playerInstance.setMatrixAt(player.index, this.positionningMatrix)
+                this.playerInstance.instanceMatrix.needsUpdate = true
+            }
+
+            return !remove
+        })
+    }
+
+    animatePlayerRotate() {
+        if (this.animatedPlayersRotate.length < 1) {
+            this.world.updateManager.remove(this, "world", "animatePlayerRotate")
+        }
+
+        const deltaTime = this.world.updateManager.time.deltaInSecond
+
+        let player
+        for (let i = 0; i < this.animatedPlayersRotate.length; i++) {
+            player = this.animatedPlayersRotate[i]
+
+            this.playerInstance.getMatrixAt(player.index, this.positionningMatrix)
+            this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+
+            this.dummyQuaternion.slerpQuaternions(player.startRotation, player.endRotation, player.passedTime / player.duration)
+            this.dummyObject.quaternion.copy(this.dummyQuaternion)
+            this.dummyObject.updateMatrix()
+
+            this.playerInstance.setMatrixAt(player.index, this.dummyObject.matrix)
+            this.playerInstance.instanceMatrix.needsUpdate = true
+
+            player.passedTime += deltaTime
+        }
+
+        this.animatedPlayersRotate = this.animatedPlayersRotate.filter((player) => {
+            const remove = player.passedTime > player.duration
+            if (remove) {
+                this.dummyObject.quaternion.copy(player.endRotation)
+                this.dummyObject.updateMatrix()
+                this.playerInstance.setMatrixAt(player.index, this.dummyObject.matrix)
+                this.playerInstance.instanceMatrix.needsUpdate = true
+            }
+
+            return !remove
+        })
     }
 
     removePlayer(playerId) {
@@ -174,8 +310,6 @@ class Players {
         this.playerInstance.setMatrixAt(index, this.positionningMatrix)
         this.playerInstance.instanceMatrix.needsUpdate = true
     }
-
-
 
     addEgg(eggInfo) {
         const [eggId, parentId, x, y] = eggInfo

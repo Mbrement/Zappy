@@ -184,9 +184,9 @@ class MessageHandler {
             return
         }
 
-        this.gameState.updatePlayerPosition(integerArguments)
+        this.world.players.movePlayer(integerArguments)
 
-        this.world.players.changePlayerPosition(integerArguments)
+        this.gameState.updatePlayerPosition(integerArguments)
     }
 
     /**
@@ -422,7 +422,7 @@ class MessageHandler {
             console.error("Received invalid time unit from server", command)
         }
 
-        // TODO : Set time unit to T
+        this.world.players.setTimeUnit(parseInt(command[1]))
     }
 
     /**

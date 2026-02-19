@@ -1,5 +1,5 @@
 const THREE = require("three/webgpu");
-const resourceTypes = require("./constants")
+const {resourceTypes} = require("./constants")
 const ResourceAssets = require("./ResourceAssets")
 
 class GameMap {
