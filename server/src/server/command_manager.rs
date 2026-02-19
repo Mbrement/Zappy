@@ -457,13 +457,14 @@ impl CommandManager {
             for (tick, (x, y, token)) in &server._game.map.egg_position {
                 // ???????
                 if tick < &server._game._tick {
+                    // here you get a team of a player that already exist so the team exist
                     let team_name = server.get_team_for_player(&token);
                     let tmp = server._max_clients.get_mut(&team_name);
                     if let Some(v) = tmp {
                         *v += 1;
 
                     } else {
-                        // ??????
+                        // since the team exist, this case never happen
                         server._max_clients.insert(team_name.clone(), 1);
                     }
                 }
