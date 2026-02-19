@@ -292,26 +292,6 @@ pub const SEE_TAB_E: [(i32, i32); 81] = [
     (-8, -8),
 ];
 
-//SERVER CONSTANT
-pub const GRAPHICAL_CLIENT: &str = "GRAPHIC";
-pub const ADMIN_CLIENT: &str = "ADMIN";
-pub const R_OK: &str = "ok\n";
-pub const R_KO: &str = "ko\n";
-pub const COMMANDLIST: [&str; 12] = [
-    "avance",
-    "droite",
-    "gauche",
-    "voir",
-    "inventaire",
-    "prend",
-    "pose",
-    "expulse",
-    "broadcast",
-    "incantation",
-    "fork",
-    "connect_nbr",
-];
-
 pub const SEE_TAB_S: [(i32, i32); 81] = [
     (0, 0),
     (-1, -1),
@@ -395,6 +375,28 @@ pub const SEE_TAB_S: [(i32, i32); 81] = [
     (7, -8),
     (8, -8),
 ];
+
+//SERVER CONSTANT
+pub const GRAPHICAL_CLIENT: &str = "GRAPHIC";
+pub const ADMIN_CLIENT: &str = "ADMIN";
+pub const R_OK: &str = "ok\n";
+pub const R_KO: &str = "ko\n";
+pub const COMMANDLIST: [&str; 12] = [
+    "avance",
+    "droite",
+    "gauche",
+    "voir",
+    "inventaire",
+    "prend",
+    "pose",
+    "expulse",
+    "broadcast",
+    "incantation",
+    "fork",
+    "connect_nbr",
+];
+
+
 
 // Client constants
 pub const ROLE_PLAYER: &str = "player";

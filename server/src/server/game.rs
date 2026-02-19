@@ -147,27 +147,22 @@ impl Game {
     }
 
     pub fn put_item_on_cell(&mut self, client: &mut Client, item: &str) -> bool {
-        let idx: Option<usize> = match item {
-            define::FOOD => Some(0),
-            define::T1_MAT => Some(1),
-            define::T2_MAT => Some(2),
-            define::T3_MAT => Some(3),
-            define::T4_MAT => Some(4),
-            define::T5_MAT => Some(5),
-            define::T6_MAT => Some(6),
-            _ => None, // If the item is not recognized, we disallow putting it on the cell
+        let idx: usize = match item {
+            define::FOOD => define::FOOD_INV,
+            define::T1_MAT => define::T1_MAT_INV,
+            define::T2_MAT => define::T2_MAT_INV,
+            define::T3_MAT => define::T3_MAT_INV,
+            define::T4_MAT => define::T4_MAT_INV,
+            define::T5_MAT => define::T5_MAT_INV,
+            define::T6_MAT => define::T6_MAT_INV,
+            _ => return false, // If the item is not recognized, we disallow putting it on the cell
         };
-        let idx = match idx {
-            Some(i) => i,
-            None => return false,
-        };
+
         if client.inventory[idx] == 0 {
             return false; // The client doesn't have the item in their inventory
         }
         let (x, y) = client.position;
-        //TODO:: a tester car je crois que ta maniere ne fonctionne pas
-        //self.map.get_tiles_mut()[y as usize][x as usize].inc_tile_item(idx);
-        self.map.get_tile_content_mut(x, y).push(item.to_string());
+        self.map.get_tiles_mut()[y as usize][x as usize].inc_tile_item(idx);
         client.inventory[idx] = client.inventory[idx].saturating_sub(1);
         true
     }
@@ -245,16 +240,26 @@ impl Game {
     pub fn take_item_from_cell(&mut self, client: &mut Client, item: &str) -> bool {
         let position = self.get_player_position(client.get_token());
         if self.map.remove_item_from_cell(position.0, position.1, item) {
-            match item {
-                define::FOOD => client.set_hunger(client.hunger + define::FOOD_VALUE), // Assuming 126 is the hunger value for food
-                define::T1_MAT => client.inventory[define::T1_MAT_INV] += 1,
-                define::T2_MAT => client.inventory[define::T2_MAT_INV] += 1,
-                define::T3_MAT => client.inventory[define::T3_MAT_INV] += 1,
-                define::T4_MAT => client.inventory[define::T4_MAT_INV] += 1,
-                define::T5_MAT => client.inventory[define::T5_MAT_INV] += 1,
-                define::T6_MAT => client.inventory[define::T6_MAT_INV] += 1,
-                _ => (),
-            }
+			// if item == define::FOOD {
+			// 	client.set_hunger(client.hunger.saturating_add(define::FOOD_VALUE));
+			// } else {
+			// 	define::ITEMS_DICT.get(item).map(|&idx| {
+			// 		if idx < client.inventory.len() {
+			// 			client.inventory[idx] = client.inventory[idx].saturating_add(1);
+			// 		}
+			// 	});
+			// }
+			client.inventory[define::ITEMS_DICT[item]] += 1;
+            // match item {
+            //     define::FOOD => client.set_hunger(client.hunger + define::FOOD_VALUE), // Assuming 126 is the hunger value for food
+            //     define::T1_MAT => client.inventory[define::T1_MAT_INV] += 1,
+            //     define::T2_MAT => client.inventory[define::T2_MAT_INV] += 1,
+            //     define::T3_MAT => client.inventory[define::T3_MAT_INV] += 1,
+            //     define::T4_MAT => client.inventory[define::T4_MAT_INV] += 1,
+            //     define::T5_MAT => client.inventory[define::T5_MAT_INV] += 1,
+            //     define::T6_MAT => client.inventory[define::T6_MAT_INV] += 1,
+            //     _ => (),
+            // }
             return true;
         }
         return false;

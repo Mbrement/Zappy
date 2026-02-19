@@ -161,7 +161,8 @@ pub fn event_graph_connect(server: &Server) -> String {
 
 pub fn event_take_an_item(server: &mut Server, token: &Token, item_num: usize) {
     let mut res = String::new();
-    let player: &Client = server._clients.get(token).unwrap();
+    let player = server._clients.get(token).unwrap(); // fixed the unwrap
+
     let (x, y) = player.position;
 
     res += &player_pick_item(player, item_num);
@@ -172,7 +173,8 @@ pub fn event_take_an_item(server: &mut Server, token: &Token, item_num: usize) {
 
 pub fn event_drop_an_item(server: &mut Server, token: &Token, item_num: usize) {
     let mut res = String::new();
-    let player: &Client = server._clients.get(token).unwrap();
+    let player = server._clients.get(token).unwrap();
+
     let (x, y) = player.position;
 
     res += &player_drop_item(player, item_num);
@@ -199,7 +201,7 @@ pub fn event_incant_end(server: &mut Server, success: bool, token: Token) {
     let (x, y) = server._game.get_player_position(token);
     let tile: &Tile = &server.get_map().get_tiles()[y as usize][x as usize];
 
-    for player in server._incantation_list.get(&token).unwrap() {
+    for player in server._incantation_list.get(&token).unwrap() { //THIS WILL CRASH IF THE TOKEN IS NOT IN THE INCANTATION LIST
         let player: &Client = server._clients.get(player).unwrap();
         res += &player_level(player);
     }
@@ -210,5 +212,6 @@ pub fn event_incant_end(server: &mut Server, success: bool, token: Token) {
 pub fn send_graphic_clients(command: String, server: &mut Server) {
     for graph_client in server.get_clients_by_type_mut(define::GRAPHICAL_CLIENT) {
         let _ = graph_client.get_socket_mut().write(command.as_bytes());
+		graph_client.get_socket_mut().write("pouet\n".as_bytes()).unwrap();
     }
 }
