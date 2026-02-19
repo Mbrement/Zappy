@@ -2,6 +2,10 @@ class ChangeThemeMusic {
     constructor() {
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Switch the visibility of the theme dropdown
+     */
     switchChangeThemeVisibility() {
         const changeThemeDropdown = document.getElementById('changeThemeDropdown')
         if (changeThemeDropdown) {
@@ -16,6 +20,10 @@ class ChangeThemeMusic {
         }
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Switch the visibility of the music dropdown
+     */
     switchChangeMusicVisibility() {
         const changeMusicDropdown = document.getElementById('changeMusicDropdown')
         if (changeMusicDropdown) {
@@ -30,12 +38,20 @@ class ChangeThemeMusic {
         }
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Close the theme dropdown
+     */
     closeChangeTheme() {
         const changeThemeDropdown = document.getElementById('changeThemeDropdown')
         changeThemeDropdown.classList.add('changeButtonDropdownHidden')
         changeThemeDropdown.style.height = "0"
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Close the music dropdown
+     */
     closeChangeMusic() {
         const changeMusicDropdown = document.getElementById('changeMusicDropdown')
 
@@ -43,6 +59,11 @@ class ChangeThemeMusic {
         changeMusicDropdown.style.height = "0"
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Change the music based on the event target
+     * @param event {Event} - The click event
+     */
     changeMusic(event) {
         let spanText
         if (event.target.closest('span')) {
@@ -61,6 +82,11 @@ class ChangeThemeMusic {
         // TODO: add music change function call here
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Change the theme based on the event target
+     * @param event {Event} - The click event
+     */
     changeTheme(event) {
         let spanText
         if (event.target.closest('span')) {
