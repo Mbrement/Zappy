@@ -185,6 +185,8 @@ class MessageHandler {
         }
 
         this.gameState.updatePlayerPosition(integerArguments)
+
+        this.world.players.changePlayerPosition(integerArguments)
     }
 
     /**

@@ -138,24 +138,11 @@ class Players {
 
         this.playerMeshes.set(unusedIndex, playerId)
 
-        const start = [-(this.gameMap.mapSize[0] - 1) * 0.5, -(this.gameMap.mapSize[1] - 1) * 0.5]
-        this.positionningMatrix.setPosition(start[0] + x, 1, start[1] + y)
-        this.playerInstance.setMatrixAt(unusedIndex, this.positionningMatrix)
-        this.rotatePlayer(playerId, orientation)
-        this.playerInstance.instanceMatrix.needsUpdate = true
+        this.changePlayerPosition([playerId, x, y, orientation])
 
         const color = new THREE.Color(this.main.gameState.teams.get(playerTeam))
         this.playerInstance.setColorAt(unusedIndex, color)
         this.playerInstance.instanceColor.needsUpdate = true
-    }
-
-    removePlayer(playerId) {
-        const index = this.getPlayerById(playerId)
-        this.playerMeshes.set(index, null)
-
-        this.positionningMatrix.setPosition(9999, 9999, 9999)
-        this.playerInstance.setMatrixAt(index, this.positionningMatrix)
-        this.playerInstance.instanceMatrix.needsUpdate = true
     }
 
     rotatePlayer(playerId, orientation) {
@@ -167,6 +154,28 @@ class Players {
         this.dummyObject.updateMatrix()
         this.playerInstance.setMatrixAt(index, this.dummyObject.matrix)
     }
+
+    changePlayerPosition(playerInfo) {
+        const [playerId, x, y, orientation] = playerInfo
+        const index = this.getPlayerById(playerId)
+
+        const start = [-(this.gameMap.mapSize[0] - 1) * 0.5, -(this.gameMap.mapSize[1] - 1) * 0.5]
+        this.positionningMatrix.setPosition(start[0] + x, 1, start[1] + y)
+        this.playerInstance.setMatrixAt(index, this.positionningMatrix)
+        this.rotatePlayer(playerId, orientation)
+        this.playerInstance.instanceMatrix.needsUpdate = true
+    }
+
+    removePlayer(playerId) {
+        const index = this.getPlayerById(playerId)
+        this.playerMeshes.set(index, null)
+
+        this.positionningMatrix.setPosition(9999, 9999, 9999)
+        this.playerInstance.setMatrixAt(index, this.positionningMatrix)
+        this.playerInstance.instanceMatrix.needsUpdate = true
+    }
+
+
 
     addEgg(eggInfo) {
         const [eggId, parentId, x, y] = eggInfo
