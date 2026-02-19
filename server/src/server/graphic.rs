@@ -164,7 +164,7 @@ pub fn event_graph_connect(server: &Server) -> String {
     res
 }
 
-pub fn event_take_an_item(server: &mut Server, token: &Token, item_num: usize) {
+pub fn event_take_an_item(server: & Server, token: &Token, item_num: usize) -> String {
     let mut res = String::new();
     let player = server._clients.get(token).unwrap(); // fixed the unwrap
 
@@ -173,10 +173,11 @@ pub fn event_take_an_item(server: &mut Server, token: &Token, item_num: usize) {
     res += &player_pick_item(player, item_num);
     res += &player_inventory(player);
     res += &content_tile(x, y, &server._game.map.get_tiles()[y as usize][x as usize]);
-    send_graphic_clients(res, server);
+    //send_graphic_clients(res, server);
+    res
 }
 
-pub fn event_drop_an_item(server: &mut Server, token: &Token, item_num: usize) {
+pub fn event_drop_an_item(server: & Server, token: &Token, item_num: usize) -> String {
     let mut res = String::new();
     let player = server._clients.get(token).unwrap();
 
@@ -185,7 +186,8 @@ pub fn event_drop_an_item(server: &mut Server, token: &Token, item_num: usize) {
     res += &player_drop_item(player, item_num);
     res += &player_inventory(player);
     res += &content_tile(x, y, &server._game.map.get_tiles()[y as usize][x as usize]);
-    send_graphic_clients(res, server);
+    //send_graphic_clients(res, server);
+    res
 }
 
 pub fn event_fus_ro_dah(players: Vec<&mut Client>, token: Token) -> String {
@@ -198,10 +200,9 @@ pub fn event_fus_ro_dah(players: Vec<&mut Client>, token: Token) -> String {
         }
     }
     res
-    //send_graphic_clients(res, server);
 }
 
-pub fn event_incant_end(server: &mut Server, success: bool, token: Token) {
+pub fn event_incant_end(server: &mut Server, success: bool, token: Token) -> String {
     let mut res = String::new();
     let (x, y) = server._game.get_player_position(token);
     let tile: &Tile = &server.get_map().get_tiles()[y as usize][x as usize];
@@ -211,7 +212,8 @@ pub fn event_incant_end(server: &mut Server, success: bool, token: Token) {
         res += &player_level(player);
     }
     res += &content_tile(x, y, tile);
-    send_graphic_clients(res, server);
+    res
+    //send_graphic_clients(res, server);
 }
 
 pub fn send_graphic_clients(command: String, server: &mut Server) {

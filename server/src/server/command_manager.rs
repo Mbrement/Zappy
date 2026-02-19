@@ -145,10 +145,12 @@ impl CommandManager {
                     let _ = client
                         .get_socket_mut()
                         .write(format!("{}", define::R_OK).as_bytes());
+                    /*
                     graphic::send_graphic_clients(
                         graphic::player_pos(client),
                         server
-                    );
+                    );*/
+                    server.send_to_graph += &graphic::player_pos(client);
                 }
             },
         );
@@ -164,10 +166,12 @@ impl CommandManager {
                     let _ = client
                         .get_socket_mut()
                         .write(format!("{}", define::R_OK).as_bytes());
+                    /*
                     graphic::send_graphic_clients(
                         graphic::player_pos(client),
                         server
-                    );
+                    );*/
+                    server.send_to_graph += &graphic::player_pos(client);
                 }
             },
         );
@@ -243,10 +247,12 @@ impl CommandManager {
                 let _ = client
                     .get_socket_mut()
                     .write(format!("{}", define::R_OK).as_bytes());
+                /*
                 graphic::send_graphic_clients(
                     graphic::player_pos(client),
                     server
-                );
+                );*/
+                server.send_to_graph += &graphic::player_pos(client);
             },
         );
         command_manager.register(
@@ -268,7 +274,7 @@ impl CommandManager {
                     }
                 }
                 if sucess {
-                    graphic::event_take_an_item(server, &_c, ITEMS_DICT[_arg]);
+                    server.send_to_graph += &graphic::event_take_an_item(server, &_c, ITEMS_DICT[_arg]);
                 }
             },
         );
@@ -289,7 +295,11 @@ impl CommandManager {
                 }
             }
             if sucess {
-                graphic::event_drop_an_item(server, &_c, ITEMS_DICT[_arg]);
+                server.send_to_graph += &graphic::event_drop_an_item(
+                    server,
+                    &_c,
+                    ITEMS_DICT[_arg]
+                );
             }
         });
         command_manager.register(
@@ -362,7 +372,8 @@ impl CommandManager {
                         );
                     }
                 }
-                graphic::send_graphic_clients(graphic::player_broadcast(&_c, _arg), server);
+                //graphic::send_graphic_clients(graphic::player_broadcast(&_c, _arg), server);
+                server.send_to_graph += &graphic::player_broadcast(&_c, _arg);
             },
         );
         command_manager.register(
@@ -415,7 +426,10 @@ impl CommandManager {
                                 .write(format!("{}\n", org_player_level).as_bytes());
                         }
                     }
-                    graphic::event_incant_end(server, sucess, _c);
+                    //graphic::event_incant_end(server, sucess, _c);
+                    let send_to_graph: String = graphic::event_incant_end(server, sucess, _c);
+                    server.send_to_graph += &send_to_graph;
+                    
                 }
                 // else{
                 // let mut client = server._clients.get_mut(&_c);
@@ -448,7 +462,7 @@ impl CommandManager {
             client
                 .get_socket_mut()
                 .write(format!("{}", define::R_OK).as_bytes());
-            graphic::send_graphic_clients(graphic::fork(&client.token), server);
+            //graphic::send_graphic_clients(graphic::fork(&client.token), server);
         });
         command_manager.register("fork_internal", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
@@ -606,7 +620,8 @@ impl CommandManager {
                 }
             }
         }
-        //TODO-mrozniec: send all graph client
+        graphic::send_graphic_clients(server.send_to_graph.clone(), server);
+        server.send_to_graph.clear();
     }
 
     pub fn next_command_time(&self, token: &Token) -> Option<u128> {
@@ -691,11 +706,13 @@ fn point_to_greater_abs_value(a: i32, b: i32) -> i32 {
                 expelled = true;
             }
         }
+        /*
         graphic::send_graphic_clients(
             graphic::event_fus_ro_dah(players, token),
             server
-        );
-        
+        );*/
+        let send_to_graph: String = graphic::event_fus_ro_dah(players, token);
+        server.send_to_graph += &send_to_graph;
         expelled
     }
 

@@ -11,7 +11,7 @@ mod map;
 pub mod utils;
 use crate::server::client::Client;
 use crate::server::command_manager::CommandManager;
-use crate::server::{self, graphic::*};
+use crate::server::{self};
 use rand::{rngs::SmallRng, *};
 use std::collections::VecDeque;
 use std::{process, time};
@@ -32,6 +32,7 @@ pub struct Server {
     _incantation_list: HashMap<Token, Vec<Token>>,
     // _command_manager: CommandManager,
     pub(crate) _game: game::Game,
+    send_to_graph: String,
 }
 
 impl Server {
@@ -62,6 +63,7 @@ impl Server {
             // _command_manager: CommandManager::new_server(),
             _game: game::Game::new(10, 10),
             _incantation_list: HashMap::new(),
+            send_to_graph: String::new(),
         };
         tmp
     }
@@ -474,12 +476,12 @@ impl Server {
                         }
                     }
                     if graphic_ok {
-                        let message = event_graph_connect(self);
+                        let message = graphic::event_graph_connect(self);
                         let client = self._clients.get(&token).unwrap();
                         if client
                             .get_socket()
                             .write(
-                                event_graph_connect(self)
+                                graphic::event_graph_connect(self)
                                 .as_bytes(),
                             )
                             .is_err()
