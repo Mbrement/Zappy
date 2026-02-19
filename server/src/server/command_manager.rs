@@ -413,10 +413,22 @@ impl CommandManager {
                 let org_player_level = server._clients.get(&_c).unwrap().level;
                 let sucess = server.incantation_success(_c);
                 if server._incantation_list.contains_key(&_c) {
+                    let mut victory = String::new();
                     //il faut vérifier pour chacune des teams qui ont un membre qui est passé lvl8 lors de l'incantation
-                    if sucess && org_player_level + 1 == 8 && server.check_win_condition(&_c) {
+                    //proposition de solution:
+                    for player in server._incantation_list.get(&_c).unwrap() {
+                        if sucess && org_player_level + 1 == 8 && server.check_win_condition(player) {
+                            victory = graphic::end_game(server.get_team_for_player(player));
+                        }
+                    }
+                    if !victory.is_empty() {
+                        graphic::send_graphic_clients(victory, server);
                         server::exit_game(server);
                     }
+                    /*
+                    if sucess && org_player_level + 1 == 8 && server.check_win_condition(&_c) {
+                        server::exit_game(server);
+                    }*/
                     for client in server._incantation_list.get(&_c) {
                         if !client.contains(&_c) {
                             #[cfg(feature = "log")]
