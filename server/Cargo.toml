@@ -16,5 +16,6 @@ anyhow = "1"
 getopts = "0.2.24"
 rand = "0.10.0"
 mio = {version = "1.1.1", features = ["net", "os-poll"]}
+phf = { version = "0.13.1", features = ["macros"] }
 
 

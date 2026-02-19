@@ -1,14 +1,24 @@
+use mio::Token;
+
+use crate::server::client;
 use crate::server::{Server, client::Client, define, game::Game, map::Tile};
 use std::collections::HashMap;
+use std::io::Write;
 
 fn map_size(width: u32, height: u32) -> String {
     format!("msz {} {}\n", width, height)
 }
 
 fn content_tile(col: u32, row: u32, tile: &Tile) -> String {
-    //format!("bct {} {} {} {} {} {} {} {} {}\n", col, row, )
-    // ToDo:: tmp string en attente du rework de Tile
-    format!("bct {} {}\n", col, row)
+    format!("bct {} {} {} {} {} {} {} {} {}\n",
+    col, row,
+    tile.get_content()[0],
+    tile.get_content()[1],
+    tile.get_content()[2],
+    tile.get_content()[3],
+    tile.get_content()[4],
+    tile.get_content()[5],
+    tile.get_content()[6])
 }
 
 fn map_content(map: &Vec<Vec<Tile>>) -> String {
@@ -33,17 +43,16 @@ fn team_names(teams: HashMap<String, Vec<mio::Token>>) -> String {
 
 fn new_player(team: String, player: &Client) -> String {
     let (x, y) = player.position;
-    format!(
-        "pnw {:?} {} {} {} {} {}\n",
-        player.token, x, y, player.orientation, player.level, team
+    format!("pnw {:?} {} {} {} {} {}\n",
+        player.token, x, y,
+        player.orientation,
+        player.level, team
     )
 }
 
 fn player_pos(player: &Client) -> String {
     let (x, y) = player.position;
-    format!(
-        "ppo {:?} {} {} {}\n",
-        player.token, x, y, player.orientation
+    format!("ppo {:?} {} {} {}\n", player.token, x, y, player.orientation
     )
 }
 
@@ -53,11 +62,8 @@ fn player_level(player: &Client) -> String {
 
 fn player_inventory(player: &Client) -> String {
     let (x, y) = player.position;
-    format!(
-        "pin {:?} {} {} {} {} {} {} {} {} {}\n",
-        player.token,
-        x,
-        y,
+    format!("pin {:?} {} {} {} {} {} {} {} {} {}\n",
+        player.token, x, y,
         player.inventory[0],
         player.inventory[1],
         player.inventory[2],
@@ -68,14 +74,15 @@ fn player_inventory(player: &Client) -> String {
     )
 }
 
+//Todo:: Bonus
 //fn ban_hammer(player: Client) -> String {
 //    #[cfg(feature = "debug")]
 //    println!("get bonked\n");
 //    format!("hax {:?}\n", player.token)
 //}
 
-fn leonidas(player: &Client) -> String {
-    format!("pex {:?}\n", player.token)
+fn leonidas(token: &Token) -> String {
+    format!("pex {:?}\n", token)
 }
 
 fn player_broadcast(player: &Client, message: String) -> String {
@@ -85,18 +92,23 @@ fn player_broadcast(player: &Client, message: String) -> String {
 //TODO après gestion par micka
 //fn start_incant() -> String {}
 
-//TODO après gestion par micka
-//fn end_incant() -> String {}
+fn end_incant(x: u32, y: u32, success: bool) -> String {
+    if success {
+        format!("pie {} {} {}\n", x, y, 1)
+    } else {
+        format!("pie {} {} {}\n", x, y, 0)
+    }
+}
 
 fn birth_egg(player: Client) -> String {
     format!("pfk {:?}\n", player.token)
 }
 
-fn player_drop_item(player: &Client, item_num: u8) -> String {
+fn player_drop_item(player: &Client, item_num: usize) -> String {
     format!("pdr {:?} {}\n", player.token, item_num)
 }
 
-fn player_pick_item(player: &Client, item_num: u8) -> String {
+fn player_pick_item(player: &Client, item_num: usize) -> String {
     format!("pgt {:?} {}\n", player.token, item_num)
 }
 
@@ -132,13 +144,13 @@ fn bad_param() -> String {
     String::from("sbp\n")
 }
 
-fn event_graph_connect(server: Server, game: Game) -> String {
+pub fn event_graph_connect(server: &Server) -> String {
     let mut res = String::new();
 
-    res += &map_size(game.map.get_width(), game.map.get_height());
+    res += &map_size(server._game.map.get_width(), server._game.map.get_height());
     res += &get_time_unit(server.get_ticks());
-    res += &map_content(game.map.get_tiles());
-    res += &team_names(game.team);
+    res += &map_content(server._game.map.get_tiles());
+    res += &team_names(server._game.team.clone());
     for player in server.get_clients_by_type(define::ROLE_PLAYER) {
         res += &new_player(server.get_team_for_player(&player.token), player);
     }
@@ -147,46 +159,56 @@ fn event_graph_connect(server: Server, game: Game) -> String {
     res
 }
 
-fn event_take_an_item(map: &Vec<Vec<Tile>>, player: &Client, item_num: u8) {
+pub fn event_take_an_item(server: &mut Server, token: &Token, item_num: usize) {
     let mut res = String::new();
+    let player: &Client = server._clients.get(token).unwrap();
     let (x, y) = player.position;
 
     res += &player_pick_item(player, item_num);
     res += &player_inventory(player);
-    res += &content_tile(x, y, &map[y as usize][x as usize])
+    res += &content_tile(x, y, &server._game.map.get_tiles()[y as usize][x as usize]);
+    send_graphic_clients(res, server);
 }
 
-fn event_drop_an_item(map: &Vec<Vec<Tile>>, player: &Client, item_num: u8) {
+pub fn event_drop_an_item(server: &mut Server, token: &Token, item_num: usize) {
     let mut res = String::new();
+    let player: &Client = server._clients.get(token).unwrap();
     let (x, y) = player.position;
 
     res += &player_drop_item(player, item_num);
     res += &player_inventory(player);
-    res += &content_tile(x, y, &map[y as usize][x as usize])
+    res += &content_tile(x, y, &server._game.map.get_tiles()[y as usize][x as usize]);
+    send_graphic_clients(res, server);
 }
 
-//TODO check après gestion par micka
-fn event_fus_ro_dah(server: Server, player: &Client) -> String {
+pub fn event_fus_ro_dah(players: Vec<&mut Client>, token: Token) -> String {
     let mut res = String::new();
 
-    res += &leonidas(player);
-    for kicked in server.get_clients_by_pos(player.position) {
-        if (kicked.token != player.token) {
-            res += &player_pos(kicked);
+    res += &leonidas(&token);
+    for player in players {
+        if (player.token != token) {
+            res += &player_pos(player);
         }
     }
     res
+    //send_graphic_clients(res, server);
 }
 
-//TODO après gestion par micka
-fn event_incant_end(server: Server, pos: (u32, u32), tile: &Tile) -> String {
+pub fn event_incant_end(server: &mut Server, success: bool, token: Token) {
     let mut res = String::new();
-    let (x, y) = pos;
+    let (x, y) = server._game.get_player_position(token);
+    let tile: &Tile = &server.get_map().get_tiles()[y as usize][x as usize];
 
-    //res += &end_incant();
-    for player in server.get_clients_by_pos(pos) {
+    for player in server._incantation_list.get(&token).unwrap() {
+        let player: &Client = server._clients.get(player).unwrap();
         res += &player_level(player);
     }
     res += &content_tile(x, y, tile);
-    res
+    send_graphic_clients(res, server);
+}
+
+pub fn send_graphic_clients(command: String, server: &mut Server) {
+    for graph_client in server.get_clients_by_type_mut(define::GRAPHICAL_CLIENT) {
+        let _ = graph_client.get_socket_mut().write(command.as_bytes());
+    }
 }

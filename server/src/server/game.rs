@@ -165,6 +165,8 @@ impl Game {
             return false; // The client doesn't have the item in their inventory
         }
         let (x, y) = client.position;
+        //TODO:: a tester car je crois que ta maniere ne fonctionne pas
+        //self.map.get_tiles_mut()[y as usize][x as usize].inc_tile_item(idx);
         self.map.get_tile_content_mut(x, y).push(item.to_string());
         client.inventory[idx] = client.inventory[idx].saturating_sub(1);
         true

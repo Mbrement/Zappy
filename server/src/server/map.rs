@@ -24,6 +24,12 @@ impl Tile {
             string_tab: [0; 7],
         }
     }
+    pub fn get_content(&self) -> [u32;7] {
+        self.string_tab
+    }
+    pub fn inc_tile_item(&mut self, item_num: usize) {
+        self.string_tab[item_num] += 1;
+    }
 }
 
 impl Map {
@@ -63,6 +69,9 @@ impl Map {
     }
     pub fn get_tiles(&self) -> &Vec<Vec<Tile>> {
         &self.tiles
+    }
+    pub fn get_tiles_mut(&mut self) -> &mut Vec<Vec<Tile>> {
+        &mut self.tiles
     }
     pub fn fill_case(tile: &mut Tile, first_rng: i32) {
         match first_rng {

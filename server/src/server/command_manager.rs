@@ -1,5 +1,5 @@
-use crate::server::{Server, define, utils};
-use crate::server::{client, utils::*};
+use crate::server::{Server, define, utils, define::ITEMS_DICT};
+use crate::server::{client, utils::*, graphic::*};
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
@@ -230,32 +230,42 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("prend", _c, server, _arg);
+                let mut sucess: bool = false;
                 if let Some(client) = server._clients.get_mut(&_c) {
                     if server._game.take_item_from_cell(client, _arg) {
                         let _ = client
                             .get_socket_mut()
                             .write(format!("{}", define::R_OK).as_bytes());
+                        sucess = true;
                     } else {
                         let _ = client
                             .get_socket_mut()
                             .write(format!("{}", define::R_KO).as_bytes());
                     }
                 }
+                if sucess {
+                    event_take_an_item(server, &_c, ITEMS_DICT[_arg]);
+                }
             },
         );
         command_manager.register("pose", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             debug_manager_register("pose", _c, server, _arg);
+            let mut sucess: bool = false;
             if let Some(client) = server._clients.get_mut(&_c) {
                 if server._game.put_item_on_cell(client, _arg) {
                     let _ = client
                         .get_socket_mut()
                         .write(format!("{}", define::R_OK).as_bytes());
+                    sucess = true;
                 } else {
                     let _ = client
                         .get_socket_mut()
                         .write(format!("{}", define::R_KO).as_bytes());
                 }
+            }
+            if sucess {
+                event_drop_an_item(server, &_c, ITEMS_DICT[_arg]);
             }
         });
         command_manager.register(
@@ -370,6 +380,7 @@ impl CommandManager {
                                 .write(format!("{}\n", org_player_level).as_bytes());
                         }
                     }
+                    event_incant_end(server, sucess, _c);
                 }
                 // else{
                 // let mut client = server._clients.get_mut(&_c);
@@ -603,6 +614,7 @@ fn point_to_greater_abs_value(a: i32, b: i32) -> i32 {
             },
             None => position,
         };
+        /*
         let others: Vec<Token> = server
             ._game
             .map
@@ -610,7 +622,7 @@ fn point_to_greater_abs_value(a: i32, b: i32) -> i32 {
             .iter()
             .filter(|(other_token, other_pos)| *other_token != &token && *other_pos == &position)
             .map(|(t, _)| *t)
-            .collect();
+            .collect();*/
 
 		let dir = get_message_transmission_direction(
                         position.0 as i32,
@@ -620,6 +632,7 @@ fn point_to_greater_abs_value(a: i32, b: i32) -> i32 {
                         server._game.map.get_width() as i32,
                         server._game.map.get_height() as i32
                     );
+        /*
         for other_token in others {
 			if let Some(other_client) = server._clients.get_mut(&other_token) {
 				other_client.position = next_pos;
@@ -628,7 +641,22 @@ fn point_to_greater_abs_value(a: i32, b: i32) -> i32 {
 					.write(format!("kick {}\n", dir).as_bytes());
 			}
             expelled = true;
+        }*/
+
+        // j'ai fait une fonction pour récupérer les clients en fonction de leur position, utilise la
+        let mut players = server.get_clients_by_pos_mut(position);
+        for player in players.iter_mut() {
+            if (player.token != token) {
+                player.position = next_pos;
+                player.get_socket_mut().write(format!("kick {}\n", dir).as_bytes());
+                expelled = true;
+            }
         }
+        send_graphic_clients(
+            event_fus_ro_dah(players, token),
+            server
+        );
+        
         expelled
     }
 

@@ -11,6 +11,7 @@ mod map;
 pub mod utils;
 use crate::server::client::Client;
 use crate::server::command_manager::CommandManager;
+use crate::server::{self, graphic::*};
 use rand::{rngs::SmallRng, *};
 use std::collections::VecDeque;
 use std::{process, time};
@@ -324,6 +325,7 @@ impl Server {
                     // break;
                     // }
                 } else {
+                    let mut graphic_ok: bool = false;
                     let token = event.token();
                     if let Some(client) = self._clients.get_mut(&token) {
                         match client.get_socket_mut().read(&mut buf) {
@@ -357,18 +359,21 @@ impl Server {
                                     let cmd = String::from_utf8_lossy(&buf[..n]).trim().to_string();
                                     if cmd == define::GRAPHICAL_CLIENT {
                                         client.r#type = define::GRAPHICAL_CLIENT.to_string();
+
                                         //TODO : Mrozniec : start the routine for comunicate with graphical interface
-                                        if client
+                                        //je ne peut pas le faire ici, j'ai besoin de self hors a cet endroit il est déjà utiliser a la ligne 330
+                                        /*if client
                                             .get_socket_mut()
                                             .write(
-                                                format!("{} connected\n", define::GRAPHICAL_CLIENT)
+                                                event_graph_connect(self)
                                                     .as_bytes(),
                                             )
                                             .is_err()
                                         {
                                             self._clients.remove(&token);
                                             to_disconnect.push(token);
-                                        }
+                                        }*/
+                                        graphic_ok = true;
                                     } else if self.teams.contains_key(&cmd) {
                                         println!(
                                             "Client {:?} wants to join team '{}' = cmd",
@@ -467,6 +472,22 @@ impl Server {
                                 to_disconnect.push(token);
                             }
                         }
+                    }
+                    if graphic_ok {
+                        let message = event_graph_connect(self);
+                        let client = self._clients.get(&token).unwrap();
+                        if client
+                            .get_socket()
+                            .write(
+                                event_graph_connect(self)
+                                .as_bytes(),
+                            )
+                            .is_err()
+                        {
+                            self._clients.remove(&token);
+                            to_disconnect.push(token);
+                        }
+
                     }
                 }
             }
