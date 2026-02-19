@@ -1,5 +1,6 @@
 use crate::server::{Server, define, utils, define::ITEMS_DICT};
 use crate::server::{client, graphic};
+use crate::server;
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
@@ -213,7 +214,7 @@ impl CommandManager {
         self.register(
             "death",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                debug_manager_register("death", _c, server, _arg);
+                utils::debug_manager_register("death", _c, server, _arg);
                 server.disconnect_client_by_token(&_c);
             },
         );
@@ -449,7 +450,7 @@ impl CommandManager {
             "connect_nbr",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 // #[cfg(feature = "log")]
-                debug_manager_register("connect_nbr", _c, server, _arg);
+                utils::debug_manager_register("connect_nbr", _c, server, _arg);
                 let tmp = server.get_team_for_player(&_c);
                 let d = server._max_clients[&tmp] - server._game.team[&tmp].len() as u32;
                 let mut client = server._clients.get_mut(&_c);
@@ -700,7 +701,8 @@ impl CommandManager {
 		for (team, eggs) in self.egg_waiting.iter() {
 			for egg in eggs {
 				if *egg <= server._game._tick {
-					pritnln("here")
+					println!("here")
+                }
 			}
 		}
     }
