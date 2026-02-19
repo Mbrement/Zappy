@@ -50,7 +50,7 @@ fn new_player(team: String, player: &Client) -> String {
     )
 }
 
-fn player_pos(player: &Client) -> String {
+pub(crate) fn player_pos(player: &Client) -> String {
     let (x, y) = player.position;
     format!("ppo {:?} {} {} {}\n", player.token, x, y, player.orientation
     )
@@ -85,8 +85,8 @@ fn leonidas(token: &Token) -> String {
     format!("pex {:?}\n", token)
 }
 
-fn player_broadcast(player: &Client, message: String) -> String {
-    format!("pbc {:?} {}", player.token, message)
+pub(crate) fn player_broadcast(token: &Token, message: &str) -> String {
+    format!("pbc {:?} {}", token, message)
 }
 
 //TODO après gestion par micka
@@ -100,8 +100,13 @@ fn end_incant(x: u32, y: u32, success: bool) -> String {
     }
 }
 
-fn birth_egg(player: Client) -> String {
-    format!("pfk {:?}\n", player.token)
+pub(crate) fn fork(token: &Token) -> String {
+    format!("pfk {:?}\n", token)
+}
+
+// voir avec micka
+pub(crate) fn end_fork(token: &Token) -> String {
+    format!("pfk {:?}\n", token)
 }
 
 fn player_drop_item(player: &Client, item_num: usize) -> String {
@@ -112,8 +117,8 @@ fn player_pick_item(player: &Client, item_num: usize) -> String {
     format!("pgt {:?} {}\n", player.token, item_num)
 }
 
-fn player_death(player: &Client) -> String {
-    format!("pdi {:?}\n", player.token)
+pub(crate) fn player_death(token: &Token) -> String {
+    format!("pdi {:?}\n", token)
 }
 
 //TODO: attente que mbrement ajoute l'id au oeufs
