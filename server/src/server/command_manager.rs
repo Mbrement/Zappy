@@ -1,5 +1,5 @@
 use crate::server::{Server, define, utils, define::ITEMS_DICT};
-use crate::server::{client, utils::*, graphic::*};
+use crate::server::{client, graphic};
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
@@ -129,7 +129,7 @@ impl CommandManager {
         command_manager.register(
             "death",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                debug_manager_register("death", _c, server, _arg);
+                utils::debug_manager_register("death", _c, server, _arg);
             },
         );
         command_manager.register(
@@ -137,7 +137,7 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 // _game.change_player_orientation(_c, "droite".into());
                 #[cfg(feature = "log")]
-                debug_manager_register("droite", _c, server, _arg);
+                utils::debug_manager_register("droite", _c, server, _arg);
                 if let Some(client) = server._clients.get_mut(&_c) {
                     server
                         ._game
@@ -152,7 +152,7 @@ impl CommandManager {
             "gauche",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
-                debug_manager_register("gauche", _c, server, _arg);
+                utils::debug_manager_register("gauche", _c, server, _arg);
                 if let Some(client) = server._clients.get_mut(&_c) {
                     server
                         ._game
@@ -160,12 +160,13 @@ impl CommandManager {
                     let _ = client
                         .get_socket_mut()
                         .write(format!("{}", define::R_OK).as_bytes());
+                    //
                 }
             },
         );
         command_manager.register("voir", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
-            debug_manager_register("voir", _c, server, _arg);
+            utils::debug_manager_register("voir", _c, server, _arg);
             let mut client = server._clients.get_mut(&_c);
             if client.is_none() {
                 #[cfg(feature = "log")]
@@ -185,7 +186,7 @@ impl CommandManager {
             "inventaire",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
-                debug_manager_register("inventaire", _c, server, _arg);
+                utils::debug_manager_register("inventaire", _c, server, _arg);
                 let mut client = server._clients.get_mut(&_c);
                 if client.is_none() {
                     #[cfg(feature = "log")]
@@ -220,7 +221,7 @@ impl CommandManager {
             "avance",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
-                debug_manager_register("avance", _c, server, _arg);
+                utils::debug_manager_register("avance", _c, server, _arg);
                 let mut client = server._clients.get_mut(&_c);
                 if client.is_none() {
                     #[cfg(feature = "log")]
@@ -239,7 +240,7 @@ impl CommandManager {
             "prend",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
-                debug_manager_register("prend", _c, server, _arg);
+                utils::debug_manager_register("prend", _c, server, _arg);
                 let mut sucess: bool = false;
                 if let Some(client) = server._clients.get_mut(&_c) {
                     if server._game.take_item_from_cell(client, _arg) {
@@ -254,13 +255,13 @@ impl CommandManager {
                     }
                 }
                 if sucess {
-                    event_take_an_item(server, &_c, ITEMS_DICT[_arg]);
+                    graphic::event_take_an_item(server, &_c, ITEMS_DICT[_arg]);
                 }
             },
         );
         command_manager.register("pose", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
-            debug_manager_register("pose", _c, server, _arg);
+            utils::debug_manager_register("pose", _c, server, _arg);
             let mut sucess: bool = false;
             if let Some(client) = server._clients.get_mut(&_c) {
                 if server._game.put_item_on_cell(client, _arg) {
@@ -275,14 +276,14 @@ impl CommandManager {
                 }
             }
             if sucess {
-                event_drop_an_item(server, &_c, ITEMS_DICT[_arg]);
+                graphic::event_drop_an_item(server, &_c, ITEMS_DICT[_arg]);
             }
         });
         command_manager.register(
             "expulse",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
-                debug_manager_register("expulse", _c, server, _arg);
+                utils::debug_manager_register("expulse", _c, server, _arg);
                 if expulse_player(server, _c) {
                     let _ = server
                         ._clients
@@ -304,7 +305,7 @@ impl CommandManager {
             "broadcast",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
-                debug_manager_register("broadcast", _c, server, _arg);
+                utils::debug_manager_register("broadcast", _c, server, _arg);
                 // Broadcast the message to all clients
 
                 let tmp = server._game.map.player_position.get(&_c);
@@ -351,14 +352,14 @@ impl CommandManager {
             "incantation",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
-                debug_manager_register("incantation", _c, server, _arg);
+                utils::debug_manager_register("incantation", _c, server, _arg);
             },
         );
         command_manager.register(
             "incantation_internal",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
-                debug_manager_register("incantation_internal", _c, server, _arg);
+                utils::debug_manager_register("incantation_internal", _c, server, _arg);
                 #[cfg(feature = "log")]
 				println!("\n\nincantation_internal for token {:?}\n\n", _c);
                 let org_player_level = server._clients.get(&_c).unwrap().level;
@@ -397,7 +398,7 @@ impl CommandManager {
                                 .write(format!("{}\n", org_player_level).as_bytes());
                         }
                     }
-                    event_incant_end(server, sucess, _c);
+                    graphic::event_incant_end(server, sucess, _c);
                 }
                 // else{
                 // let mut client = server._clients.get_mut(&_c);
@@ -416,7 +417,7 @@ impl CommandManager {
         );
         command_manager.register("fork", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
-            debug_manager_register("fork", _c, server, _arg);
+            utils::debug_manager_register("fork", _c, server, _arg);
             // server._game.fork_player(_c);
             let mut client = server._clients.get_mut(&_c);
             if client.is_none() {
@@ -433,7 +434,7 @@ impl CommandManager {
         });
         command_manager.register("fork_internal", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
-            debug_manager_register("fork_internal", _c, server, _arg);
+            utils::debug_manager_register("fork_internal", _c, server, _arg);
 			println!("here");
             for (tick, (x, y, token)) in &server._game.map.egg_position {
                 if tick < &server._game._tick {
@@ -453,7 +454,7 @@ impl CommandManager {
             "connect_nbr",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 // #[cfg(feature = "log")]
-                debug_manager_register("connect_nbr", _c, server, _arg);
+                utils::debug_manager_register("connect_nbr", _c, server, _arg);
                 let tmp = server.get_team_for_player(&_c);
                 let d = server._max_clients[&tmp] - server._game.team[&tmp].len() as u32;
                 let mut client = server._clients.get_mut(&_c);
@@ -669,8 +670,8 @@ fn point_to_greater_abs_value(a: i32, b: i32) -> i32 {
                 expelled = true;
             }
         }
-        send_graphic_clients(
-            event_fus_ro_dah(players, token),
+        graphic::send_graphic_clients(
+            graphic::event_fus_ro_dah(players, token),
             server
         );
         
