@@ -26,6 +26,7 @@ fn main() -> std::io::Result<()> {
     opts.reqopt("n", "", "set team", "team_name_1 team_name_2 ...");
     opts.optopt("c", "", "number of clients", "CLIENT");
     opts.optopt("t", "", "number of tick per sec", "TICK");
+    opts.optopt("s", "", "set the password for the admin client", "PASSWORD");
     opts.optflag("h", "help", "print this help menu");
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
@@ -35,15 +36,24 @@ fn main() -> std::io::Result<()> {
         }
     };
     let mut server: Server;
+    let port;
     if matches.opt_present("p")
         && matches.opt_str("p").is_some()
         && matches.opt_str("p").unwrap().parse::<u16>().is_ok()
     {
-        server = Server::new(matches.opt_str("p").unwrap().parse().unwrap());
+        port = matches.opt_str("p").unwrap().parse().unwrap();
     } else {
         println!("Default port : 4242");
-        server = Server::new(4242);
+        port = 4242;
     }
+
+    let password;
+    if matches.opt_present("s") && matches.opt_str("s").is_some() {
+        password = matches.opt_str("s").unwrap();
+    } else {
+        password = "ADMIN".to_string();
+    }
+    server = Server::new(port, password);
     #[cfg(feature = "log")]
     println!("Server running on port: {}", server.get_port());
 

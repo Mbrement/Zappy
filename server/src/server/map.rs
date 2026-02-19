@@ -24,7 +24,7 @@ impl Tile {
             string_tab: [0; 7],
         }
     }
-    pub fn get_content(&self) -> [u32;7] {
+    pub fn get_content(&self) -> [u32; 7] {
         self.string_tab
     }
     pub fn inc_tile_item(&mut self, item_num: usize) {

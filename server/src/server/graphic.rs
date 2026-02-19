@@ -10,15 +10,18 @@ fn map_size(width: u32, height: u32) -> String {
 }
 
 fn content_tile(col: u32, row: u32, tile: &Tile) -> String {
-    format!("bct {} {} {} {} {} {} {} {} {}\n",
-    col, row,
-    tile.get_content()[0],
-    tile.get_content()[1],
-    tile.get_content()[2],
-    tile.get_content()[3],
-    tile.get_content()[4],
-    tile.get_content()[5],
-    tile.get_content()[6])
+    format!(
+        "bct {} {} {} {} {} {} {} {} {}\n",
+        col,
+        row,
+        tile.get_content()[0],
+        tile.get_content()[1],
+        tile.get_content()[2],
+        tile.get_content()[3],
+        tile.get_content()[4],
+        tile.get_content()[5],
+        tile.get_content()[6]
+    )
 }
 
 fn map_content(map: &Vec<Vec<Tile>>) -> String {
@@ -43,16 +46,17 @@ fn team_names(teams: HashMap<String, Vec<mio::Token>>) -> String {
 
 fn new_player(team: String, player: &Client) -> String {
     let (x, y) = player.position;
-    format!("pnw {:?} {} {} {} {} {}\n",
-        player.token, x, y,
-        player.orientation,
-        player.level, team
+    format!(
+        "pnw {:?} {} {} {} {} {}\n",
+        player.token, x, y, player.orientation, player.level, team
     )
 }
 
 fn player_pos(player: &Client) -> String {
     let (x, y) = player.position;
-    format!("ppo {:?} {} {} {}\n", player.token, x, y, player.orientation
+    format!(
+        "ppo {:?} {} {} {}\n",
+        player.token, x, y, player.orientation
     )
 }
 
@@ -62,8 +66,11 @@ fn player_level(player: &Client) -> String {
 
 fn player_inventory(player: &Client) -> String {
     let (x, y) = player.position;
-    format!("pin {:?} {} {} {} {} {} {} {} {} {}\n",
-        player.token, x, y,
+    format!(
+        "pin {:?} {} {} {} {} {} {} {} {} {}\n",
+        player.token,
+        x,
+        y,
         player.inventory[0],
         player.inventory[1],
         player.inventory[2],
@@ -201,7 +208,8 @@ pub fn event_incant_end(server: &mut Server, success: bool, token: Token) {
     let (x, y) = server._game.get_player_position(token);
     let tile: &Tile = &server.get_map().get_tiles()[y as usize][x as usize];
 
-    for player in server._incantation_list.get(&token).unwrap() { //THIS WILL CRASH IF THE TOKEN IS NOT IN THE INCANTATION LIST
+    for player in server._incantation_list.get(&token).unwrap() {
+        //THIS WILL CRASH IF THE TOKEN IS NOT IN THE INCANTATION LIST
         let player: &Client = server._clients.get(player).unwrap();
         res += &player_level(player);
     }
@@ -212,6 +220,9 @@ pub fn event_incant_end(server: &mut Server, success: bool, token: Token) {
 pub fn send_graphic_clients(command: String, server: &mut Server) {
     for graph_client in server.get_clients_by_type_mut(define::GRAPHICAL_CLIENT) {
         let _ = graph_client.get_socket_mut().write(command.as_bytes());
-		graph_client.get_socket_mut().write("pouet\n".as_bytes()).unwrap();
+        graph_client
+            .get_socket_mut()
+            .write("pouet\n".as_bytes())
+            .unwrap();
     }
 }

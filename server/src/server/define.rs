@@ -396,8 +396,8 @@ pub const COMMANDLIST: [&str; 12] = [
     "connect_nbr",
 ];
 
-
-
 // Client constants
 pub const ROLE_PLAYER: &str = "player";
+pub const ROLE_GRAPHIC: &str = "GRAPHIC";
+pub const ROLE_ADMIN: &str = "ADMIN";
 pub const ROLE_WELCOMED: &str = "welcomed";
