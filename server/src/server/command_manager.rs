@@ -616,9 +616,9 @@ impl CommandManager {
                             "egg_waiting" => {
                                 self.next_execute.insert(token, server._game._tick)
                             }
-							"egg_death" => {
-								self.next_execute.insert(token, server._game._tick)
-							}
+                            "egg_death" => {
+                                self.next_execute.insert(token, server._game._tick)
+                            }
                             "connect_nbr" | "incantation" => {
                                 self.next_execute.insert(token, server._game._tick)
                             }
@@ -694,26 +694,26 @@ impl CommandManager {
                 }
             }
         }
-		// self.execute_admin_commands(server);
+        // self.execute_admin_commands(server);
         //TODO-mrozniec: send all graph client
-    graphic::send_graphic_clients(server.send_to_graph.clone(), server);
-    server.send_to_graph.clear();
-		for (team, eggs) in self.egg_waiting.iter() {
-			for egg in eggs {
-				if *egg <= server._game._tick {
-					println!("here")
+        graphic::send_graphic_clients(server.send_to_graph.clone(), server);
+        server.send_to_graph.clear();
+        for (team, eggs) in self.egg_waiting.iter() {
+            for egg in eggs {
+                if *egg <= server._game._tick {
+                    println!("here")
                 }
-			}
-		}
+            }
+        }
     }
 
-	// fn execute_admin_commands(&mut self, server: &mut Server) {
-	// 	let token = mio::Token(0);
-	// 	for command in self.order[token]{}
+    // fn execute_admin_commands(&mut self, server: &mut Server) {
+    // 	let token = mio::Token(0);
+    // 	for command in self.order[token]{}
 
-	// 	}
+    // 	}
 
-	// }
+    // }
 
     pub fn next_command_time(&self, token: &Token) -> Option<u128> {
         self.next_execute.get(token).cloned()
