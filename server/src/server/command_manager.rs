@@ -145,6 +145,10 @@ impl CommandManager {
                     let _ = client
                         .get_socket_mut()
                         .write(format!("{}", define::R_OK).as_bytes());
+                    graphic::send_graphic_clients(
+                        graphic::player_pos(client),
+                        server
+                    );
                 }
             },
         );
@@ -160,7 +164,10 @@ impl CommandManager {
                     let _ = client
                         .get_socket_mut()
                         .write(format!("{}", define::R_OK).as_bytes());
-                    //
+                    graphic::send_graphic_clients(
+                        graphic::player_pos(client),
+                        server
+                    );
                 }
             },
         );
@@ -230,10 +237,16 @@ impl CommandManager {
                 }
                 let client = client.unwrap();
                 server._game.move_player(client);
+                // ? pourquoi la ligne suivante quand tu actualise déjà la position du joueur
+                //   dans la fonction précédente?
                 client.position = server._game.get_player_position(_c);
                 let _ = client
                     .get_socket_mut()
                     .write(format!("{}", define::R_OK).as_bytes());
+                graphic::send_graphic_clients(
+                    graphic::player_pos(client),
+                    server
+                );
             },
         );
         command_manager.register(
@@ -315,11 +328,14 @@ impl CommandManager {
                     return;
                 }
                 let (position_x, position_y) = tmp.unwrap();
-                if tmp.is_none() {
-                    #[cfg(feature = "log")]
-                    println!("No player found for token {:?}", _c);
-                    return;
-                }
+                // doublon ?
+                //if tmp.is_none() {
+                //    #[cfg(feature = "log")]
+                //    println!("No player found for token {:?}", _c);
+                //    return;
+                //}
+                // server._clients va envoyer a tous les clients dont ADMIN et graphic
+                // utilise plutot ca : get_clients_by_type_mut(define::ROLE_PLAYER)
                 for (token, client) in &mut server._clients {
                     if token != &_c {
                         let tmp = server._game.map.player_position.get(token);
@@ -346,6 +362,7 @@ impl CommandManager {
                         );
                     }
                 }
+                graphic::send_graphic_clients(graphic::player_broadcast(&_c, _arg), server);
             },
         );
         command_manager.register(
@@ -366,7 +383,7 @@ impl CommandManager {
                 let sucess = server.incantation_success(_c);
                 if server._incantation_list.contains_key(&_c) {
                     if sucess && org_player_level + 1 == 8 {
-                        for client in server.get_clients_by_type_mut("player") {
+                        for client in server.get_clients_by_type_mut(define::ROLE_PLAYER) {
                             client.level = org_player_level;
                             let _ = client
                                 .get_socket_mut()
@@ -431,12 +448,14 @@ impl CommandManager {
             client
                 .get_socket_mut()
                 .write(format!("{}", define::R_OK).as_bytes());
+            graphic::send_graphic_clients(graphic::fork(&client.token), server);
         });
         command_manager.register("fork_internal", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             utils::debug_manager_register("fork_internal", _c, server, _arg);
 			println!("here");
             for (tick, (x, y, token)) in &server._game.map.egg_position {
+                // ???????
                 if tick < &server._game._tick {
                     let team_name = server.get_team_for_player(&token);
                     let tmp = server._max_clients.get_mut(&team_name);
@@ -444,6 +463,7 @@ impl CommandManager {
                         *v += 1;
 
                     } else {
+                        // ??????
                         server._max_clients.insert(team_name.clone(), 1);
                     }
                 }
