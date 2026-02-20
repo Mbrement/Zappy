@@ -25,7 +25,7 @@ pub struct Server {
     _events: Events,
     __pass__: String,
     _clients: HashMap<Token, client::Client>,
-    pub teams: HashMap<String, Vec<Token>>,
+    // pub teams: HashMap<String, Vec<Token>>,
     pub(crate) _max_clients: HashMap<String, u32>,
     pub _max_clients_per_team: u32,
     _socket: mio::net::TcpListener,
@@ -61,7 +61,6 @@ impl Server {
             _events: Events::with_capacity(1024),
             _max_clients: HashMap::new(),
             _clients: HashMap::new(),
-            teams: HashMap::new(),
             _socket: tmp_socket.unwrap(),
             _ticks: 100,
             _next_token: 1,
@@ -120,7 +119,7 @@ impl Server {
 
     pub fn set_clients_number(&mut self, clients: u32) {
         self._max_clients_per_team = clients;
-        for team in self.teams.keys() {
+        for team in self._game.team.keys() {
             self._max_clients.insert(team.clone(), clients);
         }
     }
@@ -242,7 +241,7 @@ impl Server {
         let _ = client.get_socket_mut().shutdown(std::net::Shutdown::Both);
         // self._clients.remove(&client.get_token()); // Already removed in disconnect_client_by_token
         if client.r#type == define::ROLE_PLAYER {
-            if let Some(team_name) = self.teams.iter_mut().find_map(|(name, tokens)| {
+            if let Some(team_name) = self._game.team.iter_mut().find_map(|(name, tokens)| {
                 if let Some(pos) = tokens.iter().position(|t| t == &client.get_token()) {
                     tokens.remove(pos);
                     Some(name.clone())
@@ -250,6 +249,7 @@ impl Server {
                     None
                 }
             }) {
+				println!("Decreasing max clients for team ");
                 if let Some(max) = self._max_clients.get_mut(&team_name)
                     && self._max_clients_per_team < *max
                 {
@@ -387,12 +387,12 @@ impl Server {
                                             to_disconnect.push(token);
                                         }*/
                                         graphic_ok = true;
-                                    } else if self.teams.contains_key(&cmd) {
+                                    } else if self._game.team.contains_key(&cmd) {
                                         println!(
                                             "Client {:?} wants to join team '{}' = cmd",
                                             token, cmd
                                         );
-                                        println!("Current teams: {:?}", self.teams);
+                                        println!("Current teams: {:?}", self._game.team);
                                         println!(
                                             "Max clients for team '{}': {:?}",
                                             cmd,
@@ -401,13 +401,18 @@ impl Server {
                                         println!(
                                             "Current clients in team '{}': {:?}",
                                             cmd,
-                                            self.teams.get(&cmd)
+                                            self._game.team.get(&cmd)
                                         );
-                                        if self.teams[&cmd].len() < self._max_clients[&cmd] as usize
+                                        if self._game.team[&cmd].len() < self._max_clients[&cmd] as usize
                                         {
-                                            self.teams.get_mut(&cmd).unwrap().push(token);
-                                            client.r#type = define::ROLE_PLAYER.to_string();
-                                            client.position = (if !self._game.starting {
+                                            // drop the mutable borrow of `client` so we can borrow `self` again safely
+                                            let player_token = token;
+                                            drop(client);
+
+                                            // now it's safe to mutate server structures and compute spawn position
+                                            self._game.team.get_mut(&cmd).unwrap().push(player_token);
+
+                                            let position = if !self._game.starting {
                                                 (
                                                     self._game.map.rng.random_range(
                                                         0..self._game.map.get_width(),
@@ -417,41 +422,59 @@ impl Server {
                                                     ),
                                                 )
                                             } else {
-                                                self._game.spawn_player(token, &cmd)
-                                            });
+                                                let found = self._game
+                                                    .map
+                                                    .egg_position
+                                                    .iter()
+                                                    .find(|(_, pos)| {
+                                                        cmd == self.get_team_for_player(&pos.2)
+                                                    })
+                                                    .map(|(k, v)| (*k, v.0, v.1));
 
-                                            self._game
-                                                .update_player_position(token, client.position);
-                                            client.orientation = "NESW"
-                                                .chars()
-                                                .nth(self._game.map.rng.random_range(0..3))
-                                                .unwrap();
-                                            self._game.team.get_mut(&cmd).unwrap().push(token); //push the client token into the team
-                                            let response = format!(
-                                                "{}\n{} {}\n",
-                                                self._max_clients[&cmd] as usize
-                                                    - self.teams[&cmd].len()
-                                                    + 1,
-                                                self._game.map.get_height(),
-                                                self._game.map.get_width()
-                                            );
-                                            if client
-                                                .get_socket_mut()
-                                                .write(response.as_bytes())
-                                                .is_err()
-                                            {
-                                                self._clients.remove(&token);
+                                                self._game.spawn_player(player_token, &cmd, found)
+                                            };
+
+                                            // re-borrow the client to set its fields and write responses
+                                            if let Some(client) = self._clients.get_mut(&player_token) {
+                                                client.r#type = define::ROLE_PLAYER.to_string();
+                                                client.position = position;
+
+                                                self._game
+                                                    .update_player_position(player_token, client.position);
+                                                client.orientation = "NESW"
+                                                    .chars()
+                                                    .nth(self._game.map.rng.random_range(0..3))
+                                                    .unwrap();
+                                                self._game.team.get_mut(&cmd).unwrap().push(player_token); //push the client token into the team
+                                                let response = format!(
+                                                    "{}\n{} {}\n",
+                                                    self._max_clients[&cmd] as usize
+                                                        - self._game.team[&cmd].len()
+                                                        + 1,
+                                                    self._game.map.get_height(),
+                                                    self._game.map.get_width()
+                                                );
+                                                if client
+                                                    .get_socket_mut()
+                                                    .write(response.as_bytes())
+                                                    .is_err()
+                                                {
+                                                    self._clients.remove(&player_token);
+                                                }
                                             }
                                             self._game.starting = true;
                                         } else {
-                                            client.get_socket_mut().write(
-                                                format!(
-                                                    "0\n{} {}\n",
-                                                    self._game.map.get_height(),
-                                                    self._game.map.get_width()
-                                                )
-                                                .as_bytes(),
-                                            );
+                                            // still need to use the client; re-borrow it
+                                            if let Some(client) = self._clients.get_mut(&token) {
+                                                let _ = client.get_socket_mut().write(
+                                                    format!(
+                                                        "0\n{} {}\n",
+                                                        self._game.map.get_height(),
+                                                        self._game.map.get_width()
+                                                    )
+                                                    .as_bytes(),
+                                                );
+                                            }
 
                                             // let _ = client
                                             //     .get_socket_mut()
@@ -570,7 +593,7 @@ impl Server {
     }
 
     pub fn get_team_for_player(&self, token: &Token) -> String {
-        for (team_name, tokens) in &self.teams {
+        for (team_name, tokens) in &self._game.team {
             if tokens.contains(token) {
                 return team_name.clone();
             }
@@ -609,7 +632,7 @@ impl Server {
         if team_name == "unknown" {
             return false;
         }
-        let team_tokens = match self.teams.get(&team_name) {
+        let team_tokens = match self._game.team.get(&team_name) {
             Some(tokens) => tokens,
             None => return false,
         };

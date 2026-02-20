@@ -127,7 +127,7 @@ fn main() -> std::io::Result<()> {
                     std::io::ErrorKind::InvalidInput,
                     "graphical client name used as team",
                 ));
-            } else if server.teams.get(&arg.clone()).is_some() {
+            } else if server._game.team.get(&arg.clone()).is_some() {
                 eprintln!(
                     "Found duplicate {} team, please do not use this as a team name",
                     arg
@@ -137,13 +137,12 @@ fn main() -> std::io::Result<()> {
                     "duplicate team name",
                 ));
             } else if tmp == teams[0] + 1 && !arg.starts_with("-") {
-                server.teams.insert(arg.clone(), Vec::new());
                 server._game.team.insert(arg.clone(), Vec::new());
             }
         }
         #[cfg(feature = "log")]
         println!("Server teams: {:?}", server.teams);
-        if server.teams.is_empty() {
+        if server._game.team.is_empty() {
             eprintln!("No teams found, please add teams using the -n option");
             return Err(std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
