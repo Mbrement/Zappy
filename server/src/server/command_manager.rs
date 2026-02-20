@@ -498,6 +498,7 @@ impl CommandManager {
                 client.hunger = 1260; //this line scare me
                 client.inventory[0] = 1260;
 				client.was_egg = _arg.parse().unwrap_or(0);
+                server.send_to_graph += &graphic::egg_hatches(&_c, server);
 
             },
         );
@@ -542,6 +543,7 @@ impl CommandManager {
                 }
                 println!("{:?}", server._game.map.egg_position);
                 for t in ticks_to_remove {
+                    server.send_to_graph += &graphic::rotten_egg(t);
                     server._game.map.egg_position.remove(&t);
                     // self.egg_waiting.remove(&t);
                 }
