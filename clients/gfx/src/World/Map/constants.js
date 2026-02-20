@@ -1,6 +1,6 @@
 
 const resourceTypes = {
-    0: 'nourriture',
+    0: 'food',
     1: 'linemate',
     2: 'deraumere',
     3: 'sibur',

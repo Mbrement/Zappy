@@ -15,7 +15,7 @@ class ResourceAssets {
         this.dodecahedronGeometry = new THREE.DodecahedronGeometry(this.defaultSize * 0.75)
 
         this.assetGeometries = {
-            nourriture: {
+            food: {
                 duo: null,
                 trio: null,
             },
@@ -46,7 +46,7 @@ class ResourceAssets {
         }
 
         this.resourceMeshInfo = {
-            nourriture: {
+            food: {
                 material: new THREE.MeshBasicNodeMaterial({color: 0x00ff00}),
                 geometry: this.sphereGeometry
             },
@@ -77,7 +77,7 @@ class ResourceAssets {
         }
 
         this.resourceInstances = {
-            nourriture: {},
+            food: {},
             linemate: {},
             deraumere: {},
             sibur: {},

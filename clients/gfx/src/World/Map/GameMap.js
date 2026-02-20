@@ -90,6 +90,25 @@ class GameMap {
 
     /**
      * @author Emma (epolitze) Politzer
+     * @description returns the map coordinates for the tile
+     * @param instance - The instance the tile is part of
+     * @param index - The index of the tile in the instance
+     * @returns {number[]} - X and Y map coordinates of the tile
+     */
+    getTileCoordinate(instance, index) {
+        let x, y
+        for (y = 0; y < this.mapSize[1]; y++) {
+            for (x = 0; x < this.mapSize[0]; x++) {
+                if (this.mapTiles[y][x].tile.index === index &&
+                    this.mapTiles[y][x].tile.instance === instance) {
+                    return [x, y]
+                }
+            }
+        }
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
      * @description adds the resources for a tile
      * @param x - the x coordinate of the tile
      * @param y - the y coordinate of the tile

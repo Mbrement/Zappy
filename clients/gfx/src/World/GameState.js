@@ -28,7 +28,15 @@ class GameState {
         this.map = new Array(y).fill().map(() => {
             return new Array(x).fill().map(() => {
                 return {
-                    resources: [],
+                    resources: {
+                        food: 0,
+                        linemate: 0,
+                        deraumere: 0,
+                        sibur: 0,
+                        mendiane: 0,
+                        phiras: 0,
+                        thystame: 0,
+                    },
                     players: [],
                     eggs: []
                 }
@@ -46,10 +54,10 @@ class GameState {
      * @param {Array} content - an array representing the quantity of each resource on the tile
      */
     setTileContent(x, y, content) {
-        const [nourriture, linemate, deraumere, sibur, mendiane, phiras, thystame] = content
+        const [food, linemate, deraumere, sibur, mendiane, phiras, thystame] = content
 
         this.map[y][x].resources = {
-            nourriture,
+            food,
             linemate,
             deraumere,
             sibur,
@@ -87,7 +95,8 @@ class GameState {
             y,
             orientation,
             level,
-            team: playerTeam
+            team: playerTeam,
+            color: this.teams.get(playerTeam)
         })
 
         this.map[y][x].players.push({
@@ -96,7 +105,8 @@ class GameState {
             y,
             orientation,
             level,
-            team: playerTeam
+            team: playerTeam,
+            color: this.teams.get(playerTeam)
         })
 
         console.log("Added player", id, "Total players are", this.playerInfo)
@@ -117,7 +127,7 @@ class GameState {
         player.y = y
         player.orientation = orientation
         player.inventory = {
-            nourriture: 0,
+            food: 0,
             linemate: 0,
             deraumere: 0,
             sibur: 0,
@@ -152,11 +162,11 @@ class GameState {
      * @param {Array} playerInfo - an array containing the player's id and inventory information
      */
     updatePlayerInventory(playerInfo) {
-        const [id, _, __, nourriture, linemate, deraumere, sibur, mendiane, phiras, thystame] = playerInfo
+        const [id, _, __, food, linemate, deraumere, sibur, mendiane, phiras, thystame] = playerInfo
 
         const player = this.playerInfo.get(id)
         player.inventory = {
-            nourriture,
+            food,
             linemate,
             deraumere,
             sibur,

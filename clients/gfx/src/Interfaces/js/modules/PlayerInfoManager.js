@@ -117,6 +117,7 @@ module.exports  = new PlayerInfoManager();
  * @property {String} id - The player id
  * @property {String} team - The player team
  * @property {String} level - The player level
+ * @property {String} color - The player's team color
  */
 
 /**

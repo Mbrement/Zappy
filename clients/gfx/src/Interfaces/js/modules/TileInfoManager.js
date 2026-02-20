@@ -121,6 +121,9 @@ class TileInfoManager {
             const idElement = playerDiv.querySelector('.playerTeamIdInfoContainer:nth-child(2) .resourcePlayerText:nth-child(2)')
             idElement.textContent = player.id
 
+            const dotElement = playerDiv.querySelector('.playerTeamDot')
+            dotElement.style.background = player.color
+
             playersOnTile.appendChild(playerDiv)
         }
     }
@@ -162,6 +165,16 @@ class TileInfoManager {
             console.log(`Player clicked: ID=${playerId}, Team=${playerTeam}`)
             // TODO: Focus player and display information about it
         }
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Checks if the tilesPlayerInfoContainer is open
+     * @returns {boolean} - If the tilesPlayerInfoContainer is open
+     */
+    isTilesPlayerInfoOpen() {
+        const tilesPlayerInfoContainer = document.getElementById('tilesPlayerInfoContainer')
+        return !tilesPlayerInfoContainer.classList.contains('tilesPlayerInfoContainerHidden')
     }
 
     /**

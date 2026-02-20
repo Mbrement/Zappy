@@ -11,7 +11,8 @@ class World {
     constructor() {
         window.worldInstance = this
         this.main = window.mainInstance
-        this.resources = this.main.resources;
+        this.resources = this.main.resources
+        this.gameState = this.main.gameState
         this.canvas = document.getElementById('webgpu')
 
         this.sizes = {
@@ -39,8 +40,13 @@ class World {
 
         window.addEventListener('resize', this.resizeView.bind(this))
         window.addEventListener('mousemove', this.onMouseMove.bind(this))
+        window.addEventListener('mousedown', this.onMouseDown.bind(this))
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Handles the resize event
+     */
     resizeView() {
         this.sizes.width = window.innerWidth
         this.sizes.height = window.innerHeight
@@ -56,11 +62,51 @@ class World {
         }
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Handles the mousemove event
+     * @param event - the mousemove event
+     */
     onMouseMove(event) {
         event.preventDefault();
 
         this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
         this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Handles the click event
+     * @param event - the click event
+     */
+    onMouseDown(event) {
+        event.preventDefault();
+
+        if (event.button !== 0 || event.target !== this.canvas) {
+            return
+        }
+
+        this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+        const intersection = this.castRay()
+        if (!intersection) {
+            if (this.main.eventManager.modules.TileInfoManager.isTilesPlayerInfoOpen()) {
+                this.main.eventManager.modules.TileInfoManager.showHideTilesPlayerInfo()
+            }
+            return
+        }
+
+        const instanceMesh = intersection.object
+        const index = intersection.instanceId;
+        console.log(instanceMesh)
+
+        if (instanceMesh === this.gameMap.evenInstance || instanceMesh === this.gameMap.oddInstance) {
+            const [x, y] = this.gameMap.getTileCoordinate(instanceMesh, index)
+            const tileInfo = this.gameState.map[y][x]
+
+            this.main.eventManager.modules.TileInfoManager.switchToTileInfoView(tileInfo.resources, tileInfo.players)
+        }
     }
 
     /**
@@ -80,48 +126,62 @@ class World {
         this.updateManager.add(this, 'world')
     }
 
-    update() {
-        this.raycaster.setFromCamera( this.mouse, this.camera.instance );
-        if (!this.gameMap.evenInstance) {
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Casts a ray from the camera to the mouse position
+     * @returns the first object it intercepted, if no object was intercepted returns null
+     */
+    castRay() {
+        if (!this.raycaster || !this.gameMap.evenInstance) {
             return
         }
+
+        this.raycaster.setFromCamera( this.mouse, this.camera.instance );
 
         const intersection = this.raycaster.intersectObjects( [this.gameMap.evenInstance, this.gameMap.oddInstance, this.players.playerInstance], false);
 
         if ( intersection.length > 0 ) {
+            return intersection[0]
+        }
+        return null
+    }
 
-            if (this.previousHover.mesh) {
-                this.previousHover.mesh.setColorAt(this.previousHover.index, this.previousColor)
-                this.previousHover.mesh.instanceColor.needsUpdate = true;
-            }
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Updates the world
+     */
+    update() {
+        if (this.previousHover.mesh) {
+            this.previousHover.mesh.setColorAt(this.previousHover.index, this.previousColor)
+            this.previousHover.mesh.instanceColor.needsUpdate = true;
+        }
 
-            const instanceMesh = intersection[ 0 ].object
-            const index = intersection[ 0 ].instanceId;
+        const intersection = this.castRay()
+        if (!intersection) {
+            return
+        }
 
-            instanceMesh.getColorAt( index, this.hoverColor );
-            this.previousColor.copy(this.hoverColor)
-            if (instanceMesh === this.players.playerInstance) {
-                this.hoverColor.r += 0.2
-                this.hoverColor.g += 0.2
-                this.hoverColor.b += 0.2
-            }
-            else {
-                this.hoverColor.set(2, 2, 2)
-            }
+        const instanceMesh = intersection.object
+        const index = intersection.instanceId;
 
-            instanceMesh.setColorAt( index, this.hoverColor);
-            instanceMesh.instanceColor.needsUpdate = true;
-
-            this.previousHover.mesh = instanceMesh
-            this.previousHover.index = index
-            this.previousHover.color = this.previousColor
+        instanceMesh.getColorAt( index, this.hoverColor );
+        this.previousColor.copy(this.hoverColor)
+        if (instanceMesh === this.players.playerInstance) {
+            this.hoverColor.r += 0.2
+            this.hoverColor.g += 0.2
+            this.hoverColor.b += 0.2
         }
         else {
-            if (this.previousHover.mesh) {
-                this.previousHover.mesh.setColorAt(this.previousHover.index, this.previousColor)
-                this.previousHover.mesh.instanceColor.needsUpdate = true;
-            }
+            this.hoverColor.set(2, 2, 2)
         }
+
+        instanceMesh.setColorAt( index, this.hoverColor);
+        instanceMesh.instanceColor.needsUpdate = true;
+
+        this.previousHover.mesh = instanceMesh
+        this.previousHover.index = index
+        this.previousHover.color = this.previousColor
+
     }
 }
 
