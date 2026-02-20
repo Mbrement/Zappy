@@ -256,6 +256,7 @@ class Players {
         this.animatedPlayersMove = this.animatedPlayersMove.filter((player) => {
             const remove = player.passedTime > player.duration
             if (remove) {
+                this.playerInstance.getMatrixAt(player.index, this.positionningMatrix)
                 this.positionningMatrix.setPosition(player.endPosition)
                 this.playerInstance.setMatrixAt(player.index, this.positionningMatrix)
                 this.playerInstance.instanceMatrix.needsUpdate = true
@@ -292,6 +293,8 @@ class Players {
         this.animatedPlayersRotate = this.animatedPlayersRotate.filter((player) => {
             const remove = player.passedTime > player.duration
             if (remove) {
+                this.playerInstance.getMatrixAt(player.index, this.positionningMatrix)
+                this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
                 this.dummyObject.quaternion.copy(player.endRotation)
                 this.dummyObject.updateMatrix()
                 this.playerInstance.setMatrixAt(player.index, this.dummyObject.matrix)
