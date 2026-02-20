@@ -1,7 +1,6 @@
 class ConnectMenu {
     constructor() {
         this.instance = document.getElementById("connectMenu");
-        // this.hideConnectMenu()
         this.address = "";
         this.port = "";
     }
@@ -34,10 +33,8 @@ class ConnectMenu {
      * @author Emma (epolitze) Politzer
      * @description Removes errors from the connectMenu
      */
-    resetErrors() {
-        // document.getElementById('addressError').innerHTML = ""
-        // document.getElementById('portError').innerHTML = ""
-        // document.getElementById('connectionError').innerHTML = ""
+    removeError() {
+        document.getElementById('errorText').innerHTML = ""
     }
 
     /**
@@ -45,26 +42,8 @@ class ConnectMenu {
      * @description Shows port error on the connectMenu
      * @param error - the error message
      */
-    showPortError(error) {
-        // document.getElementById('portError').innerHTML = error
-    }
-
-    /**
-     * @author Emma (epolitze) Politzer
-     * @description Shows address error on the connectMenu
-     * @param error - the error message
-     */
-    showAddressError(error) {
-        // document.getElementById('addressError').innerHTML = error
-    }
-
-    /**
-     * @author Emma (epolitze) Politzer
-     * @description Shows address error on the connectMenu
-     * @param error - the error message
-     */
-    showConnectionError(error) {
-        // document.getElementById('connectionError').innerHTML = error
+    addError(error) {
+        document.getElementById('errorText').innerHTML = error
     }
 
 
@@ -74,16 +53,17 @@ class ConnectMenu {
      * This is called when the "connect" button is clicked
      */
     connect() {
-        window.mainInstance.connectToServer("localhost", 4242) // TEMPORARY
-        window.mainInstance.startVisualisation() // TEMPORARY
-        return // TEMPORARY
+        // window.mainInstance.connectToServer("localhost", 4242) // TEMPORARY
+        // window.mainInstance.startVisualisation() // TEMPORARY
+        // return // TEMPORARY
 
-        this.resetErrors();
         this.address = document.getElementById("address").value;
         this.port = document.getElementById("port").value;
 
+        this.removeError()
+
         if (!this.address) {
-            this.showAddressError("Address must be provided")
+            this.addError("Address must be provided")
             return
         }
 
@@ -91,7 +71,7 @@ class ConnectMenu {
             this.parsePort(this.port)
         }
         catch (error) {
-            this.showPortError(error)
+            this.addError(error.message)
             return;
         }
 
@@ -104,17 +84,6 @@ class ConnectMenu {
      */
     showConnectMenu() {
         this.instance.classList.remove('hidden');
-
-        //TODO: remove code under when log in is finalized
-
-        const broadcastContainer = document.getElementById('broadcastContainer')
-        broadcastContainer.classList.add('hidden')
-
-        const tilesPlayerInfoContainer = document.getElementById('tilesPlayerInfoContainer')
-        tilesPlayerInfoContainer.classList.add('hidden')
-
-        const changeThemeMusicContainer = document.getElementById('changeThemeMusicContainer')
-        changeThemeMusicContainer.classList.add('hidden')
     }
 
     /**
@@ -123,17 +92,6 @@ class ConnectMenu {
      */
     hideConnectMenu() {
         this.instance.classList.add('hidden');
-
-        //TODO: remove code under when log in is finalized
-
-        const broadcastContainer = document.getElementById('broadcastContainer')
-        broadcastContainer.classList.remove('hidden')
-
-        const tilesPlayerInfoContainer = document.getElementById('tilesPlayerInfoContainer')
-        tilesPlayerInfoContainer.classList.remove('hidden')
-
-        const changeThemeMusicContainer = document.getElementById('changeThemeMusicContainer')
-        changeThemeMusicContainer.classList.remove('hidden')
     }
 
 }

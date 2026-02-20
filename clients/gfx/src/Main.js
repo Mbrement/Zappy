@@ -20,6 +20,7 @@ class Main {
         this.messageHandler = new MessageHandler();
         this.resources = new Resources(textures);
 
+        // TODO : Remove this
         // for (let i = 0; i < 50; i++) {
         //     for (let j = 0; j < 50; j++) {
         //         console.log(`bct ${j} ${i} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)}`)
@@ -45,10 +46,53 @@ class Main {
 
     /**
      * @author Emma (epolitze) Politzer
+     * @description Got connection error - We show the connection menu
+     */
+    connectError() {
+        this.networkClient = null
+        this.switchToConnectionMenu()
+        this.eventManager.modules.ConnectMenu.addError("Failed to connect")
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Switch UI to connection menu
+     */
+    switchToConnectionMenu() {
+        this.eventManager.modules.ConnectMenu.showConnectMenu()
+
+        const broadcastContainer = document.getElementById('broadcastContainer')
+        broadcastContainer.classList.add('hidden')
+
+        const tilesPlayerInfoContainer = document.getElementById('tilesPlayerInfoContainer')
+        tilesPlayerInfoContainer.classList.add('hidden')
+
+        const changeThemeMusicContainer = document.getElementById('changeThemeMusicContainer')
+        changeThemeMusicContainer.classList.add('hidden')
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Switch UI to game UI
+     */
+    switchToGameUI() {
+        this.eventManager.modules.ConnectMenu.hideConnectMenu()
+
+        const broadcastContainer = document.getElementById('broadcastContainer')
+        broadcastContainer.classList.remove('hidden')
+
+        const tilesPlayerInfoContainer = document.getElementById('tilesPlayerInfoContainer')
+        tilesPlayerInfoContainer.classList.remove('hidden')
+
+        const changeThemeMusicContainer = document.getElementById('changeThemeMusicContainer')
+        changeThemeMusicContainer.classList.remove('hidden')
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
      * @description Hides the connectMenu and starts the 3D visualisation
      */
     startVisualisation() {
-        this.eventManager.modules.ConnectMenu.hideConnectMenu()
         this.networkClient.send("GRAPHIC\n")
         this.world.createWorld()
         this.messageHandler.world = window.worldInstance

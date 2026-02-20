@@ -1,5 +1,6 @@
 class MessageHandler {
     constructor() {
+        this.handleConnectBind = this.handleConnect.bind(this)
         this.handleMessageBind = this.handleMessage.bind(this)
         this.handleErrorBind = this.handleError.bind(this)
 
@@ -24,8 +25,17 @@ class MessageHandler {
         this.networkClient = window.mainInstance.networkClient
         this.gameState = window.mainInstance.gameState
         this.broadcastManager = window.mainInstance.broadcastManager
+        this.networkClient.on('connect', this.handleConnectBind)
         this.networkClient.on('message', this.handleMessageBind)
         this.networkClient.on('error', this.handleErrorBind)
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description When socket connection is created hide connection menu
+     */
+    handleConnect() {
+        window.mainInstance.switchToGameUI()
     }
 
     /**
@@ -34,8 +44,9 @@ class MessageHandler {
      * the connection screen and display an error
      */
     handleError() {
-        window.mainInstance.eventManager.modules.ConnectMenu.showConnectMenu()
-        window.mainInstance.eventManager.modules.ConnectMenu.showConnectionError("Couldn't connect to server")
+        this.networkClient.off('message', this.handleMessageBind)
+        this.networkClient.off('error', this.handleErrorBind)
+        window.mainInstance.connectError()
     }
 
     /**
@@ -456,6 +467,8 @@ class MessageHandler {
         // TODO : Animate end of game and display winning team #n
 
         this.broadcastManager.clearBroadcast()
+
+        this.networkClient.closeSocket()
     }
 
 }
