@@ -69,7 +69,7 @@ impl CommandManager {
             .push_back((name.clone(), token, arg.clone()));
     }
 
-    fn add_to_queue_internal(&mut self, name: String, token: mio::Token, arg: String) {
+    pub(crate) fn add_to_queue_internal(&mut self, name: String, token: mio::Token, arg: String) {
         // #[cfg(feature = "log")]
         // println!(
         //     "Try to dded command '{}' to queue for token {:?} withargs: {}. queu len : {}",
@@ -495,7 +495,8 @@ impl CommandManager {
                 ._game
                 .map
                 .egg_position
-                .insert(server._game._tick, (x, y, client.get_token()));
+                .insert( server._game.map.egg_id_counter, (x, y, client.get_token(),server._game._tick));
+			server._game.map.egg_id_counter += 1;
             client
                 .get_socket_mut()
                 .write(format!("{}", define::R_OK).as_bytes());
@@ -513,6 +514,8 @@ impl CommandManager {
                 let mut client = server._clients.get_mut(&_c).unwrap();
                 client.hunger = 1260; //this line scare me
                 client.inventory[0] = 1260;
+				client.was_egg = _arg.parse().unwrap_or(0);
+
             },
         );
         self.register(
@@ -521,7 +524,7 @@ impl CommandManager {
                 #[cfg(feature = "log")]
                 debug_manager_register("egg_waiting", _c, server, _arg);
                 // println!("\n\nhere in egg_waiting\n\n");
-                for (tick, (x, y, token)) in &server._game.map.egg_position {
+                for (egg_id, (x, y, token, tick)) in &server._game.map.egg_position {
                     if tick < &server._game._tick {
                         let team_name = server.get_team_for_player(&token);
                         let tmp = server._max_clients.get_mut(&team_name);
@@ -540,7 +543,7 @@ impl CommandManager {
                 debug_manager_register("egg_death", _c, server, _arg);
                 // Collect ticks to remove first to avoid mutably borrowing egg_position
                 let mut ticks_to_remove: Vec<u128> = Vec::new();
-                for (tick, (x, y, token)) in server._game.map.egg_position.iter() {
+                for (egg_id, (x, y, token, tick)) in server._game.map.egg_position.iter() {
                     if tick < &server._game._tick {
                         let team_name = server.get_team_for_player(&token);
                         let tmp = server._max_clients.get_mut(&team_name);
@@ -549,7 +552,7 @@ impl CommandManager {
                                 *v -= 1;
                             }
                         }
-                        ticks_to_remove.push(*tick);
+                        ticks_to_remove.push(*egg_id);
                         break;
                     }
                 }
