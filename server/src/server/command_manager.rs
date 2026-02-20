@@ -10,7 +10,7 @@ pub type CommandFn = Box<dyn Fn(mio::Token, &mut Server, &str)>;
 pub type CommandArgs = (String, mio::Token, String);
 pub struct CommandManager {
     order: HashMap<Token, VecDeque<CommandArgs>>,
-    next_execute: HashMap<Token, u128>,
+    pub(crate) next_execute: HashMap<Token, u128>,
     egg_waiting: HashMap<String, Vec<u128>>,
     commands: HashMap<String, CommandFn>,
 }

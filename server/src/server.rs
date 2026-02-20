@@ -432,7 +432,8 @@ impl Server {
                                                         cmd == self.get_team_for_player(&pos.2)
                                                     })
                                                     .map(|(k, v)| (*k, v.0, v.1));
-
+                                                let Some((egg_id, _, _)) =found else {continue;};
+                                                _command_manager.next_execute.insert(token, egg_id); //get the tick of the hatching of the egg);
                                                 self._game.spawn_player(player_token, &cmd, found)
                                             };
 
