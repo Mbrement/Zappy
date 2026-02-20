@@ -138,11 +138,6 @@ impl CommandManager {
                     let _ = client
                         .get_socket_mut()
                         .write(format!("{}", define::R_OK).as_bytes());
-                    /*
-                    graphic::send_graphic_clients(
-                        graphic::player_pos(client),
-                        server
-                    );*/
                     server.send_to_graph += &graphic::player_pos(client);
                 }
             },
@@ -159,11 +154,6 @@ impl CommandManager {
                     let _ = client
                         .get_socket_mut()
                         .write(format!("{}", define::R_OK).as_bytes());
-                    /*
-                    graphic::send_graphic_clients(
-                        graphic::player_pos(client),
-                        server
-                    );*/
                     server.send_to_graph += &graphic::player_pos(client);
                 }
             },
@@ -187,11 +177,6 @@ impl CommandManager {
                 let _ = client
                     .get_socket_mut()
                     .write(format!("{}", define::R_OK).as_bytes());
-                /*
-                graphic::send_graphic_clients(
-                    graphic::player_pos(client),
-                    server
-                );*/
                 server.send_to_graph += &graphic::player_pos(client);
             },
         );
@@ -391,7 +376,6 @@ impl CommandManager {
                         );
                     }
                 }
-                //graphic::send_graphic_clients(graphic::player_broadcast(&_c, _arg), server);
                 server.send_to_graph += &graphic::player_broadcast(&_c, _arg);
             },
         );
@@ -400,7 +384,6 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 utils::debug_manager_register("incantation", _c, server, _arg);
-                //bgein incannt event
             },
         );
         self.register(
@@ -501,7 +484,7 @@ impl CommandManager {
                 .write(format!("{}", define::R_OK).as_bytes());
 
             //debut de fork
-            //server.send_to_graph += &graphic::fork(&client.token), server);
+            server.send_to_graph += &graphic::fork(&client.token);
         });
         self.register(
             "spawning",
@@ -528,6 +511,7 @@ impl CommandManager {
                         if let Some(v) = tmp {
                             *v += 1;
                         }
+                        server.send_to_graph += &graphic::end_fork(&token);
                     }
                 }
                 //end fork
@@ -688,15 +672,15 @@ impl CommandManager {
                                     })
                                     .map(|(tok, _)| *tok)
                                     .collect();
-                                for player in player_incanting {
+                                for player in &player_incanting {
                                     if (self.next_execute.get(&player).is_none()) {
-                                        self.next_execute.insert(player, 0);
+                                        self.next_execute.insert(*player, 0);
                                     }
                                     self.next_execute
-                                        .insert(player, self.next_execute[&player] + 300);
+                                        .insert(*player, self.next_execute[&player] + 300);
                                     self.add_to_queue_internal(
                                         "incantation_internal".to_string(),
-                                        player,
+                                        *player,
                                         "".to_string(),
                                     );
                                     let mut client = server._clients.get_mut(&player);
@@ -711,6 +695,7 @@ impl CommandManager {
                                         .write(format!("{}\n", "elevation en cours").as_bytes());
                                     client.is_incanting = true;
                                 }
+                                server.send_to_graph += &graphic::start_incant(player_incanting, token, server);
                             }
                             // self.add_to_queue_internal(
                             //     "incantation_internal".to_string(),
@@ -740,7 +725,6 @@ impl CommandManager {
             }
         }
         // self.execute_admin_commands(server);
-        //TODO-mrozniec: send all graph client
         let mut egg_remove = Vec::new();
         for (team, eggs) in self.egg_waiting.iter() {
             for egg in eggs {
@@ -756,6 +740,8 @@ impl CommandManager {
                 eggs.retain(|e| e != &egg);
             });
         }
+        graphic::send_graphic_clients(server.send_to_graph.clone(), server);
+        server.send_to_graph.clear();
     }
 
     // fn execute_admin_commands(&mut self, server: &mut Server) {
@@ -850,11 +836,6 @@ fn expulse_player(server: &mut Server, token: Token) -> bool {
             expelled = true;
         }
     }
-    /*
-    graphic::send_graphic_clients(
-        graphic::event_fus_ro_dah(players, token),
-        server
-    );*/
     let send_to_graph: String = graphic::event_fus_ro_dah(players, token);
     server.send_to_graph += &send_to_graph;
 

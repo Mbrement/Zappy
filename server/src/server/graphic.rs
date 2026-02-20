@@ -97,7 +97,15 @@ pub(crate) fn player_broadcast(token: &Token, message: &str) -> String {
 }
 
 //TODO après gestion par micka
-//fn start_incant() -> String {}
+pub(crate) fn start_incant(tokens:Vec<Token>, origin: Token, server: &Server) -> String {
+    let mut res = String::new();
+    let (x, y) = server._game.get_player_position(origin);
+    res += &format!("pic {} {} {}", x, y, server._clients.get(&origin).unwrap().level);
+    for token in tokens {
+        res += &format!(" {:?}", token);
+    }
+    res
+}
 
 fn end_incant(x: u32, y: u32, success: bool) -> String {
     if success {
@@ -111,9 +119,8 @@ pub(crate) fn fork(token: &Token) -> String {
     format!("pfk {:?}\n", token)
 }
 
-// voir avec micka
 pub(crate) fn end_fork(token: &Token) -> String {
-    format!("pfk {:?}\n", token)
+    format!("enw {:?}\n", token)
 }
 
 fn player_drop_item(player: &Client, item_num: usize) -> String {
@@ -180,7 +187,6 @@ pub(crate) fn event_take_an_item(server: &Server, token: &Token, item_num: usize
     res += &player_pick_item(player, item_num);
     res += &player_inventory(player);
     res += &content_tile(x, y, &server._game.map.get_tiles()[y as usize][x as usize]);
-    //send_graphic_clients(res, server);
     res
 }
 
@@ -193,7 +199,6 @@ pub(crate) fn event_drop_an_item(server: &Server, token: &Token, item_num: usize
     res += &player_drop_item(player, item_num);
     res += &player_inventory(player);
     res += &content_tile(x, y, &server._game.map.get_tiles()[y as usize][x as usize]);
-    //send_graphic_clients(res, server);
     res
 }
 
@@ -220,7 +225,6 @@ pub(crate) fn event_incant_end(server: &mut Server, success: bool, token: Token)
     }
     res += &content_tile(x, y, tile);
     res
-    //send_graphic_clients(res, server);
 }
 
 pub(crate) fn send_graphic_clients(command: String, server: &mut Server) {
