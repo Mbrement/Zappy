@@ -159,8 +159,8 @@ class Players {
         this.playerInstance.instanceColor.needsUpdate = true
     }
 
-    rotatePlayer(init, playerState, orientation) {
-        const index = this.getPlayerById(playerState.id)
+    rotatePlayer(init, playerId, orientation) {
+        const index = this.getPlayerById(playerId)
         const totalTime = actionTicks.droite * this.tickTime
 
         this.playerInstance.getMatrixAt(index, this.positionningMatrix)
@@ -213,8 +213,8 @@ class Players {
         this.playerInstance.instanceMatrix.needsUpdate = true
     }
 
-    positionPlayer(init, playerState, x, y) {
-        const index = this.getPlayerById(playerState.id)
+    positionPlayer(init, playerId, x, y, playerState) {
+        const index = this.getPlayerById(playerId)
         const totalTime = actionTicks.avance * this.tickTime
 
         this.playerInstance.getMatrixAt(index, this.positionningMatrix)
@@ -248,13 +248,13 @@ class Players {
     }
 
     movePlayer(playerInfo, playerState, init=false) {
-        const [_, x, y, orientation] = playerInfo
+        const [playerId, x, y, orientation] = playerInfo
 
         if (init || playerState.x !== x || playerState.y !== y) {
-            this.positionPlayer(init, playerState, x, y)
+            this.positionPlayer(init, playerId, x, y, playerState)
         }
         if (init || playerState.orientation !== orientation) {
-            this.rotatePlayer(init, playerState, orientation)
+            this.rotatePlayer(init, playerId, orientation)
         }
         this.playerInstance.instanceMatrix.needsUpdate = true
     }
@@ -332,8 +332,8 @@ class Players {
         })
     }
 
-    removePlayer(playerState) {
-        const index = this.getPlayerById(playerState.id)
+    removePlayer(playerId, playerState) {
+        const index = this.getPlayerById(playerId)
         this.playerMeshes.set(index, null)
 
         this.positionningMatrix.setPosition(9999, 9999, 9999)

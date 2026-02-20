@@ -363,7 +363,7 @@ class MessageHandler {
 
         // TODO : Animate player #n dying
 
-        this.world.players.removePlayer(oldState)
+        this.world.players.removePlayer(id, oldState)
     }
 
     /**
