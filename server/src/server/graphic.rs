@@ -96,7 +96,6 @@ pub(crate) fn player_broadcast(token: &Token, message: &str) -> String {
     format!("pbc {:?} {}", token, message)
 }
 
-//TODO après gestion par micka
 pub(crate) fn start_incant(tokens:Vec<Token>, origin: Token, server: &Server) -> String {
     let mut res = String::new();
     let (x, y) = server._game.get_player_position(origin);
@@ -104,6 +103,7 @@ pub(crate) fn start_incant(tokens:Vec<Token>, origin: Token, server: &Server) ->
     for token in tokens {
         res += &format!(" {:?}", token);
     }
+    res += "\n";
     res
 }
 
@@ -135,13 +135,20 @@ pub(crate) fn player_death(token: &Token) -> String {
     format!("pdi {:?}\n", token)
 }
 
-//TODO: attente que mbrement ajoute l'id au oeufs
-//fn egg_laid(player: Client) -> String {
-//    let (x, y) = player.position;
-//    format!("enw {} {:?} {} {}\n", ???, player.token, x, y)
-//}
+pub(crate) fn egg_hatches(token: &Token, server: &Server) -> String {
+    let mut res = String::new();
+    let player = server._clients.get(token).unwrap();
 
-//fn egg_hatches() -> String {}
+    if player.was_egg > 0 {
+        res += &format!("eht {}\n", player.was_egg);
+    }
+    res += &new_player(server.get_team_for_player(&player.token),player);
+    res
+}
+
+pub(crate) fn rotten_egg(egg_id: u128) -> String {
+    format!("edi {}", egg_id)
+}
 
 fn get_time_unit(tick: u64) -> String {
     format!("sgt {}\n", tick)
@@ -180,7 +187,7 @@ pub(crate) fn event_graph_connect(server: &Server) -> String {
 
 pub(crate) fn event_take_an_item(server: &Server, token: &Token, item_num: usize) -> String {
     let mut res = String::new();
-    let player = server._clients.get(token).unwrap(); // fixed the unwrap
+    let player = server._clients.get(token).unwrap();
 
     let (x, y) = player.position;
 
