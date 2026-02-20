@@ -82,6 +82,7 @@ class GameState {
         const [id, x, y, orientation, level] = playerInfo
 
         this.playerInfo.set(id, {
+            id,
             x,
             y,
             orientation,
@@ -201,8 +202,8 @@ class GameState {
     }
 
     deletePlayer(playerId) {
-        const player = this.playerInfo.get(playerId)
-        this.map[player.y][player.x].players = this.map[player.y][player.x].players.filter((player) => player.id !== playerId)
+        const deletedPlayer = this.playerInfo.get(playerId)
+        this.map[deletedPlayer.y][deletedPlayer.x].players = this.map[deletedPlayer.y][deletedPlayer.x].players.filter((player) => player.id !== playerId)
 
         this.playerInfo.delete(playerId)
 
