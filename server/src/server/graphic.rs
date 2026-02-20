@@ -171,7 +171,7 @@ pub(crate) fn event_graph_connect(server: &Server) -> String {
     res
 }
 
-pub(crate) fn event_take_an_item(server: & Server, token: &Token, item_num: usize) -> String {
+pub(crate) fn event_take_an_item(server: &Server, token: &Token, item_num: usize) -> String {
     let mut res = String::new();
     let player = server._clients.get(token).unwrap(); // fixed the unwrap
 
@@ -184,7 +184,7 @@ pub(crate) fn event_take_an_item(server: & Server, token: &Token, item_num: usiz
     res
 }
 
-pub(crate) fn event_drop_an_item(server: & Server, token: &Token, item_num: usize) -> String {
+pub(crate) fn event_drop_an_item(server: &Server, token: &Token, item_num: usize) -> String {
     let mut res = String::new();
     let player = server._clients.get(token).unwrap();
 
