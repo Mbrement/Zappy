@@ -52,7 +52,7 @@ fn new_player(team: String, player: &Client) -> String {
     )
 }
 
-fn player_pos(player: &Client) -> String {
+pub(crate) fn player_pos(player: &Client) -> String {
     let (x, y) = player.position;
     format!(
         "ppo {:?} {} {} {}\n",
@@ -92,8 +92,8 @@ fn leonidas(token: &Token) -> String {
     format!("pex {:?}\n", token)
 }
 
-fn player_broadcast(player: &Client, message: String) -> String {
-    format!("pbc {:?} {}", player.token, message)
+pub(crate) fn player_broadcast(token: &Token, message: &str) -> String {
+    format!("pbc {:?} {}", token, message)
 }
 
 //TODO après gestion par micka
@@ -107,8 +107,13 @@ fn end_incant(x: u32, y: u32, success: bool) -> String {
     }
 }
 
-fn birth_egg(player: Client) -> String {
-    format!("pfk {:?}\n", player.token)
+pub(crate) fn fork(token: &Token) -> String {
+    format!("pfk {:?}\n", token)
+}
+
+// voir avec micka
+pub(crate) fn end_fork(token: &Token) -> String {
+    format!("pfk {:?}\n", token)
 }
 
 fn player_drop_item(player: &Client, item_num: usize) -> String {
@@ -119,8 +124,8 @@ fn player_pick_item(player: &Client, item_num: usize) -> String {
     format!("pgt {:?} {}\n", player.token, item_num)
 }
 
-fn player_death(player: &Client) -> String {
-    format!("pdi {:?}\n", player.token)
+pub(crate) fn player_death(token: &Token) -> String {
+    format!("pdi {:?}\n", token)
 }
 
 //TODO: attente que mbrement ajoute l'id au oeufs
@@ -135,7 +140,7 @@ fn get_time_unit(tick: u64) -> String {
     format!("sgt {}\n", tick)
 }
 
-fn end_game(winner: String) -> String {
+pub(crate) fn end_game(winner: String) -> String {
     format!("seg {}\n", winner)
 }
 
@@ -151,7 +156,7 @@ fn bad_param() -> String {
     String::from("sbp\n")
 }
 
-pub fn event_graph_connect(server: &Server) -> String {
+pub(crate) fn event_graph_connect(server: &Server) -> String {
     let mut res = String::new();
 
     res += &map_size(server._game.map.get_width(), server._game.map.get_height());
@@ -166,7 +171,7 @@ pub fn event_graph_connect(server: &Server) -> String {
     res
 }
 
-pub fn event_take_an_item(server: &mut Server, token: &Token, item_num: usize) {
+pub(crate) fn event_take_an_item(server: & Server, token: &Token, item_num: usize) -> String {
     let mut res = String::new();
     let player = server._clients.get(token).unwrap(); // fixed the unwrap
 
@@ -175,10 +180,11 @@ pub fn event_take_an_item(server: &mut Server, token: &Token, item_num: usize) {
     res += &player_pick_item(player, item_num);
     res += &player_inventory(player);
     res += &content_tile(x, y, &server._game.map.get_tiles()[y as usize][x as usize]);
-    send_graphic_clients(res, server);
+    //send_graphic_clients(res, server);
+    res
 }
 
-pub fn event_drop_an_item(server: &mut Server, token: &Token, item_num: usize) {
+pub(crate) fn event_drop_an_item(server: & Server, token: &Token, item_num: usize) -> String {
     let mut res = String::new();
     let player = server._clients.get(token).unwrap();
 
@@ -187,10 +193,11 @@ pub fn event_drop_an_item(server: &mut Server, token: &Token, item_num: usize) {
     res += &player_drop_item(player, item_num);
     res += &player_inventory(player);
     res += &content_tile(x, y, &server._game.map.get_tiles()[y as usize][x as usize]);
-    send_graphic_clients(res, server);
+    //send_graphic_clients(res, server);
+    res
 }
 
-pub fn event_fus_ro_dah(players: Vec<&mut Client>, token: Token) -> String {
+pub(crate) fn event_fus_ro_dah(players: Vec<&mut Client>, token: Token) -> String {
     let mut res = String::new();
 
     res += &leonidas(&token);
@@ -200,29 +207,24 @@ pub fn event_fus_ro_dah(players: Vec<&mut Client>, token: Token) -> String {
         }
     }
     res
-    //send_graphic_clients(res, server);
 }
 
-pub fn event_incant_end(server: &mut Server, success: bool, token: Token) {
+pub(crate) fn event_incant_end(server: &mut Server, success: bool, token: Token) -> String {
     let mut res = String::new();
     let (x, y) = server._game.get_player_position(token);
     let tile: &Tile = &server.get_map().get_tiles()[y as usize][x as usize];
 
     for player in server._incantation_list.get(&token).unwrap() {
-        //THIS WILL CRASH IF THE TOKEN IS NOT IN THE INCANTATION LIST
         let player: &Client = server._clients.get(player).unwrap();
         res += &player_level(player);
     }
     res += &content_tile(x, y, tile);
-    send_graphic_clients(res, server);
+    res
+    //send_graphic_clients(res, server);
 }
 
-pub fn send_graphic_clients(command: String, server: &mut Server) {
+pub(crate) fn send_graphic_clients(command: String, server: &mut Server) {
     for graph_client in server.get_clients_by_type_mut(define::GRAPHICAL_CLIENT) {
         let _ = graph_client.get_socket_mut().write(command.as_bytes());
-        graph_client
-            .get_socket_mut()
-            .write("pouet\n".as_bytes())
-            .unwrap();
     }
 }
