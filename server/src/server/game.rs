@@ -139,7 +139,12 @@ impl Game {
         }
     }
 
-    pub fn spawn_player(&mut self, token: Token, team: &str, found: Option<(u128, u32, u32)>) -> (u32, u32) {
+    pub fn spawn_player(
+        &mut self,
+        token: Token,
+        team: &str,
+        found: Option<(u128, u32, u32)>,
+    ) -> (u32, u32) {
         // find an egg matching the team and copy its key and coords out of the borrow
         // let found = self
         //     .map

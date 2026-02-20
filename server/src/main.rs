@@ -141,7 +141,7 @@ fn main() -> std::io::Result<()> {
             }
         }
         #[cfg(feature = "log")]
-        println!("Server teams: {:?}", server.teams);
+        println!("Server teams: {:?}", server._game.team);
         if server._game.team.is_empty() {
             eprintln!("No teams found, please add teams using the -n option");
             return Err(std::io::Error::new(

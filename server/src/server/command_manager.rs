@@ -1,6 +1,7 @@
+use crate::server;
+use crate::server::utils::debug_manager_register;
 use crate::server::{Server, define, utils};
 use crate::server::{client, graphic};
-use crate::server;
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
@@ -294,7 +295,8 @@ impl CommandManager {
                     }
                 }
                 if sucess {
-                    server.send_to_graph += &graphic::event_take_an_item(server, &_c, define::ITEMS_DICT[_arg]);
+                    server.send_to_graph +=
+                        &graphic::event_take_an_item(server, &_c, define::ITEMS_DICT[_arg]);
                 }
             },
         );
@@ -315,11 +317,8 @@ impl CommandManager {
                 }
             }
             if sucess {
-                server.send_to_graph += &graphic::event_drop_an_item(
-                    server,
-                    &_c,
-                    define::ITEMS_DICT[_arg]
-                );
+                server.send_to_graph +=
+                    &graphic::event_drop_an_item(server, &_c, define::ITEMS_DICT[_arg]);
             }
         });
         self.register(
@@ -418,7 +417,8 @@ impl CommandManager {
                     //il faut vérifier pour chacune des teams qui ont un membre qui est passé lvl8 lors de l'incantation
                     //proposition de solution:
                     for player in server._incantation_list.get(&_c).unwrap() {
-                        if sucess && org_player_level + 1 == 8 && server.check_win_condition(player) {
+                        if sucess && org_player_level + 1 == 8 && server.check_win_condition(player)
+                        {
                             victory = graphic::end_game(server.get_team_for_player(player));
                         }
                     }
@@ -455,7 +455,6 @@ impl CommandManager {
                     //graphic::event_incant_end(server, sucess, _c);
                     let send_to_graph: String = graphic::event_incant_end(server, sucess, _c);
                     server.send_to_graph += &send_to_graph;
-                    
                 }
             },
         );
@@ -504,13 +503,18 @@ impl CommandManager {
             //debut de fork
             //server.send_to_graph += &graphic::fork(&client.token), server);
         });
-        self.register("spawning", |_c: mio::Token, server: &mut Server, _arg: &str| {
-            #[cfg(feature = "log")]
-            utils::debug_manager_register("spawning", _c, server, _arg);
-            //player hatch
-            println!("pouet\n")
-            
-        });
+        self.register(
+            "spawning",
+            |_c: mio::Token, server: &mut Server, _arg: &str| {
+                #[cfg(feature = "log")]
+                utils::debug_manager_register("spawning", _c, server, _arg);
+                //player hatch
+                println!("pouet\n");
+                let mut client = server._clients.get_mut(&_c).unwrap();
+                client.hunger = 1260; //this line scare me
+                client.inventory[0] = 1260;
+            },
+        );
         self.register(
             "egg_waiting",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
@@ -549,12 +553,12 @@ impl CommandManager {
                         break;
                     }
                 }
-				println!("{:?}", server._game.map.egg_position);
+                println!("{:?}", server._game.map.egg_position);
                 for t in ticks_to_remove {
                     server._game.map.egg_position.remove(&t);
-					// self.egg_waiting.remove(&t);
+                    // self.egg_waiting.remove(&t);
                 }
-				println!("{:?}", server._game.map.egg_position);
+                println!("{:?}", server._game.map.egg_position);
             },
         );
     }
@@ -574,11 +578,23 @@ impl CommandManager {
                 let tick = server._game._tick;
                 let width = server._game.map.get_width();
                 let height = server._game.map.get_height();
+				let player_by_team: HashMap<String, usize> = server
+					._game
+					.team
+					.iter()
+					.map(|(team_name, player_tokens)| (team_name.clone(), player_tokens.len()))
+					.collect();
+				let max_players_by_team: HashMap<String, u32> = server
+					._max_clients
+					.iter()
+					.map(|(team_name, max_players)| (team_name.clone(), *max_players))
+					.collect();
 
                 let response = format!(
-                    "Server status:\nTick/s: {}\nTicks since game started : {}\nPlayers: {}\nGraphics clients: {}\nAdmins: {}\nTeams: {:?}\nMap size: {}x{}\n",
-                    ticks, tick, len, graphics, admins, teams, width, height
+                    "Server status:\nTick/s: {}\nTicks since game started : {}\nPlayers: {}\nGraphics clients: {}\nAdmins: {}\nTeams: {:?}\nMap size: {}x{}\nPlayers by team: {:?}\nMax players by team: {:?}\n",
+                    ticks, tick, len, graphics, admins, teams, width, height, player_by_team, max_players_by_team
                 );
+				println!("{:?}", server._game.team);
                 for client in server.get_clients_by_type_mut(define::ROLE_ADMIN) {
                     let _ = client.get_socket_mut().write(response.as_bytes());
                 }
@@ -638,7 +654,9 @@ impl CommandManager {
                             "incantation_internal" => {
                                 self.next_execute.insert(token, server._game._tick + 300)
                             }
-                            "egg_waiting" => self.next_execute.insert(token, server._game._tick + 42),
+                            "egg_waiting" => {
+                                self.next_execute.insert(token, server._game._tick + 42)
+                            }
                             "egg_death" => self.next_execute.insert(token, server._game._tick),
                             "connect_nbr" | "incantation" => {
                                 self.next_execute.insert(token, server._game._tick)
@@ -701,19 +719,19 @@ impl CommandManager {
                             // );
                         } else if command.as_str() == "fork" {
                             // For fork, we want to add the new command to the front of the queue, so we use add_to_queue_internal
-                            
+
                             self.egg_waiting
-                            .entry(server.get_team_for_player(&token))
-                            .or_insert_with(Vec::new)
-                            .push(server._game._tick + 642);
-                        self.order.get_mut(&token).unwrap().pop_front();
-                        self.add_to_queue_internal(
-                            "egg_waiting".to_string(),
-                            token,
-                            "".to_string(), 
-                        );
-                        // println!("{} {}", server._game._tick, self.next_execute.get(token));
-                        self.next_execute.insert(token, server._game._tick + 42);
+                                .entry(server.get_team_for_player(&token))
+                                .or_insert_with(Vec::new)
+                                .push(server._game._tick + 642);
+                            self.order.get_mut(&token).unwrap().pop_front();
+                            self.add_to_queue_internal(
+                                "egg_waiting".to_string(),
+                                token,
+                                "".to_string(),
+                            );
+                            // println!("{} {}", server._game._tick, self.next_execute.get(token));
+                            self.next_execute.insert(token, server._game._tick + 42);
                         } else {
                             self.order.get_mut(&token).unwrap().pop_front();
                         }
@@ -723,21 +741,21 @@ impl CommandManager {
         }
         // self.execute_admin_commands(server);
         //TODO-mrozniec: send all graph client
-		let mut egg_remove = Vec::new();
+        let mut egg_remove = Vec::new();
         for (team, eggs) in self.egg_waiting.iter() {
             for egg in eggs {
                 if *egg <= server._game._tick {
                     self.execute("egg_death", mio::Token(0), team, server);
-					egg_remove.push(egg.clone());
-					break;
+                    egg_remove.push(egg.clone());
+                    break;
                 }
             }
         }
-		for egg in egg_remove {
-			self.egg_waiting.iter_mut().for_each(|(_team, eggs)| {
-				eggs.retain(|e| e != &egg);
-			});
-		}
+        for egg in egg_remove {
+            self.egg_waiting.iter_mut().for_each(|(_team, eggs)| {
+                eggs.retain(|e| e != &egg);
+            });
+        }
     }
 
     // fn execute_admin_commands(&mut self, server: &mut Server) {

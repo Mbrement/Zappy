@@ -251,7 +251,7 @@ impl Server {
                     None
                 }
             }) {
-				println!("Decreasing max clients for team ");
+                println!("Decreasing max clients for team ");
                 if let Some(max) = self._max_clients.get_mut(&team_name)
                     && self._max_clients_per_team < *max
                 {
@@ -288,7 +288,8 @@ impl Server {
                 eprintln!("Failed to poll events");
                 return;
             }
-            for event in self._events.iter() {
+            let events_snapshot: Vec<mio::event::Event> = self._events.iter().cloned().collect();
+            for event in events_snapshot.iter() {
                 if event.token() == self._client_token {
                     // loop {
                     match self._socket.accept() {
@@ -400,19 +401,16 @@ impl Server {
                                             cmd,
                                             self._max_clients.get(&cmd)
                                         );
-                                        println!(
-                                            "Current clients in team '{}': {:?}",
-                                            cmd,
-                                            self._game.team.get(&cmd)
-                                        );
-                                        if self._game.team[&cmd].len() < self._max_clients[&cmd] as usize
+                                        if self._game.team[&cmd].len()
+                                            < self._max_clients[&cmd] as usize
                                         {
-                                            // drop the mutable borrow of `client` so we can borrow `self` again safely
                                             let player_token = token;
                                             drop(client);
-
-                                            // now it's safe to mutate server structures and compute spawn position
-                                            self._game.team.get_mut(&cmd).unwrap().push(player_token);
+                                            // self._game
+                                            //     .team
+                                            //     .get_mut(&cmd)
+                                            //     .unwrap()
+                                            //     .push(player_token);
 
                                             let position = if !self._game.starting {
                                                 (
@@ -424,7 +422,8 @@ impl Server {
                                                     ),
                                                 )
                                             } else {
-                                                let found = self._game
+                                                let found = self
+                                                    ._game
                                                     .map
                                                     .egg_position
                                                     .iter()
@@ -432,29 +431,37 @@ impl Server {
                                                         cmd == self.get_team_for_player(&pos.2)
                                                     })
                                                     .map(|(k, v)| (*k, v.0, v.1));
-                                                let Some((egg_id, _, _)) =found else {continue;};
-                                                _command_manager.next_execute.insert(token, egg_id); //get the tick of the hatching of the egg);
+                                                let (egg_id, _, _) = found .unwrap_or((0, 0,0));
+                                                _command_manager.next_execute.insert(token, egg_id + 600); //get the tick of the hatching of the egg);
                                                 _command_manager.add_to_queue(
-                                        "spawning".to_string(),
-                                        token,
-                                        "".to_string(),
-                                    );
-                                    // println!("here\n");
+                                                    "spawning".to_string(),
+                                                    token,
+                                                    "".to_string(),
+                                                );
+                                                println!("{:?}, {:?}", _command_manager.next_execute[&token], self._game._tick);
                                                 self._game.spawn_player(player_token, &cmd, found)
                                             };
 
                                             // re-borrow the client to set its fields and write responses
-                                            if let Some(client) = self._clients.get_mut(&player_token) {
+                                            if let Some(client) =
+                                                self._clients.get_mut(&player_token)
+                                            {
                                                 client.r#type = define::ROLE_PLAYER.to_string();
                                                 client.position = position;
 
-                                                self._game
-                                                    .update_player_position(player_token, client.position);
+                                                self._game.update_player_position(
+                                                    player_token,
+                                                    client.position,
+                                                );
                                                 client.orientation = "NESW"
                                                     .chars()
                                                     .nth(self._game.map.rng.random_range(0..3))
                                                     .unwrap();
-                                                self._game.team.get_mut(&cmd).unwrap().push(player_token); //push the client token into the team
+                                                self._game
+                                                    .team
+                                                    .get_mut(&cmd)
+                                                    .unwrap()
+                                                    .push(player_token); //push the client token into the team
                                                 let response = format!(
                                                     "{}\n{} {}\n",
                                                     self._max_clients[&cmd] as usize
@@ -538,11 +545,10 @@ impl Server {
                                     let mut parts = cmd.splitn(2, ' ');
                                     let name = parts.next().unwrap_or("");
                                     let arg = parts.next().unwrap_or("");
-                                    #[cfg(feature = "debug")]
+                                    #[cfg(feature = "log")]
                                     println!("Received command '{}' from {:?} 3", cmd, token);
-                                    drop(client);
                                     _command_manager
-                                        .add_to_queue_admin(name.to_string(), arg.to_string());
+                                        .execute(name, token, arg, self);
                                 }
                             }
                             Err(_) => {
@@ -559,10 +565,7 @@ impl Server {
                         let client = self._clients.get(&token).unwrap();
                         if client
                             .get_socket()
-                            .write(
-                                graphic::event_graph_connect(self)
-                                .as_bytes(),
-                            )
+                            .write(graphic::event_graph_connect(self).as_bytes())
                             .is_err()
                         {
                             self._clients.remove(&token);
