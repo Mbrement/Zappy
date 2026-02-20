@@ -402,15 +402,18 @@ class MessageHandler {
             return
         }
 
-        if (!this.gameState.eggInfo.has(command[1])) {
+        const id = parseInt(command[1])
+
+        if (!this.gameState.eggInfo.has(id)) {
             return
         }
 
         // TODO : Animate egg #e hatching
 
-        this.gameState.removeEgg(parseInt(command[1]))
+        const oldState = Object.assign({}, this.gameState.eggInfo.get(id))
+        this.gameState.removeEgg(id)
 
-        this.world.players.removeEgg(parseInt(command[1]))
+        this.world.players.removeEgg(id, oldState)
     }
 
     /**

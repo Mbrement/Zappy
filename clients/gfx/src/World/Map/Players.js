@@ -18,7 +18,10 @@ class Players {
         this.maxEggs = 50
 
         this.playerGroundFloor = 1
+        this.playerBaseGroundFloor = this.playerGroundFloor
+        this.playerFloorSize = this.playerGroundFloor * 0.5
         this.eggGroundFloor = 0.5
+        this.eggFloorSize = this.eggGroundFloor * 0.5
 
         this.playerMeshes = new Map()
         this.eggMeshes = new Map()
@@ -192,7 +195,7 @@ class Players {
     calculatePlayerPos(x, y, playerPositionIndex) {
         const start = [-(this.gameMap.mapSize[0] - 1) * 0.5, -(this.gameMap.mapSize[1] - 1) * 0.5]
         const xCellIndex = Math.max(0, playerPositionIndex) % 9
-        const yCellIndex = this.playerGroundFloor + (Math.floor(playerPositionIndex / 9) * (this.playerGroundFloor * 0.5))
+        const yCellIndex = this.playerGroundFloor + (Math.floor(playerPositionIndex / 9) * this.playerFloorSize)
 
         this.dummyVector.x = start[0] + x - 0.33 + (xCellIndex % 3 / 3)
         this.dummyVector.y = yCellIndex
@@ -367,23 +370,54 @@ class Players {
 
         this.eggMeshes.set(unusedIndex, eggId)
 
-        const start = [-(this.gameMap.mapSize[0] - 1) * 0.5, -(this.gameMap.mapSize[1] - 1) * 0.5]
-        this.positionningMatrix.setPosition(start[0] + x, 0.5, start[1] + y)
+        this.calculateEggPos(x, y, this.gameState.map[y][x].eggs.length - 1)
+        this.positionningMatrix.setPosition(this.dummyVector)
         this.eggInstance.setMatrixAt(unusedIndex, this.positionningMatrix)
         this.eggInstance.instanceMatrix.needsUpdate = true
+
+        this.restackPlayers(x, y)
 
         const color = new THREE.Color(this.main.gameState.teams.get(eggTeam))
         this.eggInstance.setColorAt(unusedIndex, color)
         this.eggInstance.instanceColor.needsUpdate = true
     }
 
-    removeEgg(eggId) {
+    calculateEggPos(x, y, eggPositionIndex) {
+        const start = [-(this.gameMap.mapSize[0] - 1) * 0.5, -(this.gameMap.mapSize[1] - 1) * 0.5]
+        const xCellIndex = Math.max(0, eggPositionIndex) % 9
+        const yCellIndex = this.eggGroundFloor + (Math.floor(eggPositionIndex / 9) * this.eggFloorSize)
+        this.playerGroundFloor = this.playerBaseGroundFloor + (Math.floor(eggPositionIndex / 9) * this.eggFloorSize)
+
+        this.dummyVector.x = start[0] + x - 0.33 + (xCellIndex % 3 / 3)
+        this.dummyVector.y = yCellIndex
+        this.dummyVector.z = start[1] + y - 0.35  + (Math.floor(xCellIndex / 3) / 3)
+    }
+
+    restackEggs(x, y) {
+        const eggs = this.gameState.map[y][x].eggs
+
+        for (let i = 0; i < eggs.length; i++) {
+            this.calculateEggPos(x, y, i)
+            const index = this.getEggById(eggs[i].id)
+            this.eggInstance.getMatrixAt(index, this.positionningMatrix)
+            this.positionningMatrix.setPosition(this.dummyVector)
+            this.eggInstance.setMatrixAt(index, this.positionningMatrix)
+        }
+        this.eggInstance.updateMatrix()
+        this.eggInstance.instanceMatrix.needsUpdate = true
+    }
+
+    removeEgg(eggId, eggState) {
         const index = this.getEggById(eggId)
         this.eggMeshes.set(index, null)
 
         this.positionningMatrix.setPosition(9999, 9999, 9999)
         this.eggInstance.setMatrixAt(index, this.positionningMatrix)
         this.eggInstance.instanceMatrix.needsUpdate = true
+
+        this.restackEggs(eggState.x, eggState.y)
+
+        this.restackPlayers(eggState.x, eggState.y)
     }
 }
 

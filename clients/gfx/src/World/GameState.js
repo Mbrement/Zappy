@@ -219,8 +219,8 @@ class GameState {
     addEgg(eggInfo) {
         const [eggId, parentId, x, y] = eggInfo
 
-        this.map[y][x].eggs.push({eggId, parentId})
-        this.eggInfo.set(eggId, {parentId, x, y})
+        this.map[y][x].eggs.push({id: eggId, parentId})
+        this.eggInfo.set(eggId, {id: eggId, parentId, x, y})
 
         console.log("Added egg", eggId, "at", x, y, "by player", parentId, "Map", this.map)
     }
@@ -232,7 +232,7 @@ class GameState {
      */
     removeEgg(eggId) {
         const egg = this.eggInfo.get(eggId)
-        this.map[egg.y][egg.x].eggs = this.map[egg.y][egg.x].eggs.filter(e => e.eggId !== eggId)
+        this.map[egg.y][egg.x].eggs = this.map[egg.y][egg.x].eggs.filter(e => e.id !== eggId)
         this.eggInfo.delete(eggId)
 
         console.log("Removed egg", eggId, "from", egg.x, egg.y, "Map", this.map)
