@@ -401,6 +401,7 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 utils::debug_manager_register("incantation", _c, server, _arg);
+                //bgein incannt event
             },
         );
         self.register(
@@ -499,14 +500,23 @@ impl CommandManager {
             client
                 .get_socket_mut()
                 .write(format!("{}", define::R_OK).as_bytes());
-            //graphic::send_graphic_clients(graphic::fork(&client.token), server);
+
+            //debut de fork
+            //server.send_to_graph += &graphic::fork(&client.token), server);
+        });
+        self.register("spawning", |_c: mio::Token, server: &mut Server, _arg: &str| {
+            #[cfg(feature = "log")]
+            utils::debug_manager_register("spawning", _c, server, _arg);
+            //player hatch
+            println!("pouet\n")
+            
         });
         self.register(
             "egg_waiting",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("egg_waiting", _c, server, _arg);
-                println!("\n\nhere in egg_waiting\n\n");
+                // println!("\n\nhere in egg_waiting\n\n");
                 for (tick, (x, y, token)) in &server._game.map.egg_position {
                     if tick < &server._game._tick {
                         let team_name = server.get_team_for_player(&token);
@@ -516,6 +526,7 @@ impl CommandManager {
                         }
                     }
                 }
+                //end fork
             },
         );
         self.register(
@@ -627,7 +638,7 @@ impl CommandManager {
                             "incantation_internal" => {
                                 self.next_execute.insert(token, server._game._tick + 300)
                             }
-                            "egg_waiting" => self.next_execute.insert(token, server._game._tick),
+                            "egg_waiting" => self.next_execute.insert(token, server._game._tick + 42),
                             "egg_death" => self.next_execute.insert(token, server._game._tick),
                             "connect_nbr" | "incantation" => {
                                 self.next_execute.insert(token, server._game._tick)
@@ -690,18 +701,19 @@ impl CommandManager {
                             // );
                         } else if command.as_str() == "fork" {
                             // For fork, we want to add the new command to the front of the queue, so we use add_to_queue_internal
-                            println!("\n\nhere in fork\n\n");
-							self.execute(
-                                "egg_waiting",
-                                mio::Token(0),
-                                "", 
-								server
-                            );
+                            
                             self.egg_waiting
-                                .entry(server.get_team_for_player(&token))
-                                .or_insert_with(Vec::new)
-                                .push(server._game._tick + 600);
-                            self.order.get_mut(&token).unwrap().pop_front();
+                            .entry(server.get_team_for_player(&token))
+                            .or_insert_with(Vec::new)
+                            .push(server._game._tick + 642);
+                        self.order.get_mut(&token).unwrap().pop_front();
+                        self.add_to_queue_internal(
+                            "egg_waiting".to_string(),
+                            token,
+                            "".to_string(), 
+                        );
+                        // println!("{} {}", server._game._tick, self.next_execute.get(token));
+                        self.next_execute.insert(token, server._game._tick + 42);
                         } else {
                             self.order.get_mut(&token).unwrap().pop_front();
                         }

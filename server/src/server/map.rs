@@ -1,4 +1,5 @@
 use crate::server::define::*;
+use getopts::Options;
 use mio::Token;
 use rand::{rngs::SmallRng, *};
 use std::collections::HashMap;
