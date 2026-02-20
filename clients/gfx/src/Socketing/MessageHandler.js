@@ -184,9 +184,10 @@ class MessageHandler {
             return
         }
 
-        this.world.players.movePlayer(integerArguments)
-
+        const oldState = Object.assign({}, this.gameState.playerInfo.get(integerArguments[0]))
         this.gameState.updatePlayerPosition(integerArguments)
+
+        this.world.players.movePlayer(integerArguments, oldState)
     }
 
     /**
@@ -357,11 +358,12 @@ class MessageHandler {
             return
         }
 
+        const oldState = Object.assign({}, this.gameState.playerInfo.get(id))
         this.gameState.deletePlayer(id)
 
         // TODO : Animate player #n dying
 
-        this.world.players.removePlayer(id)
+        this.world.players.removePlayer(oldState)
     }
 
     /**

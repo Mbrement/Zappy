@@ -106,11 +106,11 @@ tna c
 tna d
 tna e
 pnw 1 0 0 1 0 a
-pnw 2 0 1 2 0 a
-pnw 3 0 2 3 0 b
-pnw 4 0 3 4 0 c
-pnw 5 1 0 1 0 d
-pnw 6 1 1 1 0 e
+pnw 2 0 0 2 0 a
+pnw 3 0 0 3 0 b
+pnw 4 0 0 4 0 c
+pnw 5 0 0 1 0 d
+pnw 6 0 0 1 0 e
 pdi 1
 pnw 1 0 0 1 0 e
 enw 1 6 1 1

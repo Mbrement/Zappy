@@ -10,12 +10,15 @@ class Players {
         this.main = window.mainInstance
         this.gameState = this.main.gameState
 
-        this.tickTime = 100 / 60
+        this.tickTime = 0.1
         this.animatedPlayersMove = []
         this.animatedPlayersRotate = []
 
         this.maxPlayers = 50
         this.maxEggs = 50
+
+        this.playerGroundFloor = 1
+        this.eggGroundFloor = 0.5
 
         this.playerMeshes = new Map()
         this.eggMeshes = new Map()
@@ -130,7 +133,7 @@ class Players {
     addPlayer(playerInfo, playerTeam) {
         const [playerId, x, y, orientation] = playerInfo
 
-        if (!this.main.gameState.playerInfo.has(playerId)) {
+        if (!this.gameState.playerInfo.has(playerId)) {
             return
         }
 
@@ -149,17 +152,16 @@ class Players {
 
         this.playerMeshes.set(unusedIndex, playerId)
 
-        this.movePlayer([playerId, x, y, orientation], true)
+        this.movePlayer([playerId, x, y, orientation], this.gameState.playerInfo.get(playerId), true)
 
         const color = new THREE.Color(this.main.gameState.teams.get(playerTeam))
         this.playerInstance.setColorAt(unusedIndex, color)
         this.playerInstance.instanceColor.needsUpdate = true
     }
 
-    rotatePlayer(init, playerId, orientation) {
-
-        const index = this.getPlayerById(playerId)
-        const totalTime = actionTicks.avance * this.tickTime
+    rotatePlayer(init, playerState, orientation) {
+        const index = this.getPlayerById(playerState.id)
+        const totalTime = actionTicks.droite * this.tickTime
 
         this.playerInstance.getMatrixAt(index, this.positionningMatrix)
         this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
@@ -187,16 +189,41 @@ class Players {
         }
     }
 
-    positionPlayer(init, playerId, x, y) {
-        const index = this.getPlayerById(playerId)
-        const totalTime = actionTicks.avance * this.tickTime
+    calculatePlayerPos(x, y, playerPositionIndex) {
         const start = [-(this.gameMap.mapSize[0] - 1) * 0.5, -(this.gameMap.mapSize[1] - 1) * 0.5]
+        const xCellIndex = Math.max(0, playerPositionIndex) % 9
+        const yCellIndex = this.playerGroundFloor + (Math.floor(playerPositionIndex / 9) * (this.playerGroundFloor * 0.5))
+
+        this.dummyVector.x = start[0] + x - 0.33 + (xCellIndex % 3 / 3)
+        this.dummyVector.y = yCellIndex
+        this.dummyVector.z = start[1] + y - 0.35  + (Math.floor(xCellIndex / 3) / 3)
+    }
+
+    restackPlayers(x, y) {
+        const players = this.gameState.map[y][x].players
+
+        for (let i = 0; i < players.length; i++) {
+            this.calculatePlayerPos(x, y, i)
+            const index = this.getPlayerById(players[i].id)
+            this.playerInstance.getMatrixAt(index, this.positionningMatrix)
+            this.positionningMatrix.setPosition(this.dummyVector)
+            this.playerInstance.setMatrixAt(index, this.positionningMatrix)
+        }
+        this.playerInstance.updateMatrix()
+        this.playerInstance.instanceMatrix.needsUpdate = true
+    }
+
+    positionPlayer(init, playerState, x, y) {
+        const index = this.getPlayerById(playerState.id)
+        const totalTime = actionTicks.avance * this.tickTime
 
         this.playerInstance.getMatrixAt(index, this.positionningMatrix)
         this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
         const startPosition = this.dummyObject.position.clone()
 
-        this.positionningMatrix.setPosition(start[0] + x, 1, start[1] + y)
+        this.calculatePlayerPos(x, y, this.gameState.map[y][x].players.length - 1)
+
+        this.positionningMatrix.setPosition(this.dummyVector)
         this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
         const endPosition = this.dummyObject.position.clone()
 
@@ -204,6 +231,8 @@ class Players {
             this.playerInstance.setMatrixAt(index, this.positionningMatrix)
         }
         else {
+            this.restackPlayers(playerState.x, playerState.y)
+
             if (this.animatedPlayersMove.length === 0) {
                 this.world.updateManager.add(this, "world", "animatePlayerMove")
             }
@@ -218,16 +247,14 @@ class Players {
         }
     }
 
-    movePlayer(playerInfo, init=false) {
-        const [playerId, x, y, orientation] = playerInfo
-
-        const playerState = this.gameState.playerInfo.get(playerId)
+    movePlayer(playerInfo, playerState, init=false) {
+        const [_, x, y, orientation] = playerInfo
 
         if (init || playerState.x !== x || playerState.y !== y) {
-            this.positionPlayer(init, playerId, x, y)
+            this.positionPlayer(init, playerState, x, y)
         }
         if (init || playerState.orientation !== orientation) {
-            this.rotatePlayer(init, playerId, orientation)
+            this.rotatePlayer(init, playerState, orientation)
         }
         this.playerInstance.instanceMatrix.needsUpdate = true
     }
@@ -305,13 +332,15 @@ class Players {
         })
     }
 
-    removePlayer(playerId) {
-        const index = this.getPlayerById(playerId)
+    removePlayer(playerState) {
+        const index = this.getPlayerById(playerState.id)
         this.playerMeshes.set(index, null)
 
         this.positionningMatrix.setPosition(9999, 9999, 9999)
         this.playerInstance.setMatrixAt(index, this.positionningMatrix)
         this.playerInstance.instanceMatrix.needsUpdate = true
+
+        this.restackPlayers(playerState.x, playerState.y)
     }
 
     addEgg(eggInfo) {

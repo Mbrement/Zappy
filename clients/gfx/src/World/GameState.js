@@ -30,7 +30,6 @@ class GameState {
                 return {
                     resources: [],
                     players: [],
-                    incantation: false,
                     eggs: []
                 }
             })
@@ -90,6 +89,15 @@ class GameState {
             team: playerTeam
         })
 
+        this.map[y][x].players.push({
+            id,
+            x,
+            y,
+            orientation,
+            level,
+            team: playerTeam
+        })
+
         console.log("Added player", id, "Total players are", this.playerInfo)
     }
 
@@ -102,6 +110,8 @@ class GameState {
         const [id, x, y, orientation] = playerInfo
 
         const player = this.playerInfo.get(id)
+        this.map[player.y][player.x].players = this.map[player.y][player.x].players.filter((player) => player.id !== id)
+
         player.x = x
         player.y = y
         player.orientation = orientation
@@ -116,6 +126,7 @@ class GameState {
         }
         player.incantation = { state: false, toLevel: null}
 
+        this.map[y][x].players.push(player)
 
         console.log("updated player position", id, "Total players are", this.playerInfo)
     }
@@ -140,7 +151,7 @@ class GameState {
      * @param {Array} playerInfo - an array containing the player's id and inventory information
      */
     updatePlayerInventory(playerInfo) {
-        const [id, x, y, nourriture, linemate, deraumere, sibur, mendiane, phiras, thystame] = playerInfo
+        const [id, _, __, nourriture, linemate, deraumere, sibur, mendiane, phiras, thystame] = playerInfo
 
         const player = this.playerInfo.get(id)
         player.inventory = {
@@ -190,6 +201,9 @@ class GameState {
     }
 
     deletePlayer(playerId) {
+        const player = this.playerInfo.get(playerId)
+        this.map[player.y][player.x].players = this.map[player.y][player.x].players.filter((player) => player.id !== playerId)
+
         this.playerInfo.delete(playerId)
 
         console.log("Deleted player", playerId, "Total players are", this.playerInfo)
