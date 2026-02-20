@@ -35,4 +35,4 @@ class BroadcastManager {
     }
 }
 
-module.exports = new BroadcastManager()
+module.exports = BroadcastManager

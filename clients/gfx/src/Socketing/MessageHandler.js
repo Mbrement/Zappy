@@ -23,6 +23,7 @@ class MessageHandler {
     setupHandlers() {
         this.networkClient = window.mainInstance.networkClient
         this.gameState = window.mainInstance.gameState
+        this.broadcastManager = window.mainInstance.broadcastManager
         this.networkClient.on('message', this.handleMessageBind)
         this.networkClient.on('error', this.handleErrorBind)
     }
@@ -252,7 +253,18 @@ class MessageHandler {
      * @param {Array} command - the command and it's arguments
      */
     cmd_pbc(command) {
+        if (command.length < 3) {
+            return
+        }
+
         // TODO : Animate player #n broadcasting message
+
+        let message = `#${command[1]}:`
+        for (let i = 2; i < command.length; i++) {
+            message += " " + command[i]
+        }
+
+        this.broadcastManager.addBroadcast(message)
     }
 
     /**
@@ -442,6 +454,8 @@ class MessageHandler {
         }
 
         // TODO : Animate end of game and display winning team #n
+
+        this.broadcastManager.clearBroadcast()
     }
 
 }
