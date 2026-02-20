@@ -1,13 +1,18 @@
 
 class EventManager {
     constructor() {
-
         const ConnectMenu = require('./modules/ConnectMenu')
+        const TileInfoManager = require('./modules/TileInfoManager')
+        const ChangeThemeMusic = require('./modules/ChangeThemeMusic')
         this.modules = {
-            ConnectMenu: new ConnectMenu()
+            ConnectMenu: new ConnectMenu(),
+            TileInfoManager: new TileInfoManager(),
+            ChangeThemeMusic: new ChangeThemeMusic()
         }
         this.authorizedFunctions = {
-            ConnectMenu: new Set(['connect'])
+            ConnectMenu: new Set(['connect']),
+            TileInfoManager: new Set(['displayPlayerInfo', 'showHideTilesPlayerInfo']),
+            ChangeThemeMusic: new Set(['switchChangeThemeVisibility', 'changeTheme', 'switchChangeMusicVisibility','changeMusic'])
         }
 
         this.onClickbind = this.onClick.bind(this)

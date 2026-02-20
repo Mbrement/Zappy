@@ -29,6 +29,173 @@
             </div>
         </div>
     </div>
+
+    <div id="changeThemeMusicContainer" class="hidden" data-module="ChangeThemeMusic">
+        <div class="changeButtonDiv">
+            <button class="changeButton" data-action="switchChangeThemeVisibility">
+                <p>Change theme</p>
+            </button>
+            <div id="changeThemeDropdown" class="changeButtonDropdown changeButtonDropdownHidden" style="height: 0">
+                <div class="changeListThemeItem" data-action="changeTheme">
+                    <span>Dark Theme</span>
+                </div>
+                <div class="changeListThemeItem" data-action="changeTheme">
+                    <span>Light Theme</span>
+                </div>
+            </div>
+        </div>
+        <div class="changeButtonDiv">
+            <button class="changeButton" data-action="switchChangeMusicVisibility">
+                <p>Change music</p>
+            </button>
+            <div id="changeMusicDropdown" class="changeButtonDropdown changeButtonDropdownHidden" style="height: 0">
+                <div class="changeListItem" data-action="changeMusic">
+                    <span>It's showtime! 8bits</span>
+                </div>
+                <div class="changeListItem" data-action="changeMusic">
+                    <span>Dwarf fortress OST</span>
+                </div>
+                <div class="changeListItem" data-action="changeMusic">
+                    <span>Ghost n’ Goblins (CPC 6128) OST</span>
+                </div>
+                <div class="changeListItem" data-action="changeMusic">
+                    <span>Sonic Green Hill Zone OST</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="broadcastContainer" class="noScrollBars hidden">
+        <p>#1 : y’a qq svp repondez moi TwT<p>
+        <p>#3 : Oe chuis la bg<p>
+        <p>#1 : On fait un pti date trkl<p>
+        <p>#3 : En vrai le sang g pas le nv<p>
+        <p>#1 : Aah on fé ca la prochaine fois <p>
+        <p>#3 : Bien sur!<p>
+        <p>#1 : Really fucking long string to test how the fuck boradcast window make it work if FSM try to DDOS server<p>
+        <p>#1 : y’a qq svp repondez moi TwT<p>
+        <p>#1 : y’a qq svp repondez moi TwT<p>
+    </div>
+
+    <div id="tilesPlayerInfoContainer" class="noScrollBars tilesPlayerInfoContainerHidden hidden" data-module="TileInfoManager">
+        <div id="hideTilesPlayerInfoContainer" data-action="showHideTilesPlayerInfo">
+            <div id="hideTilesPlayerTick"></div>
+        </div>
+        <div id="tilesPlayerInfoHeaderContainer" class="hidden">
+            <p id="tilesPlayerInfoTitle"></p>
+        </div>
+        <div id="tilesInfoContainer" class="mainInfoContainer noScrollBars hidden">
+            <div id="tileResourcesContainer">
+                <p class="tilesPlayerInfoCategoryTitles">Resources</p>
+                <div class="informationContainer alignFlexNormal noScrollBars">
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Nourriture:</p>
+                        <p id="foodCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Linemate:</p>
+                        <p id="linemateCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Demraumère:</p>
+                        <p id="deraumereCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Sibur:</p>
+                        <p id="siburCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Mendiane:</p>
+                        <p id="mendianeCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Phiras:</p>
+                        <p id="phirasCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Thystame:</p>
+                        <p id="thystameCount" class="resourcePlayerText">0</p>
+                    </div>
+                </div>
+            </div>
+            <div id="playersOnTileContainer">
+                <p class="tilesPlayerInfoCategoryTitles">Players on tile</p>
+                <div id="playersOnTile" class="informationContainer noScrollBars">
+                    <div class="playerOnTile" data-action="displayPlayerInfo">
+                        <div class="playerTeamDot"></div>
+                        <div class="playerVerticalSeparator"></div>
+                        <div class="playerContainer">
+                            <div class="playerTeamIdInfoContainer">
+                                <p class="resourcePlayerText">Team:</p>
+                                <p class="resourcePlayerText">teamX</p>
+                            </div>
+                            <div class="playerTeamIdInfoContainer">
+                                <p class="resourcePlayerText">Player ID:</p>
+                                <p class="resourcePlayerText">1</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="playerInfoContainer" class="mainInfoContainer noScrollBars hidden">
+            <div id="playerInformationContainer">
+                <p class="tilesPlayerInfoCategoryTitles">Information</p>
+                <div class="informationContainer alignFlexNormal noScrollBars">
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">ID:</p>
+                        <p id="playerID" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Team:</p>
+                        <p id="playerTeamName" class="resourcePlayerText">teamX</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Level:</p>
+                        <p id="playerLevel" class="resourcePlayerText">1</p>
+                    </div>
+                </div>
+            </div>
+            <div id="playerInventoryContainer">
+                <p class="tilesPlayerInfoCategoryTitles">Inventory</p>
+                <div class="informationContainer alignFlexNormal noScrollBars">
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Nourriture:</p>
+                        <p id="playerFoodCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Linemate:</p>
+                        <p id="playerLinemateCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Demraumère:</p>
+                        <p id="playerDeraumereCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Sibur:</p>
+                        <p id="playerSiburCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Mendiane:</p>
+                        <p id="playerMendianeCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Phiras:</p>
+                        <p id="playerPhirasCount" class="resourcePlayerText">0</p>
+                    </div>
+                    <div class="tilesResources">
+                        <p class="resourcePlayerText">Thystame:</p>
+                        <p id="playerThystameCount" class="resourcePlayerText">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="nothingToSeeContainer">
+            <p class="nothingToSeeText">Nothing to see right now...</p>
+            <p class="nothingToSeeText">Select a tile or a player to see information about it.</p>
+        </div>
+
+    </div>
     <canvas id="webgpu" class="webgpu"></canvas>
     <script src="Main.js"></script>
 </body>

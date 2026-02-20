@@ -1,7 +1,7 @@
 class ConnectMenu {
     constructor() {
         this.instance = document.getElementById("connectMenu");
-        this.hideConnectMenu()
+        // this.hideConnectMenu()
         this.address = "";
         this.port = "";
     }
@@ -104,6 +104,17 @@ class ConnectMenu {
      */
     showConnectMenu() {
         this.instance.classList.remove('hidden');
+
+        //TODO: remove code under when log in is finalized
+
+        const broadcastContainer = document.getElementById('broadcastContainer')
+        broadcastContainer.classList.add('hidden')
+
+        const tilesPlayerInfoContainer = document.getElementById('tilesPlayerInfoContainer')
+        tilesPlayerInfoContainer.classList.add('hidden')
+
+        const changeThemeMusicContainer = document.getElementById('changeThemeMusicContainer')
+        changeThemeMusicContainer.classList.add('hidden')
     }
 
     /**
@@ -112,6 +123,17 @@ class ConnectMenu {
      */
     hideConnectMenu() {
         this.instance.classList.add('hidden');
+
+        //TODO: remove code under when log in is finalized
+
+        const broadcastContainer = document.getElementById('broadcastContainer')
+        broadcastContainer.classList.remove('hidden')
+
+        const tilesPlayerInfoContainer = document.getElementById('tilesPlayerInfoContainer')
+        tilesPlayerInfoContainer.classList.remove('hidden')
+
+        const changeThemeMusicContainer = document.getElementById('changeThemeMusicContainer')
+        changeThemeMusicContainer.classList.remove('hidden')
     }
 
 }
