@@ -18,7 +18,13 @@ class UpdateManager {
             shaders: [],
             renderers: []
         }
+    }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Starts the update loop
+     */
+    start() {
         this.time.on('tick', () => {
             this.update()
         })

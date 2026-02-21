@@ -95,9 +95,9 @@ class Main {
      * @description Hides the connectMenu and starts the 3D visualisation
      */
     startVisualisation() {
-        this.networkClient.send("GRAPHIC\n")
         this.world.createWorld()
         this.messageHandler.world = window.worldInstance
+        this.networkClient.send("GRAPHIC\n")
     }
 }
 

@@ -31,6 +31,7 @@ class World {
         }
 
         this.time = new Time()
+        this.updateManager = new UpdateManager()
         this.scene = new THREE.Scene()
         this.gameMap = new GameMap()
         this.players = new Players()
@@ -127,7 +128,7 @@ class World {
 
         this.controls = new OrbitControls(this.camera.instance, this.canvas)
 
-        this.updateManager = new UpdateManager()
+        this.updateManager.start()
 
         this.updateManager.add(this.renderer, 'renderers')
         this.updateManager.add(this, 'world')
