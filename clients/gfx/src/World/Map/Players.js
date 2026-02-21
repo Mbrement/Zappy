@@ -176,6 +176,7 @@ class Players {
 
         if (init) {
             this.playerInstance.setMatrixAt(index, this.dummyObject.matrix)
+            this.playerInstance.computeBoundingSphere()
         }
         else {
             if (this.animatedPlayersRotate.length === 0) {
@@ -214,6 +215,7 @@ class Players {
         }
         this.playerInstance.updateMatrix()
         this.playerInstance.instanceMatrix.needsUpdate = true
+        this.playerInstance.computeBoundingSphere()
     }
 
     positionPlayer(init, playerId, x, y, playerState) {
@@ -232,6 +234,7 @@ class Players {
 
         if (init) {
             this.playerInstance.setMatrixAt(index, this.positionningMatrix)
+            this.playerInstance.computeBoundingSphere()
         }
         else {
             this.restackPlayers(playerState.x, playerState.y)
@@ -260,6 +263,7 @@ class Players {
             this.rotatePlayer(init, playerId, orientation)
         }
         this.playerInstance.instanceMatrix.needsUpdate = true
+        this.playerInstance.computeBoundingSphere()
     }
 
     animatePlayerMove() {
@@ -279,6 +283,7 @@ class Players {
             this.playerInstance.setMatrixAt(player.index, this.positionningMatrix)
 
             this.playerInstance.instanceMatrix.needsUpdate = true
+            this.playerInstance.computeBoundingSphere()
 
             player.passedTime += deltaTime
         }
@@ -290,6 +295,7 @@ class Players {
                 this.positionningMatrix.setPosition(player.endPosition)
                 this.playerInstance.setMatrixAt(player.index, this.positionningMatrix)
                 this.playerInstance.instanceMatrix.needsUpdate = true
+                this.playerInstance.computeBoundingSphere()
             }
 
             return !remove
@@ -316,6 +322,7 @@ class Players {
 
             this.playerInstance.setMatrixAt(player.index, this.dummyObject.matrix)
             this.playerInstance.instanceMatrix.needsUpdate = true
+            this.playerInstance.computeBoundingSphere()
 
             player.passedTime += deltaTime
         }
@@ -329,6 +336,7 @@ class Players {
                 this.dummyObject.updateMatrix()
                 this.playerInstance.setMatrixAt(player.index, this.dummyObject.matrix)
                 this.playerInstance.instanceMatrix.needsUpdate = true
+                this.playerInstance.computeBoundingSphere()
             }
 
             return !remove
@@ -342,6 +350,7 @@ class Players {
         this.positionningMatrix.setPosition(9999, 9999, 9999)
         this.playerInstance.setMatrixAt(index, this.positionningMatrix)
         this.playerInstance.instanceMatrix.needsUpdate = true
+        this.playerInstance.computeBoundingSphere()
 
         this.restackPlayers(playerState.x, playerState.y)
     }
