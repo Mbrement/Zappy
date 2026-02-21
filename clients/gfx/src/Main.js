@@ -31,7 +31,7 @@ class Main {
 
         this.world = new World()
         this.resources.once('loaded', () => {
-            this.eventManager.modules.ConnectMenu.showConnectMenu()
+            this.switchToConnectionMenu()
         })
     }
 
