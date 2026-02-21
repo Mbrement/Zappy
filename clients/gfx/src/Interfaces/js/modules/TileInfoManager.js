@@ -161,9 +161,10 @@ class TileInfoManager {
         const playerDiv = event.target.closest('.playerOnTile')
         if (playerDiv) {
             const playerId = playerDiv.dataset.id
-            const playerTeam = playerDiv.dataset.team
-            console.log(`Player clicked: ID=${playerId}, Team=${playerTeam}`)
-            // TODO: Focus player and display information about it
+            const player = window.worldInstance.gameState.playerInfo.get(parseInt(playerId))
+            const playerCopy = Object.assign({}, player)
+            playerCopy.id = playerCopy.id.toString()
+            window.mainInstance.playerInfoManager.switchToPlayerInfoView(playerCopy, playerCopy.inventory)
         }
     }
 

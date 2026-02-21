@@ -55,11 +55,13 @@ class PlayerInfoManager  {
     /**
      * @author Corentin (ccharton) Charton
      * @description Fill the inventory of the player in the right element
+     * @param playerId - The id of the player whose level changed
      * @param inventory {PlayerInventory} - The player inventory object
      */
-    changePlayerInventory(inventory) {
+    changePlayerInventory(playerId, inventory) {
         const playerInfoContainer = document.getElementById('playerInfoContainer')
-        if(playerInfoContainer) {
+        const containerPlayerID = playerInfoContainer.querySelector('#playerID')
+        if(playerInfoContainer && containerPlayerID.textContent === playerId) {
             const playerFoodCount = playerInfoContainer.querySelector('#playerFoodCount')
             playerFoodCount.textContent = inventory.food
 
@@ -92,23 +94,26 @@ class PlayerInfoManager  {
      */
     fillPlayerView(info, inventory) {
         this.changePlayerInfo(info);
-        this.changePlayerInventory(inventory);
+        this.changePlayerInventory(info.id, inventory);
     }
 
     /**
      * @author Corentin (ccharton) Charton
      * @description Change the level of the player
+     * @param playerId - The id of the player whose level changed
      * @param newLevel {String} - The new level of the player
      */
-    changePlayerLevel(newLevel) {
+    changePlayerLevel(playerId, newLevel) {
+        const playerInfoContainer = document.getElementById('playerInfoContainer')
+        const containerPlayerID = playerInfoContainer.querySelector('#playerID')
         const playerLevel = document.getElementById('playerLevel')
-        if(playerLevel) {
+        if(playerInfoContainer && playerLevel && containerPlayerID.textContent === playerId) {
             playerLevel.textContent = newLevel
         }
     }
 }
 
-module.exports  = new PlayerInfoManager();
+module.exports  = PlayerInfoManager
 
 
 /**

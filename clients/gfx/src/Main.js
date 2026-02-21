@@ -2,6 +2,7 @@ const NetworkClient = require('./Socketing/NetworkClient');
 const MessageHandler = require("./Socketing/MessageHandler");
 const EventManager = require('./Interfaces/js/EventManager')
 const BroadcastManager = require('./Interfaces/js/modules/BroadcastManager')
+const PlayerInfoManager = require("./Interfaces/js/modules/PlayerInfoManager");
 const World = require("./World/World");
 const GameState = require("./World/GameState");
 const {textures} = require("./World/sources");
@@ -17,6 +18,7 @@ class Main {
         this.gameState = new GameState();
         this.eventManager = new EventManager();
         this.broadcastManager = new BroadcastManager()
+        this.playerInfoManager = new PlayerInfoManager()
         this.messageHandler = new MessageHandler();
         this.resources = new Resources(textures);
 

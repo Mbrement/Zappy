@@ -89,25 +89,29 @@ class GameState {
     addNewPlayer(playerInfo, playerTeam) {
         const [id, x, y, orientation, level] = playerInfo
 
-        this.playerInfo.set(id, {
+        const playerObject = {
             id,
             x,
             y,
             orientation,
             level,
+            inventory: {
+                food: 0,
+                linemate: 0,
+                deraumere: 0,
+                sibur: 0,
+                mendiane: 0,
+                phiras: 0,
+                thystame: 0
+            },
             team: playerTeam,
-            color: this.teams.get(playerTeam)
-        })
+            color: this.teams.get(playerTeam),
+            incantation: { state: false, toLevel: null}
+        }
 
-        this.map[y][x].players.push({
-            id,
-            x,
-            y,
-            orientation,
-            level,
-            team: playerTeam,
-            color: this.teams.get(playerTeam)
-        })
+        this.playerInfo.set(id, playerObject)
+
+        this.map[y][x].players.push(playerObject)
 
         console.log("Added player", id, "Total players are", this.playerInfo)
     }
@@ -126,16 +130,6 @@ class GameState {
         player.x = x
         player.y = y
         player.orientation = orientation
-        player.inventory = {
-            food: 0,
-            linemate: 0,
-            deraumere: 0,
-            sibur: 0,
-            mendiane: 0,
-            phiras: 0,
-            thystame: 0
-        }
-        player.incantation = { state: false, toLevel: null}
 
         this.map[y][x].players.push(player)
 
@@ -153,6 +147,7 @@ class GameState {
         const player = this.playerInfo.get(id)
         player.level = level
 
+        window.mainInstance.playerInfoManager.changePlayerLevel(player.id.toString(), player.level)
         console.log("updated player level", id, "Total players are", this.playerInfo)
     }
 
@@ -175,6 +170,7 @@ class GameState {
             thystame
         }
 
+        window.mainInstance.playerInfoManager.changePlayerInventory(player.id.toString(), player.inventory)
         console.log("updated player inventory", id, "Total players are", this.playerInfo)
     }
 

@@ -99,13 +99,20 @@ class World {
 
         const instanceMesh = intersection.object
         const index = intersection.instanceId;
-        console.log(instanceMesh)
 
         if (instanceMesh === this.gameMap.evenInstance || instanceMesh === this.gameMap.oddInstance) {
             const [x, y] = this.gameMap.getTileCoordinate(instanceMesh, index)
             const tileInfo = this.gameState.map[y][x]
 
             this.main.eventManager.modules.TileInfoManager.switchToTileInfoView(tileInfo.resources, tileInfo.players)
+        }
+        else {
+            const playerId = this.players.playerMeshes.get(index)
+            const player = this.gameState.playerInfo.get(playerId)
+
+            const playerCopy = Object.assign({}, player)
+            playerCopy.id = playerCopy.id.toString()
+            this.main.playerInfoManager.switchToPlayerInfoView(playerCopy, playerCopy.inventory)
         }
     }
 
