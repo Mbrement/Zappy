@@ -1,6 +1,19 @@
-const { app, BrowserWindow, protocol, net } = require('electron');
-const path = require('path');
-const url = require('url');
+const { app, BrowserWindow, protocol, net } = require('electron')
+const path = require('path')
+const url = require('url')
+
+protocol.registerSchemesAsPrivileged([
+    {
+        scheme: 'static',
+        privileges: {
+            standard: true,
+            secure: true,
+            supportFetchAPI: true,
+            corsEnabled: true,
+            stream: true,
+        }
+    }
+]);
 
 function createWindow() {
     const mainWindow = new BrowserWindow({
@@ -24,7 +37,11 @@ function createWindow() {
 
 app.whenReady().then(() => {
     protocol.handle('static', async (request) => {
-        const filePath = request.url.slice('static://'.length);
+        let filePath = request.url.slice('static://'.length);
+
+        if (filePath.endsWith('/')) {
+            filePath = filePath.slice(0, -1);
+        }
 
         const fullPath = path.join(__dirname, '../static', filePath);
 

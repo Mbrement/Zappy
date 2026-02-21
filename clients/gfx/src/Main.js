@@ -3,6 +3,7 @@ const MessageHandler = require("./Socketing/MessageHandler");
 const EventManager = require('./Interfaces/js/EventManager')
 const BroadcastManager = require('./Interfaces/js/modules/BroadcastManager')
 const PlayerInfoManager = require("./Interfaces/js/modules/PlayerInfoManager");
+const MusicManager = require("./World/MusicManager");
 const World = require("./World/World");
 const GameState = require("./World/GameState");
 const {textures} = require("./World/sources");
@@ -15,6 +16,7 @@ class Main {
         }
         window.mainInstance = this
 
+        this.musicManager = new MusicManager()
         this.gameState = new GameState();
         this.eventManager = new EventManager();
         this.broadcastManager = new BroadcastManager()
@@ -30,8 +32,10 @@ class Main {
         // }
 
         this.world = new World()
-        this.resources.once('loaded', () => {
-            this.switchToConnectionMenu()
+        this.musicManager.once('loaded', () => {
+            this.resources.once('loaded', () => {
+                this.switchToConnectionMenu()
+            })
         })
     }
 
@@ -63,6 +67,8 @@ class Main {
     switchToConnectionMenu() {
         this.eventManager.modules.ConnectMenu.showConnectMenu()
 
+        this.musicManager.turnOffSoundtrack()
+
         const broadcastContainer = document.getElementById('broadcastContainer')
         broadcastContainer.classList.add('hidden')
 
@@ -79,6 +85,8 @@ class Main {
      */
     switchToGameUI() {
         this.eventManager.modules.ConnectMenu.hideConnectMenu()
+
+        this.musicManager.playDefault()
 
         const broadcastContainer = document.getElementById('broadcastContainer')
         broadcastContainer.classList.remove('hidden')
