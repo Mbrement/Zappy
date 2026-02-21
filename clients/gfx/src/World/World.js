@@ -29,6 +29,7 @@ class World {
             mesh: null,
             color: null,
         }
+        this.focusedMeshIndex = null
 
         this.time = new Time()
         this.updateManager = new UpdateManager()
@@ -92,6 +93,9 @@ class World {
 
         const intersection = this.castRay()
         if (!intersection) {
+            this.focusedMeshIndex = null
+            this.updateManager.remove(this, "world", "focusPlayer")
+
             if (this.main.eventManager.modules.TileInfoManager.isTilesPlayerInfoOpen()) {
                 this.main.eventManager.modules.TileInfoManager.showHideTilesPlayerInfo()
             }
@@ -102,12 +106,18 @@ class World {
         const index = intersection.instanceId;
 
         if (instanceMesh === this.gameMap.evenInstance || instanceMesh === this.gameMap.oddInstance) {
+            this.focusedMeshIndex = null
+            this.updateManager.remove(this, "world", "focusPlayer")
+
             const [x, y] = this.gameMap.getTileCoordinate(instanceMesh, index)
             const tileInfo = this.gameState.map[y][x]
 
             this.main.eventManager.modules.TileInfoManager.switchToTileInfoView(tileInfo.resources, tileInfo.players)
         }
         else {
+            this.focusedMeshIndex = index
+            this.updateManager.add(this, "world", "focusPlayer")
+
             const playerId = this.players.playerMeshes.get(index)
             const player = this.gameState.playerInfo.get(playerId)
 
@@ -152,6 +162,17 @@ class World {
             return intersection[0]
         }
         return null
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Focuses the camera/controls on a given player
+     */
+    focusPlayer() {
+        this.players.playerInstance.getMatrixAt(this.focusedMeshIndex, this.players.positionningMatrix)
+        this.players.positionningMatrix.decompose(this.players.dummyObject.position, this.players.dummyObject.quaternion, this.players.dummyObject.scale)
+        this.controls.target = this.players.dummyObject.position
+        this.controls.update()
     }
 
     /**
