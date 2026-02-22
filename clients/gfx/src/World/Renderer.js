@@ -1,15 +1,11 @@
 const THREE = require('three/webgpu');
-const Stats = require('stats.js');
+const { Inspector }  = require('three/addons/inspector/Inspector.js')
 
 class Renderer {
     constructor(scene) {
         this.world = self.worldInstance
         this.canvas = this.world.canvas
         this.scene = scene
-
-        this.stats = new Stats()
-        this.stats.showPanel(0)
-        document.body.appendChild(this.stats.dom)
     }
 
     /**
@@ -28,6 +24,8 @@ class Renderer {
         this.instance.debug.checkShaderErrors = false
         this.instance.shadowMap.enabled = false;
 
+        this.instance.inspector = new Inspector()
+
         await this.instance.init()
     }
 
@@ -36,9 +34,7 @@ class Renderer {
      * @description Updates the renderer instance
      */
     update() {
-        this.stats.begin()
         this.instance.render(this.scene, this.world.camera.instance)
-        this.stats.end()
 
         // console.log(this.instance.info.render)
     }
