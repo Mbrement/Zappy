@@ -6,13 +6,15 @@ class Renderer {
         this.world = self.worldInstance
         this.canvas = this.world.canvas
         this.scene = scene
+
+        this.setInstance()
     }
 
     /**
      * @author Emma (epolitze) Politzer
      * @description Creates the renderer instance
      */
-    async setInstance() {
+    setInstance() {
         this.instance = new THREE.WebGPURenderer({
             antialias: true,
             canvas: this.canvas,
@@ -21,11 +23,19 @@ class Renderer {
         })
         this.instance.setSize(this.world.sizes.width, this.world.sizes.height)
         this.instance.setPixelRatio(1)
+        this.instance.toneMapping = THREE.LinearToneMapping
+        this.instance.toneMappingExposure = 0.75
         this.instance.debug.checkShaderErrors = false
         this.instance.shadowMap.enabled = false;
 
         this.instance.inspector = new Inspector()
+    }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Initializes the renderer instance
+     */
+    async init() {
         await this.instance.init()
     }
 

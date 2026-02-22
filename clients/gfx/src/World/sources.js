@@ -2,12 +2,22 @@ const textures = [
     {
         name: 'rockyGroundDiffTexture',
         type: 'texture',
-        path: 'static://ground/rocky_terrain_02_diff_1k.jpg'
+        path: 'static://textures/ground/rocky_terrain_02_diff_1k.jpg'
     },
     {
         name: 'grassGroundDiffTexture',
         type: 'texture',
-        path: 'static://ground/aerial_grass_rock_diff_1k.jpg'
+        path: 'static://textures/ground/aerial_grass_rock_diff_1k.jpg'
+    },
+    {
+        name: 'starTexture',
+        type: 'texture',
+        path: 'static://textures/star/star.png'
+    },
+    {
+        name: 'moonTexture',
+        type: 'texture',
+        path: 'static://textures/moon/moon.jpg'
     }
 ]
 

@@ -89,8 +89,6 @@ class ChangeThemeMusic {
         let spanText
         if (event.target.closest('span')) {
             spanText = event.target.closest('span').textContent.replaceAll(' ', '_')
-
-            console.log('Using closet found:', spanText)
         } else {
             for (const child of event.target.children) {
                 if (child.tagName === 'SPAN') {
@@ -98,9 +96,8 @@ class ChangeThemeMusic {
                     break
                 }
             }
-            console.log('Using children found:', spanText)
         }
-        // TODO: add theme change function call here
+        window.worldInstance.themeManager.switchSky(spanText)
     }
 }
 

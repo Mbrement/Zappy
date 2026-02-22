@@ -2,8 +2,9 @@ const THREE = require('three/webgpu');
 const {OrbitControls} = require('three/examples/jsm/controls/OrbitControls.js');
 const Renderer = require("./Renderer");
 const Camera = require("./Camera");
-const UpdateManager = require("./UpdateManager");
 const Time = require("./Utils/Time");
+const UpdateManager = require("./UpdateManager");
+const ThemeManager = require("./ThemeManager");
 const GameMap = require("./Map/GameMap");
 const Players = require("./Map/Players")
 
@@ -34,11 +35,11 @@ class World {
         this.time = new Time()
         this.updateManager = new UpdateManager()
         this.scene = new THREE.Scene()
+        this.scene.background = new THREE.Color(0x000000)
+        this.renderer = new Renderer(this.scene)
+        this.themeManager = new ThemeManager()
         this.gameMap = new GameMap()
         this.players = new Players()
-
-        this.ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-        this.scene.add(this.ambientLight)
 
         window.addEventListener('resize', this.resizeView.bind(this))
         window.addEventListener('mousemove', this.onMouseMove.bind(this))
@@ -133,8 +134,7 @@ class World {
      */
     async createWorld() {
         this.camera = new Camera(this.scene)
-        this.renderer = new Renderer(this.scene)
-        await this.renderer.setInstance()
+        await this.renderer.init()
 
         this.controls = new OrbitControls(this.camera.instance, this.canvas)
 
