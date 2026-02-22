@@ -57,7 +57,9 @@ class GameState {
         const [food, linemate, deraumere, sibur, mendiane, phiras, thystame] = content
 
         this.map[y][x].resources = {
-            food: Math.floor(food / 126),
+            // TODO: Uncomment this line when plugged to server
+            // food: Math.floor(food / 126),
+            food,
             linemate,
             deraumere,
             sibur,
@@ -161,7 +163,9 @@ class GameState {
 
         const player = this.playerInfo.get(id)
         player.inventory = {
-            food: Math.floor(food / 126),
+            // TODO: Uncomment this line when plugged to server
+            // food: Math.floor(food / 126),
+            food,
             linemate,
             deraumere,
             sibur,
