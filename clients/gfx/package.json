@@ -4,7 +4,7 @@
   "dependencies": {
     "electron": "^40.2.1",
     "stats.js": "^0.17.0",
-    "three": "^0.182.0"
+    "three": "^0.183.0"
   },
   "scripts": {
     "start": "electron ."
