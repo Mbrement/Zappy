@@ -31,6 +31,7 @@ class World {
             color: null,
         }
         this.focusedMeshIndex = null
+        this.selectedTile = null
 
         this.time = new Time()
         this.updateManager = new UpdateManager()
@@ -113,9 +114,16 @@ class World {
             const [x, y] = this.gameMap.getTileCoordinate(instanceMesh, index)
             const tileInfo = this.gameState.map[y][x]
 
+            this.selectedTile = {
+                x,
+                y,
+            }
+
             this.main.eventManager.modules.TileInfoManager.switchToTileInfoView(tileInfo.resources, tileInfo.players)
         }
         else {
+            this.selectedTile = null
+
             this.focusedMeshIndex = index
             this.updateManager.add(this, "world", "focusPlayer")
 
@@ -162,6 +170,16 @@ class World {
             return intersection[0]
         }
         return null
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Sets the focused mesh to the player correct player mesh based on the given ID
+     * @param playerId - The id of the player we want to focus
+     */
+    focusPlayerWithId(playerId) {
+        this.focusedMeshIndex = this.players.getPlayerById(playerId)
+        this.focusPlayer()
     }
 
     /**

@@ -165,6 +165,7 @@ class TileInfoManager {
             const playerCopy = Object.assign({}, player)
             playerCopy.id = playerCopy.id.toString()
             window.mainInstance.playerInfoManager.switchToPlayerInfoView(playerCopy, playerCopy.inventory)
+            window.worldInstance.focusPlayerWithId(player.id)
         }
     }
 
