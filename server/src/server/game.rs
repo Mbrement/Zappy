@@ -274,7 +274,11 @@ impl Game {
             // 		}
             // 	});
             // }
-            client.inventory[define::ITEMS_DICT[item]] += 1;
+            let mut inc: u32 = 1;
+            if (item == define::FOOD) {
+                inc = 126;
+            }
+            client.inventory[define::ITEMS_DICT[item]] += inc;
             // match item {
             //     define::FOOD => client.set_hunger(client.hunger + define::FOOD_VALUE), // Assuming 126 is the hunger value for food
             //     define::T1_MAT => client.inventory[define::T1_MAT_INV] += 1,

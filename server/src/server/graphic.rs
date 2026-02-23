@@ -44,11 +44,11 @@ fn team_names(teams: HashMap<String, Vec<mio::Token>>) -> String {
     res
 }
 
-fn new_player(team: String, player: &Client) -> String {
+pub(crate) fn new_player(team: String, player: &Client) -> String {
     let (x, y) = player.position;
     format!(
         "pnw {:?} {} {} {} {} {}\n",
-        player.token.0, x, y, player.orientation, player.level, team
+        player.token.0, x, y, define::CARDINAL_DICT[&player.orientation], player.level, team
     )
 }
 
@@ -56,7 +56,7 @@ pub(crate) fn player_pos(player: &Client) -> String {
     let (x, y) = player.position;
     format!(
         "ppo {:?} {} {} {}\n",
-        player.token.0, x, y, player.orientation
+        player.token.0, x, y, define::CARDINAL_DICT[&player.orientation]
     )
 }
 
@@ -143,6 +143,7 @@ pub(crate) fn egg_hatches(token: &Token, server: &Server) -> String {
         res += &format!("eht {}\n", player.was_egg);
     }
     res += &new_player(server.get_team_for_player(&player.token),player);
+    println!("{}\n",res);
     res
 }
 

@@ -240,7 +240,7 @@ impl CommandManager {
                 let inventory = client.get_inventory();
                 client.get_socket_mut().write(
                     format!(
-                        "{} {}, {} {}, {} {}, {} {}, {} {}, {} {}, {} {}\n",
+                        "{{{} {}, {} {}, {} {}, {} {}, {} {}, {} {}, {} {}}}\n",
                         define::FOOD,
                         inventory[define::FOOD_INV],
                         define::T1_MAT,
@@ -496,7 +496,7 @@ impl CommandManager {
                 #[cfg(feature = "log")]
                 utils::debug_manager_register("spawning", _c, server, _arg);
                 //player hatch
-                println!("pouet\n");
+                println!("pouet1502\n");
                 let mut client = server._clients.get_mut(&_c).unwrap();
                 client.hunger = 1260; //this line scare me
                 client.inventory[0] = 1260;

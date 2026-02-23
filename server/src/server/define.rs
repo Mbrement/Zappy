@@ -19,6 +19,13 @@ pub static ITEMS_DICT: phf::Map<&'static str, usize> = phf_map! {
     "thystame" => T6_MAT_INV,
 };
 
+pub static CARDINAL_DICT: phf::Map<char, u8> = phf_map! {
+    'N' => 1,
+    'E' => 2,
+    'S' => 3,
+    'O' => 4,
+};
+
 pub const INCANTATION_REQ: [[u32; 7]; 7] = [
     [1, 0, 0, 0, 0, 0, 0],
     [2, 1, 1, 1, 0, 0, 0],
