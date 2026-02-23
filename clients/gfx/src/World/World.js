@@ -41,10 +41,6 @@ class World {
         this.themeManager = new ThemeManager()
         this.gameMap = new GameMap()
         this.players = new Players()
-
-        window.addEventListener('resize', this.resizeView.bind(this))
-        window.addEventListener('mousemove', this.onMouseMove.bind(this))
-        window.addEventListener('mousedown', this.onMouseDown.bind(this))
     }
 
     /**
@@ -141,6 +137,10 @@ class World {
      * @description Creates the world
      */
     async createWorld() {
+        window.addEventListener('resize', this.resizeView.bind(this))
+        window.addEventListener('mousemove', this.onMouseMove.bind(this))
+        window.addEventListener('mousedown', this.onMouseDown.bind(this))
+
         this.camera = new Camera(this.scene)
         await this.renderer.init()
 
