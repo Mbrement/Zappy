@@ -10,7 +10,7 @@ class Players {
         this.main = window.mainInstance
         this.gameState = this.main.gameState
 
-        this.tickTime = 0.1
+        this.tickTime = 0.01
         this.animatedPlayersMove = []
         this.animatedPlayersRotate = []
 
@@ -79,7 +79,7 @@ class Players {
      * @param newUnit - the new time unit (T/second) where t is the newUnit
      */
     setTimeUnit(newUnit) {
-        this.tickTime = newUnit * 0.001
+        this.tickTime = 1 / newUnit
     }
 
     /**
