@@ -31,21 +31,22 @@ impl Game {
         }
     }
 
-    pub fn routine(&mut self) {
+    pub fn routine(&mut self) -> String {
+        let mut res = String::new();
         if self._is_running {
             self._tick += 1;
             match self._tick % 100 {
                 0 => {
-                    self.map.partial_fill(0);
+                    res += &self.map.partial_fill(0);
                 }
                 25 => {
-                    self.map.partial_fill(1);
+                    res += &self.map.partial_fill(1);
                 }
                 50 => {
-                    self.map.partial_fill(2);
+                    res += &self.map.partial_fill(2);
                 }
                 75 => {
-                    self.map.partial_fill(3);
+                    res += &self.map.partial_fill(3);
                 }
                 _ => (),
             }
@@ -57,6 +58,7 @@ impl Game {
             #[cfg(feature = "log")]
             self.map.print_map();
         }
+        res
     }
 
     pub fn get_player_position(&self, token: Token) -> (u32, u32) {

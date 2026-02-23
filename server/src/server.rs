@@ -587,7 +587,7 @@ impl Server {
                         .as_millis())
                 );
                 self._game.last_update = time::Instant::now();
-                self._game.routine();
+                self.send_to_graph += &self._game.routine();
                 _command_manager.process_queue(self);
 
                 for client in self.get_clients_by_type_mut(define::ROLE_PLAYER) {

@@ -9,7 +9,7 @@ fn map_size(width: u32, height: u32) -> String {
     format!("msz {} {}\n", width, height)
 }
 
-fn content_tile(col: u32, row: u32, tile: &Tile) -> String {
+pub(crate) fn content_tile(col: u32, row: u32, tile: &Tile) -> String {
     format!(
         "bct {} {} {} {} {} {} {} {} {}\n",
         col,

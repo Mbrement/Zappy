@@ -1,4 +1,4 @@
-use crate::server::define::*;
+use crate::server::{define::*, graphic};
 use getopts::Options;
 use mio::Token;
 use rand::{rngs::SmallRng, *};
@@ -176,16 +176,18 @@ impl Map {
             }
         }
     }
-    pub fn partial_fill(&mut self, ticks: u8) {
+    pub fn partial_fill(&mut self, ticks: u8) -> String {
         //TODO : optimize this with iterator on the 2nd loop
-        let mut row_nb: u8 = 0;
-        let mut tile_nb: u8 = 0;
+        let mut res = String::new();
+        let mut row_nb: u32 = 0;
+        let mut tile_nb: u32 = 0;
         for row in &mut self.tiles {
             tile_nb = 0;
             for tile in row {
-                if (tile_nb + row_nb) % 4 == ticks {
+                if (tile_nb + row_nb) % 4 == ticks as u32 {
                     let rng: i32 = self.rng.random_range(0..=300);
                     Self::fill_case(tile, rng);
+                    res  += &graphic::content_tile(tile_nb, row_nb, tile);
                 }
                 tile_nb += 1;
             }
@@ -193,6 +195,7 @@ impl Map {
         }
         #[cfg(feature = "debug")]
         self.print_map();
+        res
     }
 
     pub fn print_map(&self) {
