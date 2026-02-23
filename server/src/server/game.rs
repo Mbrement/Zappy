@@ -109,11 +109,11 @@ impl Game {
                         .move_player(&player.get_token(), (position.0, position.1 - 1));
                 } else {
                     self.map
-                        .move_player(&player.get_token(), (position.0, self.map.get_height()));
+                        .move_player(&player.get_token(), (position.0, self.map.get_height() - 1));
                 }
             }
             'E' => {
-                if self.map.get_width() > position.0 {
+                if self.map.get_width() - 1 > position.0 {
                     self.map
                         .move_player(&player.get_token(), (position.0 + 1, position.1));
                 } else {
@@ -121,7 +121,7 @@ impl Game {
                 }
             }
             'S' => {
-                if self.map.get_height() > position.1 {
+                if self.map.get_height() - 1 > position.1 {
                     self.map
                         .move_player(&player.get_token(), (position.0, position.1 + 1));
                 } else {
@@ -134,7 +134,7 @@ impl Game {
                         .move_player(&player.get_token(), (position.0 - 1, position.1));
                 } else {
                     self.map
-                        .move_player(&player.get_token(), (self.map.get_width(), position.1));
+                        .move_player(&player.get_token(), (self.map.get_width() - 1, position.1));
                 }
             }
             _ => {}
