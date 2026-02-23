@@ -27,7 +27,10 @@ class MusicManager extends EventEmitter {
                 }, { once: true })
 
                 audio.addEventListener('error', (e) => {
-                    console.error(`Failed to load soundtrack: ${soundtrack.name}`, e)
+                    if (audio.error.code === 3) {
+                        return reject(e)
+                    }
+                    console.error(`Unable to play soundtrack: ${soundtrack.name}`, audio.error)
                     reject(e)
                 }, { once: true })
 
