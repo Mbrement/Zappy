@@ -154,7 +154,6 @@ class ThemeManager {
         this.nightSky = new THREE.Group()
         this.createStars()
         this.createMoon()
-        console.log(this.nightSky)
     }
 
     switchSky(newTheme) {
