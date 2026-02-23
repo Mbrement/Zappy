@@ -115,7 +115,7 @@ class GameState {
 
         this.map[y][x].players.push(playerObject)
 
-        if (window.worldInstance.selectedTile.x === x && window.worldInstance.selectedTile.y === y) {
+        if (window.worldInstance.selectedTile && window.worldInstance.selectedTile.x === x && window.worldInstance.selectedTile.y === y) {
             window.mainInstance.eventManager.modules.TileInfoManager.addPlayer(playerObject)
         }
 
@@ -133,7 +133,7 @@ class GameState {
         const player = this.playerInfo.get(id)
         this.map[player.y][player.x].players = this.map[player.y][player.x].players.filter((player) => player.id !== id)
 
-        if (window.worldInstance.selectedTile.x === player.x && window.worldInstance.selectedTile.y === player.y) {
+        if (window.worldInstance.selectedTile && window.worldInstance.selectedTile.x === player.x && window.worldInstance.selectedTile.y === player.y) {
             window.mainInstance.eventManager.modules.TileInfoManager.removePlayer(player.id)
         }
 
@@ -143,7 +143,7 @@ class GameState {
 
         this.map[y][x].players.push(player)
 
-        if (window.worldInstance.selectedTile.x === x && window.worldInstance.selectedTile.y === y) {
+        if (window.worldInstance.selectedTile && window.worldInstance.selectedTile.x === x && window.worldInstance.selectedTile.y === y) {
             window.mainInstance.eventManager.modules.TileInfoManager.addPlayer(player)
         }
 
@@ -227,7 +227,7 @@ class GameState {
         const deletedPlayer = this.playerInfo.get(playerId)
         this.map[deletedPlayer.y][deletedPlayer.x].players = this.map[deletedPlayer.y][deletedPlayer.x].players.filter((player) => player.id !== playerId)
 
-        if (window.worldInstance.selectedTile.x === deletedPlayer.x && window.worldInstance.selectedTile.y === deletedPlayer.y) {
+        if (window.worldInstance.selectedTile && window.worldInstance.selectedTile.x === deletedPlayer.x && window.worldInstance.selectedTile.y === deletedPlayer.y) {
             window.mainInstance.eventManager.modules.TileInfoManager.removePlayer(deletedPlayer.id)
         }
 
