@@ -448,6 +448,14 @@ class Players {
      */
     removePlayer(playerId, playerState) {
         const index = this.getPlayerById(playerId)
+
+        if (this.world.focusedMeshIndex === index) {
+            this.world.focusedMeshIndex = null
+            this.world.updateManager.remove(this.world, "world", "focusPlayer")
+            this.world.controls.target = new THREE.Vector3()
+            this.world.controls.update()
+        }
+
         this.playerMeshes.set(index, null)
 
         this.positionningMatrix.setPosition(9999, 9999, 9999)
