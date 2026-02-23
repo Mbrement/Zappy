@@ -240,7 +240,7 @@ impl CommandManager {
                 let inventory = client.get_inventory();
                 client.get_socket_mut().write(
                     format!(
-                        "{} {}, {} {}, {} {}, {} {}, {} {}, {} {}, {} {}\n",
+                        "{{{} {}, {} {}, {} {}, {} {}, {} {}, {} {}, {} {}}}\n",
                         define::FOOD,
                         inventory[define::FOOD_INV],
                         define::T1_MAT,
@@ -496,9 +496,9 @@ impl CommandManager {
                 #[cfg(feature = "log")]
                 utils::debug_manager_register("spawning", _c, server, _arg);
                 //player hatch
-                println!("pouet\n");
+                println!("pouet1502\n");
                 let mut client = server._clients.get_mut(&_c).unwrap();
-                client.hunger = 1260; //this line scare me
+                //client.hunger = 1260; //this line scare me
                 client.inventory[0] = 1260;
 				client.was_egg = _arg.parse().unwrap_or(0);
                 server.send_to_graph += &graphic::egg_hatches(&_c, server);
@@ -518,7 +518,7 @@ impl CommandManager {
                         if let Some(v) = tmp {
                             *v += 1;
                         }
-                        server.send_to_graph += &graphic::end_fork(&token);
+                        server.send_to_graph += &graphic::end_fork(&token, *egg_id, *x, *y);
                     }
                 }
                 //end fork
@@ -799,7 +799,7 @@ fn expulse_player(server: &mut Server, token: Token) -> bool {
             'N' => (position.0, position.1.saturating_sub(1)),
             'E' => (position.0 + 1, position.1),
             'S' => (position.0, position.1 + 1),
-            'W' => (position.0.saturating_sub(1), position.1),
+            'O' => (position.0.saturating_sub(1), position.1),
             _ => position,
         },
         None => position,

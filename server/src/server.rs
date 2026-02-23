@@ -477,6 +477,9 @@ impl Server {
                                                 {
                                                     self._clients.remove(&player_token);
                                                 }
+                                                if !self._game.starting {
+                                                    graphic::send_graphic_clients(graphic::egg_hatches(&player_token, self), self);
+                                                }
                                             }
                                             self._game.starting = true;
                                         } else {
@@ -587,14 +590,14 @@ impl Server {
                         .as_millis())
                 );
                 self._game.last_update = time::Instant::now();
-                self._game.routine();
+                self.send_to_graph += &self._game.routine();
                 _command_manager.process_queue(self);
 
                 for client in self.get_clients_by_type_mut(define::ROLE_PLAYER) {
                     client.hunger_tick();
                     #[cfg(feature = "debug")]
-                    println!("Client {:?} hunger: {}", client.get_token(), client.hunger);
-                    if client.hunger == 0 {
+                    println!("Client {:?} hunger: {}", client.get_token(), client.inventory[0]);
+                    if client.inventory[0] == 0 {
                         let _ = client.get_socket_mut().write(b"mort\n");
                         to_disconnect.push(client.get_token());
                     }
@@ -624,7 +627,7 @@ impl Server {
             if let Some(player) = self._clients.get_mut(&token) {
                 let player_level = player.level;
                 for i in 1..7 {
-                    player.inventory[i] -= define::INCANTATION_REQ[player_level as usize - 1][i];
+                    player.inventory[i] -= define::INCANTATION_REQ[player_level as usize - 1][i] as u128;
                 }
             } else {
                 eprintln!("Player with token {:?} not found", token);
@@ -637,7 +640,7 @@ impl Server {
         };
         let player_level = player.level;
         if (self._incantation_list.contains_key(&token)
-            && (self._incantation_list[&token].len() as u32 + 1)
+            && (self._incantation_list[&token].len() as u128 + 1)
                 < define::INCANTATION_REQ[player_level as usize - 1][0])
         {
             return false;

@@ -19,7 +19,14 @@ pub static ITEMS_DICT: phf::Map<&'static str, usize> = phf_map! {
     "thystame" => T6_MAT_INV,
 };
 
-pub const INCANTATION_REQ: [[u32; 7]; 7] = [
+pub static CARDINAL_DICT: phf::Map<char, u8> = phf_map! {
+    'N' => 1,
+    'E' => 2,
+    'S' => 3,
+    'O' => 4,
+};
+
+pub const INCANTATION_REQ: [[u128; 7]; 7] = [
     [1, 0, 0, 0, 0, 0, 0],
     [2, 1, 1, 1, 0, 0, 0],
     [2, 2, 0, 1, 0, 2, 0],
@@ -32,7 +39,7 @@ pub const INCANTATION_REQ: [[u32; 7]; 7] = [
 pub const FOOD_VALUE: u128 = 126;
 // pub const INCANTATION_PLAYERS_REQ: [u32; 8] = [1, 2, 2, 4, 4, 6, 6, 8];
 
-pub const SEE_TAB_N: [(i32, i32); 81] = [
+pub const SEE_TAB_S: [(i32, i32); 81] = [
     (0, 0),
     (1, 1),
     (0, 1),
@@ -116,7 +123,7 @@ pub const SEE_TAB_N: [(i32, i32); 81] = [
     (-8, 8),
 ];
 
-pub const SEE_TAB_W: [(i32, i32); 81] = [
+pub const SEE_TAB_E: [(i32, i32); 81] = [
     (0, 0),
     (1, -1),
     (1, 0),
@@ -200,7 +207,7 @@ pub const SEE_TAB_W: [(i32, i32); 81] = [
     (8, 8),
 ];
 // INVANTORY CONST
-pub const FOOD_INV: usize = 0; // symbolic, it is the hunger bar;
+pub const FOOD_INV: usize = 0;
 pub const T1_MAT_INV: usize = 1;
 pub const T2_MAT_INV: usize = 2;
 pub const T3_MAT_INV: usize = 3;
@@ -208,7 +215,7 @@ pub const T4_MAT_INV: usize = 4;
 pub const T5_MAT_INV: usize = 5;
 pub const T6_MAT_INV: usize = 6;
 
-pub const SEE_TAB_E: [(i32, i32); 81] = [
+pub const SEE_TAB_W: [(i32, i32); 81] = [
     (0, 0),
     (-1, 1),
     (-1, 0),
@@ -292,7 +299,7 @@ pub const SEE_TAB_E: [(i32, i32); 81] = [
     (-8, -8),
 ];
 
-pub const SEE_TAB_S: [(i32, i32); 81] = [
+pub const SEE_TAB_N: [(i32, i32); 81] = [
     (0, 0),
     (-1, -1),
     (0, -1),

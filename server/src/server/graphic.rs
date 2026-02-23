@@ -9,7 +9,7 @@ fn map_size(width: u32, height: u32) -> String {
     format!("msz {} {}\n", width, height)
 }
 
-fn content_tile(col: u32, row: u32, tile: &Tile) -> String {
+pub(crate) fn content_tile(col: u32, row: u32, tile: &Tile) -> String {
     format!(
         "bct {} {} {} {} {} {} {} {} {}\n",
         col,
@@ -44,11 +44,11 @@ fn team_names(teams: HashMap<String, Vec<mio::Token>>) -> String {
     res
 }
 
-fn new_player(team: String, player: &Client) -> String {
+pub(crate) fn new_player(team: String, player: &Client) -> String {
     let (x, y) = player.position;
     format!(
         "pnw {:?} {} {} {} {} {}\n",
-        player.token, x, y, player.orientation, player.level, team
+        player.token.0, x, y, define::CARDINAL_DICT[&player.orientation], player.level, team
     )
 }
 
@@ -56,19 +56,19 @@ pub(crate) fn player_pos(player: &Client) -> String {
     let (x, y) = player.position;
     format!(
         "ppo {:?} {} {} {}\n",
-        player.token, x, y, player.orientation
+        player.token.0, x, y, define::CARDINAL_DICT[&player.orientation]
     )
 }
 
 fn player_level(player: &Client) -> String {
-    format!("plv {:?} {}\n", player.token, player.level)
+    format!("plv {:?} {}\n", player.token.0, player.level)
 }
 
 fn player_inventory(player: &Client) -> String {
     let (x, y) = player.position;
     format!(
         "pin {:?} {} {} {} {} {} {} {} {} {}\n",
-        player.token,
+        player.token.0,
         x,
         y,
         player.inventory[0],
@@ -89,11 +89,11 @@ fn player_inventory(player: &Client) -> String {
 //}
 
 fn leonidas(token: &Token) -> String {
-    format!("pex {:?}\n", token)
+    format!("pex {:?}\n", token.0)
 }
 
 pub(crate) fn player_broadcast(token: &Token, message: &str) -> String {
-    format!("pbc {:?} {}", token, message)
+    format!("pbc {:?} {}", token.0, message)
 }
 
 pub(crate) fn start_incant(tokens:Vec<Token>, origin: Token, server: &Server) -> String {
@@ -101,7 +101,7 @@ pub(crate) fn start_incant(tokens:Vec<Token>, origin: Token, server: &Server) ->
     let (x, y) = server._game.get_player_position(origin);
     res += &format!("pic {} {} {}", x, y, server._clients.get(&origin).unwrap().level);
     for token in tokens {
-        res += &format!(" {:?}", token);
+        res += &format!(" {:?}", token.0);
     }
     res += "\n";
     res
@@ -116,23 +116,23 @@ fn end_incant(x: u32, y: u32, success: bool) -> String {
 }
 
 pub(crate) fn fork(token: &Token) -> String {
-    format!("pfk {:?}\n", token)
+    format!("pfk {:?}\n", token.0)
 }
 
-pub(crate) fn end_fork(token: &Token) -> String {
-    format!("enw {:?}\n", token)
+pub(crate) fn end_fork(token: &Token, egg_id: u128, x: u32, y: u32) -> String {
+    format!("enw {} {:?} {} {}\n", egg_id, token.0, x, y)
 }
 
 fn player_drop_item(player: &Client, item_num: usize) -> String {
-    format!("pdr {:?} {}\n", player.token, item_num)
+    format!("pdr {:?} {}\n", player.token.0, item_num)
 }
 
 fn player_pick_item(player: &Client, item_num: usize) -> String {
-    format!("pgt {:?} {}\n", player.token, item_num)
+    format!("pgt {:?} {}\n", player.token.0, item_num)
 }
 
 pub(crate) fn player_death(token: &Token) -> String {
-    format!("pdi {:?}\n", token)
+    format!("pdi {:?}\n", token.0)
 }
 
 pub(crate) fn egg_hatches(token: &Token, server: &Server) -> String {
@@ -143,6 +143,7 @@ pub(crate) fn egg_hatches(token: &Token, server: &Server) -> String {
         res += &format!("eht {}\n", player.was_egg);
     }
     res += &new_player(server.get_team_for_player(&player.token),player);
+    println!("{}\n",res);
     res
 }
 
@@ -180,8 +181,9 @@ pub(crate) fn event_graph_connect(server: &Server) -> String {
     for player in server.get_clients_by_type(define::ROLE_PLAYER) {
         res += &new_player(server.get_team_for_player(&player.token), player);
     }
-    //TODO après gestion par micka
-    //res += &egg_laid()
+    for (egg_id, (x, y, token, tick)) in &server._game.map.egg_position {
+        res += &end_fork(token, *egg_id, *x, *y);
+    }
     res
 }
 

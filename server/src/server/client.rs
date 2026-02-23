@@ -6,9 +6,9 @@ pub struct Client {
     socket: TcpStream,
     pub(crate) token: Token,
     pub(crate) r#type: String,
-    pub(crate) inventory: [u32; 7],
+    pub(crate) inventory: [u128; 7],
     pub(crate) level: u8,
-    pub(crate) hunger: u128,
+    //pub(crate) hunger: u128,
     pub(crate) position: (u32, u32),
     pub(crate) orientation: char,
     pub(crate) is_incanting: bool,
@@ -21,9 +21,9 @@ impl client::Client {
             socket,
             token,
             r#type: String::from("unknown"),
-            inventory: [0, 0, 0, 0, 0, 0, 0],
+            inventory: [1260, 0, 0, 0, 0, 0, 0],
             level: 1,
-            hunger: 1260,
+            //hunger: 1260,
             position: (0, 0),
             orientation: ('N'),
             is_incanting: false,
@@ -31,10 +31,11 @@ impl client::Client {
         }
     }
 
-    pub fn get_inventory(&self) -> [u32; 7] {
-        let mut tmp = self.inventory;
-        tmp[0] = self.hunger as u32;
-        tmp
+    pub fn get_inventory(&self) -> [u128; 7] {
+        //let mut tmp = self.inventory;
+        //tmp[0] = self.hunger as u32;
+        //tmp
+        self.inventory
     }
     pub fn get_socket(&self) -> &TcpStream {
         &self.socket
@@ -49,11 +50,11 @@ impl client::Client {
     }
 
     pub fn set_hunger(&mut self, hunger: u128) {
-        self.hunger = hunger;
+        self.inventory[0] = hunger;
     }
     pub fn hunger_tick(&mut self) {
-        if self.hunger > 0 {
-            self.hunger -= 1;
+        if self.inventory[0] > 0 {
+            self.inventory[0] -= 1;
         }
     }
 }

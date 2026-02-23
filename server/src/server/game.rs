@@ -31,21 +31,22 @@ impl Game {
         }
     }
 
-    pub fn routine(&mut self) {
+    pub fn routine(&mut self) -> String {
+        let mut res = String::new();
         if self._is_running {
             self._tick += 1;
             match self._tick % 100 {
                 0 => {
-                    self.map.partial_fill(0);
+                    res += &self.map.partial_fill(0);
                 }
                 25 => {
-                    self.map.partial_fill(1);
+                    res += &self.map.partial_fill(1);
                 }
                 50 => {
-                    self.map.partial_fill(2);
+                    res += &self.map.partial_fill(2);
                 }
                 75 => {
-                    self.map.partial_fill(3);
+                    res += &self.map.partial_fill(3);
                 }
                 _ => (),
             }
@@ -57,6 +58,7 @@ impl Game {
             #[cfg(feature = "log")]
             self.map.print_map();
         }
+        res
     }
 
     pub fn get_player_position(&self, token: Token) -> (u32, u32) {
@@ -82,16 +84,16 @@ impl Game {
             player.orientation = match orientation {
                 'N' => 'E',
                 'E' => 'S',
-                'S' => 'W',
-                'W' => 'N',
+                'S' => 'O',
+                'O' => 'N',
                 _ => orientation,
             };
         } else if rotation == "gauche" {
             player.orientation = match orientation {
-                'N' => 'W',
+                'N' => 'O',
                 'E' => 'N',
                 'S' => 'E',
-                'W' => 'S',
+                'O' => 'S',
                 _ => orientation,
             };
         }
@@ -107,11 +109,11 @@ impl Game {
                         .move_player(&player.get_token(), (position.0, position.1 - 1));
                 } else {
                     self.map
-                        .move_player(&player.get_token(), (position.0, self.map.get_height()));
+                        .move_player(&player.get_token(), (position.0, self.map.get_height() - 1));
                 }
             }
             'E' => {
-                if self.map.get_width() > position.0 {
+                if self.map.get_width() - 1 > position.0 {
                     self.map
                         .move_player(&player.get_token(), (position.0 + 1, position.1));
                 } else {
@@ -119,20 +121,20 @@ impl Game {
                 }
             }
             'S' => {
-                if self.map.get_height() > position.1 {
+                if self.map.get_height() - 1 > position.1 {
                     self.map
                         .move_player(&player.get_token(), (position.0, position.1 + 1));
                 } else {
                     self.map.move_player(&player.get_token(), (position.0, 0));
                 }
             }
-            'W' => {
+            'O' => {
                 if position.0 > 0 {
                     self.map
                         .move_player(&player.get_token(), (position.0 - 1, position.1));
                 } else {
                     self.map
-                        .move_player(&player.get_token(), (self.map.get_width(), position.1));
+                        .move_player(&player.get_token(), (self.map.get_width() - 1, position.1));
                 }
             }
             _ => {}
@@ -196,7 +198,7 @@ impl Game {
             'N' => define::SEE_TAB_N,
             'E' => define::SEE_TAB_E,
             'S' => define::SEE_TAB_S,
-            'W' => define::SEE_TAB_W,
+            'O' => define::SEE_TAB_W,
             _ => [(0, 0); 81],
         };
 
@@ -262,6 +264,7 @@ impl Game {
 
     pub fn take_item_from_cell(&mut self, client: &mut Client, item: &str) -> bool {
         let position = self.get_player_position(client.get_token());
+        println!("micka ?\n");
         if self.map.remove_item_from_cell(position.0, position.1, item) {
             // if item == define::FOOD {
             // 	client.set_hunger(client.hunger.saturating_add(define::FOOD_VALUE));
@@ -272,7 +275,16 @@ impl Game {
             // 		}
             // 	});
             // }
-            client.inventory[define::ITEMS_DICT[item]] += 1;
+
+            let mut inc: u128 = 1;
+            println!("take item {}\n", item);
+            if (item == define::FOOD) {
+                println!("is ok food {}\n", item);
+                inc = 126;
+            }
+            println!("inventaire for {} before {}\n", item, client.inventory[define::ITEMS_DICT[item]]);
+            client.inventory[define::ITEMS_DICT[item]] += inc;
+            println!("inventaire for {} after {}\n", item, client.inventory[define::ITEMS_DICT[item]]);
             // match item {
             //     define::FOOD => client.set_hunger(client.hunger + define::FOOD_VALUE), // Assuming 126 is the hunger value for food
             //     define::T1_MAT => client.inventory[define::T1_MAT_INV] += 1,
