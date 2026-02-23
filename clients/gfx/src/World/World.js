@@ -68,8 +68,6 @@ class World {
      * @param event - the mousemove event
      */
     onMouseMove(event) {
-        event.preventDefault();
-
         this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
         this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     }
@@ -80,8 +78,6 @@ class World {
      * @param event - the click event
      */
     onMouseDown(event) {
-        event.preventDefault();
-
         if (event.button !== 0 || event.target !== this.canvas) {
             return
         }
@@ -150,6 +146,7 @@ class World {
 
         this.updateManager.add(this.renderer, 'renderers')
         this.updateManager.add(this, 'world')
+        this.resizeView()
     }
 
     /**
