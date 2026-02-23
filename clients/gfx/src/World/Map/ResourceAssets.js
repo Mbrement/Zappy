@@ -141,9 +141,9 @@ class ResourceAssets {
             resource.duoQuantity = quantity
             resource.trioQuantity = quantity
 
-            resource.singleInstance = this.createInstance(name, this.resourceMeshInfo[name].geometry, matrix, quantity)
-            resource.duoInstance = this.createInstance(name, this.assetGeometries[name].duo, matrix, quantity)
-            resource.trioInstance = this.createInstance(name, this.assetGeometries[name].trio, matrix, quantity)
+            resource.singleInstance = this.createInstance(name, this.resourceMeshInfo[name].geometry, this.positioningMatrix, quantity)
+            resource.duoInstance = this.createInstance(name, this.assetGeometries[name].duo, this.positioningMatrix, quantity)
+            resource.trioInstance = this.createInstance(name, this.assetGeometries[name].trio, this.positioningMatrix, quantity)
 
             this.scene.add(resource.singleInstance, resource.duoInstance, resource.trioInstance)
         })
