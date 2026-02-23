@@ -230,6 +230,32 @@ class World {
         this.previousHover.color = this.previousColor
 
     }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Resets the world
+     */
+    reset() {
+        window.removeEventListener('resize', this.resizeView.bind(this))
+        window.removeEventListener('mousemove', this.onMouseMove.bind(this))
+        window.removeEventListener('mousedown', this.onMouseDown.bind(this))
+
+        this.gameMap.reset()
+        this.players.reset()
+        this.themeManager.reset()
+
+        this.updateManager.remove(this, "world", "focusPlayer")
+        this.updateManager.remove(this.renderer, 'renderers')
+        this.updateManager.remove(this, 'world')
+
+        this.camera?.cleanup()
+        this.camera = null
+        this.controls = null
+
+        this.updateManager?.stop()
+
+        this.renderer.instance.clear()
+    }
 }
 
 module.exports = World

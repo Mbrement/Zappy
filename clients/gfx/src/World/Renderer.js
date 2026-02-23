@@ -15,6 +15,10 @@ class Renderer {
      * @description Creates the renderer instance
      */
     setInstance() {
+        if (this.instance) {
+            return
+        }
+
         this.instance = new THREE.WebGPURenderer({
             antialias: true,
             canvas: this.canvas,

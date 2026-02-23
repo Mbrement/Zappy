@@ -8,6 +8,8 @@ class ResourceAssets {
 
         this.defaultSize = 0.05
 
+        this.positioningMatrix = new THREE.Matrix4()
+
         this.sphereGeometry = new THREE.SphereGeometry(this.defaultSize * 0.75, 6, 6)
         this.octahedronGeometry = new THREE.OctahedronGeometry(this.defaultSize)
         this.pyramidGeometry = new THREE.ConeGeometry(this.defaultSize, 0.07, 4)
@@ -89,6 +91,10 @@ class ResourceAssets {
         this.createResourceGeometries()
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Creates the resources geometries
+     */
     createResourceGeometries() {
         let geometries, geometry
         Object.entries(this.assetGeometries).forEach(([name, meshes]) => {
@@ -122,8 +128,13 @@ class ResourceAssets {
         })
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Creates all the resources instances
+     * @param mapSize - The size of the map
+     */
     createResourceInstances(mapSize) {
-        const matrix = new THREE.Matrix4().setPosition(9999, 9999, 9999)
+        this.positioningMatrix.setPosition(9999, 9999, 9999)
         const quantity = mapSize[0] * mapSize[1]
         Object.entries(this.resourceInstances).forEach(([name, resource]) => {
             resource.singleQuantity = quantity
@@ -138,7 +149,15 @@ class ResourceAssets {
         })
     }
 
-    createInstance(name, geometry, matrix, quantity) {
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Create an instance of a resource
+     * @param name - The name of the resource
+     * @param geometry - The geometry of the resource
+     * @param quantity - The amount of instances to create
+     * @returns {THREE.InstancedMesh} - The newly created instance
+     */
+    createInstance(name, geometry, quantity) {
         const instance = new THREE.InstancedMesh(geometry, this.resourceMeshInfo[name].material, quantity)
         instance.position.set(0, 0, 0)
         instance.frustumCulled = false
@@ -146,10 +165,24 @@ class ResourceAssets {
         instance.matrixWorldAutoUpdate = false
 
         for (let i = 0; i < quantity; i++) {
-            instance.setMatrixAt(i, matrix)
+            instance.setMatrixAt(i, this.positioningMatrix)
         }
         instance.instanceMatrix.needsUpdate = true
         return instance
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Resets the resource instances
+     */
+    reset() {
+        Object.entries(this.resourceInstances).forEach(([_, resource]) => {
+            this.scene.remove(resource.singleInstance, resource.duoInstance, resource.trioInstance)
+
+            resource.singleInstance = null
+            resource.duoInstance = null
+            resource.trioInstance = null
+        })
     }
 }
 

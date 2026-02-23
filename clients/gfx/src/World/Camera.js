@@ -20,6 +20,16 @@ class Camera {
 
         this.scene.add(this.instance)
     }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Cleans up the camera class
+     */
+    cleanup() {
+        for (const properties in this) {
+            this[properties] = null
+        }
+    }
 }
 
 module.exports = Camera

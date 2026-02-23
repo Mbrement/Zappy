@@ -34,7 +34,7 @@ class Main {
         this.world = new World()
         this.musicManager.once('loaded', () => {
             this.resources.once('loaded', () => {
-                this.switchToConnectionMenu()
+                this.switchToConnectionMenu(true)
             })
         })
     }
@@ -55,6 +55,7 @@ class Main {
      * @description Got connection error - We show the connection menu
      */
     connectError() {
+        this.networkClient.closeSocket()
         this.networkClient = null
         this.switchToConnectionMenu()
         this.eventManager.modules.ConnectMenu.addError("Failed to connect")
@@ -62,12 +63,27 @@ class Main {
 
     /**
      * @author Emma (epolitze) Politzer
-     * @description Switch UI to connection menu
+     * @description Connection was closed - We show the connection menu
      */
-    switchToConnectionMenu() {
+    connectionClosed() {
+        this.networkClient = null
+        this.switchToConnectionMenu()
+        this.eventManager.modules.ConnectMenu.addError("Connection closed")
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Switch UI to connection menu
+     * @param init - If it is called right after initialization or not
+     */
+    switchToConnectionMenu(init=false) {
         this.eventManager.modules.ConnectMenu.showConnectMenu()
 
-        this.musicManager.turnOffSoundtrack()
+        if (!init) {
+            this.world.reset()
+            this.musicManager.turnOffSoundtrack()
+            this.gameState.reset()
+        }
 
         const broadcastContainer = document.getElementById('broadcastContainer')
         broadcastContainer.classList.add('hidden')
@@ -86,6 +102,7 @@ class Main {
     switchToGameUI() {
         this.eventManager.modules.ConnectMenu.hideConnectMenu()
 
+        this.world.themeManager.switchSky('Dark_Theme')
         this.musicManager.playDefault()
 
         const broadcastContainer = document.getElementById('broadcastContainer')

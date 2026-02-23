@@ -18,6 +18,8 @@ class UpdateManager {
             shaders: [],
             renderers: []
         }
+
+        this.updateBind = this.update.bind(this)
     }
 
     /**
@@ -25,9 +27,11 @@ class UpdateManager {
      * @description Starts the update loop
      */
     start() {
-        this.time.on('tick', () => {
-            this.update()
-        })
+        this.time.on('tick', this.updateBind)
+    }
+
+    stop() {
+        this.time.off('tick', this.updateBind)
     }
 
     /**

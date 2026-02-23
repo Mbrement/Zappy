@@ -171,6 +171,15 @@ class ThemeManager {
 
     /**
      * @author Emma (epolitze) Politzer
+     * @description Removes theme
+     */
+    reset() {
+        this.scene.remove(this.nightSky)
+        this.scene.remove(this.sky)
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
      * @description Cleans up the ThemeManager class
      */
     cleanup() {

@@ -15,6 +15,8 @@ class GameMap {
         this.tileHeight = 1
 
         this.tileGeometry = new THREE.BoxGeometry(this.tileSize, this.tileHeight, this.tileSize)
+        this.positioningMatrix = new THREE.Matrix4()
+
     }
 
     /**
@@ -22,13 +24,17 @@ class GameMap {
      * @description Creates the 3D map
      */
     createMap() {
-        this.material1 = new THREE.MeshStandardNodeMaterial({
-            map: this.resources.items['default'].rockyGroundDiffTexture.file
-        })
+        if (!this.oddMaterial) {
+            this.oddMaterial = new THREE.MeshStandardNodeMaterial({
+                map: this.resources.items['default'].rockyGroundDiffTexture.file
+            })
+        }
 
-        this.material2 = new THREE.MeshStandardNodeMaterial({
-            map: this.resources.items['default'].grassGroundDiffTexture.file
-        })
+        if (!this.evenMaterial) {
+            this.evenMaterial = new THREE.MeshStandardNodeMaterial({
+                map: this.resources.items['default'].grassGroundDiffTexture.file
+            })
+        }
 
         this.mapSize = [this.gameState.map[0].length, this.gameState.map.length]
 
@@ -44,20 +50,18 @@ class GameMap {
 
         const oddInstanceQuantity = Math.ceil(this.mapSize[0] * this.mapSize[1] / 2)
         const evenInstanceQuantity = Math.floor(this.mapSize[0] * this.mapSize[1] / 2)
-        this.oddInstance = new THREE.InstancedMesh(this.tileGeometry, this.material1, oddInstanceQuantity)
-        this.evenInstance = new THREE.InstancedMesh(this.tileGeometry, this.material2, evenInstanceQuantity)
+        this.oddInstance = new THREE.InstancedMesh(this.tileGeometry, this.oddMaterial, oddInstanceQuantity)
+        this.evenInstance = new THREE.InstancedMesh(this.tileGeometry, this.evenMaterial, evenInstanceQuantity)
 
         const start = [-(this.mapSize[0] - 1) * 0.5, -(this.mapSize[1] - 1) * 0.5]
-
-        const matrix = new THREE.Matrix4()
 
         let oddIndex = 0, evenIndex = 0
         for (let y = 0; y < this.mapSize[1]; y++) {
             for (let x = 0; x < this.mapSize[0]; x++) {
-                matrix.setPosition(start[0] + x, - this.tileHeight * 0.6, start[1] + y)
+                this.positioningMatrix.setPosition(start[0] + x, - this.tileHeight * 0.6, start[1] + y)
 
                 if ((x + y) % 2 === 0) {
-                    this.oddInstance.setMatrixAt(oddIndex, matrix)
+                    this.oddInstance.setMatrixAt(oddIndex, this.positioningMatrix)
                     this.oddInstance.instanceMatrix.needsUpdate = true
 
                     this.oddInstance.setColorAt(oddIndex, new THREE.Color())
@@ -70,7 +74,7 @@ class GameMap {
                     oddIndex++
                 }
                 else {
-                    this.evenInstance.setMatrixAt(evenIndex, matrix)
+                    this.evenInstance.setMatrixAt(evenIndex, this.positioningMatrix)
                     this.evenInstance.instanceMatrix.needsUpdate = true
 
                     this.evenInstance.setColorAt(oddIndex, new THREE.Color())
@@ -115,38 +119,53 @@ class GameMap {
      */
     loadTileResources(x, y) {
         const tileResources = this.gameState.map[y][x].resources
-        const matrix = new THREE.Matrix4()
 
         const availableSlots = Array.from({ length: 9 }, (_, i) => i)
         availableSlots.sort(() => Math.random() - 0.5);
 
         let cellIndex = 0
         for (let i = 0; i <= 6; i++) {
-            this.resetTileResources(x, y, i, matrix)
+            this.resetTileResource(x, y, i)
             let quantity = tileResources[this.resourceTypes[i]]
             if (quantity > 0) {
                 cellIndex = availableSlots.pop()
-                this.spawnResource(x, y, cellIndex, i, quantity, matrix)
+                this.spawnResource(x, y, cellIndex, i, quantity)
             }
         }
     }
 
-    resetTileResources(x, y, type, matrix) {
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Resets a tiles resources to 0
+     * @param x - the x coordinate of the tile
+     * @param y - the y coordinate of the tile
+     * @param type - the type of resource we want to remove
+     */
+    resetTileResource(x, y, type) {
         const index = y * this.mapSize[1] + x
         const resourceData = this.resourceAssets.resourceInstances[this.resourceTypes[type]]
 
-        matrix.setPosition(9999, 9999, 9999)
-        resourceData.singleInstance.setMatrixAt(index, matrix)
+        this.positioningMatrix.setPosition(9999, 9999, 9999)
+        resourceData.singleInstance.setMatrixAt(index, this.positioningMatrix)
         resourceData.singleInstance.instanceMatrix.needsUpdate = true
 
-        resourceData.duoInstance.setMatrixAt(index, matrix)
+        resourceData.duoInstance.setMatrixAt(index, this.positioningMatrix)
         resourceData.duoInstance.instanceMatrix.needsUpdate = true
 
-        resourceData.trioInstance.setMatrixAt(index, matrix)
+        resourceData.trioInstance.setMatrixAt(index, this.positioningMatrix)
         resourceData.trioInstance.instanceMatrix.needsUpdate = true
     }
 
-    spawnResource(x, y, cellIndex, type, quantity, matrix) {
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Spawns a resource on the tile
+     * @param x - the x coordinate of the tile
+     * @param y - the y coordinate of the tile
+     * @param cellIndex - The index of the resource in the tile
+     * @param type - the type of resource we want to remove
+     * @param quantity - the quantity of the resource
+     */
+    spawnResource(x, y, cellIndex, type, quantity) {
         const index = y * this.mapSize[1] + x
         const resourceData = this.resourceAssets.resourceInstances[this.resourceTypes[type]]
 
@@ -167,9 +186,22 @@ class GameMap {
         const finalY = 0
         const finalZ = start[1] + y - 0.35  + (Math.floor(cellIndex / 3) / 3)
 
-        matrix.setPosition(finalX, finalY, finalZ)
-        resourceInstance.setMatrixAt(index, matrix)
+        this.positioningMatrix.setPosition(finalX, finalY, finalZ)
+        resourceInstance.setMatrixAt(index, this.positioningMatrix)
         resourceInstance.instanceMatrix.needsUpdate = true
+    }
+
+    /**
+     * Emma (epolitze) Politzer
+     * @description resets map tile instances
+     */
+    reset() {
+        this.scene.remove(this.oddInstance)
+        this.oddInstance = null
+        this.scene.remove(this.evenInstance)
+        this.evenInstance = null
+
+        this.resourceAssets.reset()
     }
 }
 

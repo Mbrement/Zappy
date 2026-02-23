@@ -9,8 +9,10 @@ class NetworkClient extends EventEmitter {
         this.address = address;
         this.port = port;
 
+        this.receiveConnectBind = this.receiveConnect.bind(this)
         this.receiveMessageBind = this.receiveMessage.bind(this);
         this.socketErrorBind = this.socketError.bind(this);
+        this.socketCloseBind = this.socketClose.bind(this)
 
 
         this.socket = new Socket({keepalive: true, onread: this.receiveMessageBind})
@@ -23,9 +25,10 @@ class NetworkClient extends EventEmitter {
      */
     connect() {
         this.socket.connect({host: this.address, port: this.port})
-        this.socket.on('connect', this.receiveConnect.bind(this))
+        this.socket.on('connect', this.receiveConnectBind)
         this.socket.on('data', this.receiveMessageBind)
         this.socket.on('error', this.socketErrorBind)
+        this.socket.on('close', this.socketCloseBind)
     }
 
     /**
@@ -62,7 +65,7 @@ class NetworkClient extends EventEmitter {
     /**
      * @author Corentin (ccharton) Charton Edited by Emma (epolitze) Politzer
      * @description Handle socket error and exit process.
-     * @param event {Object} -  The error Object from the socket.
+     * @param event {Object} - The error event object from the socket.
      */
     socketError(event) {
         console.error('An error on the socket connection has occured:', event.message)
@@ -70,6 +73,15 @@ class NetworkClient extends EventEmitter {
         if (!this.socket.destroyed) {
             this.socket.destroy()
         }
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description If socket connection closes we emit the 'close' event
+     * @param event {Object} - The close event object from the socket
+     */
+    socketClose(event) {
+        this.emit('close')
     }
 
     /**

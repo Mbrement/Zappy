@@ -3,6 +3,7 @@ class MessageHandler {
         this.handleConnectBind = this.handleConnect.bind(this)
         this.handleMessageBind = this.handleMessage.bind(this)
         this.handleErrorBind = this.handleError.bind(this)
+        this.handleCloseBind = this.handleClose.bind(this)
 
         this.networkClient = null
         this.gameState = null
@@ -28,6 +29,7 @@ class MessageHandler {
         this.networkClient.on('connect', this.handleConnectBind)
         this.networkClient.on('message', this.handleMessageBind)
         this.networkClient.on('error', this.handleErrorBind)
+        this.networkClient.on('close', this.handleCloseBind)
     }
 
     /**
@@ -44,9 +46,24 @@ class MessageHandler {
      * the connection screen and display an error
      */
     handleError() {
+        this.networkClient.off('connect', this.handleConnectBind)
         this.networkClient.off('message', this.handleMessageBind)
         this.networkClient.off('error', this.handleErrorBind)
+        this.networkClient.off('close', this.handleCloseBind)
         window.mainInstance.connectError()
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description If the socket closes we show the connection screen
+     * and display an error
+     */
+    handleClose() {
+        this.networkClient.off('connect', this.handleConnectBind)
+        this.networkClient.off('message', this.handleMessageBind)
+        this.networkClient.off('error', this.handleErrorBind)
+        this.networkClient.off('close', this.handleCloseBind)
+        window.mainInstance.connectionClosed()
     }
 
     /**

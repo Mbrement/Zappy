@@ -37,7 +37,10 @@ class Players {
         this.createInstances()
     }
 
-
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Creates the player and egg instances
+     */
     createInstances() {
         this.bodyGeometry = new THREE.CapsuleGeometry(0.05, 0.1, 1, 4, 1)
 
@@ -57,16 +60,34 @@ class Players {
         this.eggInstance = this.createInstance(this.eggGeometry, this.eggMaterial, this.maxEggs)
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description nullifies the given map
+     * @param map - The map we want to nullify
+     * @param start - From where we want to nullify
+     * @param end - Where we want to stop nullifying
+     */
     nullifyMap(map, start, end) {
         for (let i = start; i < end; i++) {
             map.set(i, null)
         }
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Sets the time unit
+     * @param newUnit - the new time unit (T/second) where t is the newUnit
+     */
     setTimeUnit(newUnit) {
         this.tickTime = newUnit * 0.001
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Get the player's instance index with its id
+     * @param id - the player's id
+     * @returns {number} - The player's instance index
+     */
     getPlayerById(id) {
         for (let index = 0; index < this.maxPlayers; index++) {
             if (this.playerMeshes.get(index) === id) {
@@ -75,6 +96,12 @@ class Players {
         }
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Get the egg's instance index with its id
+     * @param id the egg's id
+     * @returns {number} - The egg's instance index
+     */
     getEggById(id) {
         for (let index = 0; index < this.maxEggs; index++) {
             if (this.eggMeshes.get(index) === id) {
@@ -83,6 +110,14 @@ class Players {
         }
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Creates an instanceMesh
+     * @param geometry - The geometry of the instancedMesh
+     * @param material - The material of the instancedMesh
+     * @param maxCount - The amount of instances
+     * @returns {THREE.InstancedMesh} - The newly created instancedMesh
+     */
     createInstance(geometry, material, maxCount) {
         const instance = new THREE.InstancedMesh(geometry, material, maxCount)
         instance.frustumCulled = false
@@ -100,6 +135,13 @@ class Players {
         return instance
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Sets the old instancedMesh's positions to the new instancedMesh's instances
+     * @param oldInstance - The old instancedMesh
+     * @param newInstance - The new instancedMesh
+     * @param maxCount - The amount of instances in the old instancedMesh
+     */
     remapInstance(oldInstance, newInstance, maxCount) {
         let color = new THREE.Color()
         for (let index = 0; index < maxCount; index++) {
@@ -113,6 +155,11 @@ class Players {
         newInstance.instanceColor.needsUpdate = true
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Creates new instancedMesh when all instances of the old one are used
+     * @param type - Which instance to re-do
+     */
     changeInstance(type) {
         console.log("Changing instances due to too many assets needed", type)
         if (type === 'player') {
@@ -133,6 +180,12 @@ class Players {
         }
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Add a player to the map
+     * @param playerInfo - The information of the new player
+     * @param playerTeam - The new player's team
+     */
     addPlayer(playerInfo, playerTeam) {
         const [playerId, x, y, orientation] = playerInfo
 
@@ -162,6 +215,13 @@ class Players {
         this.playerInstance.instanceColor.needsUpdate = true
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Starts the rotate animation for the given player
+     * @param init - Whether the function is called at initialization
+     * @param playerId - The player's id
+     * @param orientation - Which way the player should now be pointing
+     */
     rotatePlayer(init, playerId, orientation) {
         const index = this.getPlayerById(playerId)
         const totalTime = actionTicks.droite * this.tickTime
@@ -193,6 +253,13 @@ class Players {
         }
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Calculates the player's position inside its tile
+     * @param x - The x coordinate of the tile
+     * @param y - The y coordinate of the tile
+     * @param playerPositionIndex - The position of the player in the player stack
+     */
     calculatePlayerPos(x, y, playerPositionIndex) {
         const start = [-(this.gameMap.mapSize[0] - 1) * 0.5, -(this.gameMap.mapSize[1] - 1) * 0.5]
         const xCellIndex = Math.max(0, playerPositionIndex) % 9
@@ -203,6 +270,12 @@ class Players {
         this.dummyVector.z = start[1] + y - 0.35  + (Math.floor(xCellIndex / 3) / 3)
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Re positions all the players on a given tile
+     * @param x - The x coordinate of the tile
+     * @param y - The y coordinate of the tile
+     */
     restackPlayers(x, y) {
         const players = this.gameState.map[y][x].players
 
@@ -218,6 +291,15 @@ class Players {
         this.playerInstance.computeBoundingSphere()
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Either places the player on a tile or starts the move animation
+     * @param init - Whether the function is called at initialization
+     * @param playerId - The player's id
+     * @param x - The x coordinate of the tile
+     * @param y - The y coordinate of the tile
+     * @param playerState - The player's state
+     */
     positionPlayer(init, playerId, x, y, playerState) {
         const index = this.getPlayerById(playerId)
         const totalTime = actionTicks.avance * this.tickTime
@@ -253,6 +335,13 @@ class Players {
         }
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Moves the player by rotating and/or positioning them
+     * @param playerInfo - The information of the player
+     * @param playerState - The player's old state
+     * @param init - Whether the function is called at initialization
+     */
     movePlayer(playerInfo, playerState, init=false) {
         const [playerId, x, y, orientation] = playerInfo
 
@@ -266,6 +355,10 @@ class Players {
         this.playerInstance.computeBoundingSphere()
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Animates the player movements
+     */
     animatePlayerMove() {
         if (this.animatedPlayersMove.length < 1) {
             this.world.updateManager.remove(this, "world", "animatePlayerMove")
@@ -302,6 +395,10 @@ class Players {
         })
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Animates the player rotations
+     */
     animatePlayerRotate() {
         if (this.animatedPlayersRotate.length < 1) {
             this.world.updateManager.remove(this, "world", "animatePlayerRotate")
@@ -343,6 +440,12 @@ class Players {
         })
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Removes a player from the map
+     * @param playerId - The player's id
+     * @param playerState - The player's state
+     */
     removePlayer(playerId, playerState) {
         const index = this.getPlayerById(playerId)
         this.playerMeshes.set(index, null)
@@ -355,6 +458,11 @@ class Players {
         this.restackPlayers(playerState.x, playerState.y)
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Adds an egg to the map
+     * @param eggInfo - The info of the egg
+     */
     addEgg(eggInfo) {
         const [eggId, parentId, x, y] = eggInfo
 
@@ -391,6 +499,13 @@ class Players {
         this.eggInstance.instanceColor.needsUpdate = true
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Calculates the egg's position in the tile's egg stack
+     * @param x - The x coordinate of the tile
+     * @param y - The y coordinate of the tile
+     * @param eggPositionIndex - The position of the egg in the tile's egg stack
+     */
     calculateEggPos(x, y, eggPositionIndex) {
         const start = [-(this.gameMap.mapSize[0] - 1) * 0.5, -(this.gameMap.mapSize[1] - 1) * 0.5]
         const xCellIndex = Math.max(0, eggPositionIndex) % 9
@@ -402,6 +517,12 @@ class Players {
         this.dummyVector.z = start[1] + y - 0.35  + (Math.floor(xCellIndex / 3) / 3)
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Re positions the eggs in the tile's egg stack
+     * @param x - The x coordinate of the tile
+     * @param y - The y coordinate of the tile
+     */
     restackEggs(x, y) {
         const eggs = this.gameState.map[y][x].eggs
 
@@ -416,10 +537,17 @@ class Players {
         this.eggInstance.instanceMatrix.needsUpdate = true
     }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Removes the egg from the map
+     * @param eggId - The egg's id
+     * @param eggState - The egg's state
+     */
     removeEgg(eggId, eggState) {
         const index = this.getEggById(eggId)
         this.eggMeshes.set(index, null)
 
+        this.eggInstance.getMatrixAt(index, this.positionningMatrix)
         this.positionningMatrix.setPosition(9999, 9999, 9999)
         this.eggInstance.setMatrixAt(index, this.positionningMatrix)
         this.eggInstance.instanceMatrix.needsUpdate = true
@@ -427,6 +555,29 @@ class Players {
         this.restackEggs(eggState.x, eggState.y)
 
         this.restackPlayers(eggState.x, eggState.y)
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description resets the player and egg instances
+     */
+    reset() {
+        this.playerMeshes.forEach((index) => {
+            this.playerInstance.getMatrixAt(index, this.positionningMatrix)
+            this.positionningMatrix.setPosition(9999, 9999, 9999)
+            this.playerInstance.setMatrixAt(index, this.positionningMatrix)
+            this.playerInstance.instanceMatrix.needsUpdate = true
+        })
+
+        this.eggMeshes.forEach((index) => {
+            this.eggInstance.getMatrixAt(index, this.positionningMatrix)
+            this.positionningMatrix.setPosition(9999, 9999, 9999)
+            this.eggInstance.setMatrixAt(index, this.positionningMatrix)
+            this.eggInstance.instanceMatrix.needsUpdate = true
+        })
+
+        this.nullifyMap(this.playerMeshes, 0, this.maxPlayers)
+        this.nullifyMap(this.eggMeshes, 0, this.maxEggs)
     }
 }
 
