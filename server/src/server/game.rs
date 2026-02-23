@@ -84,16 +84,16 @@ impl Game {
             player.orientation = match orientation {
                 'N' => 'E',
                 'E' => 'S',
-                'S' => 'W',
-                'W' => 'N',
+                'S' => 'O',
+                'O' => 'N',
                 _ => orientation,
             };
         } else if rotation == "gauche" {
             player.orientation = match orientation {
-                'N' => 'W',
+                'N' => 'O',
                 'E' => 'N',
                 'S' => 'E',
-                'W' => 'S',
+                'O' => 'S',
                 _ => orientation,
             };
         }
@@ -128,7 +128,7 @@ impl Game {
                     self.map.move_player(&player.get_token(), (position.0, 0));
                 }
             }
-            'W' => {
+            'O' => {
                 if position.0 > 0 {
                     self.map
                         .move_player(&player.get_token(), (position.0 - 1, position.1));
@@ -198,7 +198,7 @@ impl Game {
             'N' => define::SEE_TAB_N,
             'E' => define::SEE_TAB_E,
             'S' => define::SEE_TAB_S,
-            'W' => define::SEE_TAB_W,
+            'O' => define::SEE_TAB_W,
             _ => [(0, 0); 81],
         };
 

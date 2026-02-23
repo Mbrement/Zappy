@@ -799,7 +799,7 @@ fn expulse_player(server: &mut Server, token: Token) -> bool {
             'N' => (position.0, position.1.saturating_sub(1)),
             'E' => (position.0 + 1, position.1),
             'S' => (position.0, position.1 + 1),
-            'W' => (position.0.saturating_sub(1), position.1),
+            'O' => (position.0.saturating_sub(1), position.1),
             _ => position,
         },
         None => position,
