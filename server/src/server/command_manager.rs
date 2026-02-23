@@ -515,7 +515,7 @@ impl CommandManager {
                         if let Some(v) = tmp {
                             *v += 1;
                         }
-                        server.send_to_graph += &graphic::end_fork(&token);
+                        server.send_to_graph += &graphic::end_fork(&token, *egg_id, *x, *y);
                     }
                 }
                 //end fork
