@@ -146,6 +146,7 @@ impl Map {
     }
 
     pub fn remove_item_from_cell(&mut self, x: u32, y: u32, item: &str) -> bool {
+        // pourquoi ?
         if x >= self.width || y >= self.height {
             return false;
         }

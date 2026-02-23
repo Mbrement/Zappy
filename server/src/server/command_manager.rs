@@ -498,7 +498,7 @@ impl CommandManager {
                 //player hatch
                 println!("pouet1502\n");
                 let mut client = server._clients.get_mut(&_c).unwrap();
-                client.hunger = 1260; //this line scare me
+                //client.hunger = 1260; //this line scare me
                 client.inventory[0] = 1260;
 				client.was_egg = _arg.parse().unwrap_or(0);
                 server.send_to_graph += &graphic::egg_hatches(&_c, server);

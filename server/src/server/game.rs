@@ -264,6 +264,7 @@ impl Game {
 
     pub fn take_item_from_cell(&mut self, client: &mut Client, item: &str) -> bool {
         let position = self.get_player_position(client.get_token());
+        println!("micka ?\n");
         if self.map.remove_item_from_cell(position.0, position.1, item) {
             // if item == define::FOOD {
             // 	client.set_hunger(client.hunger.saturating_add(define::FOOD_VALUE));
@@ -274,11 +275,16 @@ impl Game {
             // 		}
             // 	});
             // }
-            let mut inc: u32 = 1;
+
+            let mut inc: u128 = 1;
+            println!("take item {}\n", item);
             if (item == define::FOOD) {
+                println!("is ok food {}\n", item);
                 inc = 126;
             }
+            println!("inventaire for {} before {}\n", item, client.inventory[define::ITEMS_DICT[item]]);
             client.inventory[define::ITEMS_DICT[item]] += inc;
+            println!("inventaire for {} after {}\n", item, client.inventory[define::ITEMS_DICT[item]]);
             // match item {
             //     define::FOOD => client.set_hunger(client.hunger + define::FOOD_VALUE), // Assuming 126 is the hunger value for food
             //     define::T1_MAT => client.inventory[define::T1_MAT_INV] += 1,
