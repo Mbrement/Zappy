@@ -428,11 +428,14 @@ impl CommandManager {
                         }
                         let client = client.unwrap();
                         client.is_incanting = false;
-                        if sucess && client.level < org_player_level {
-                            client.level = org_player_level + 1;
+                        if sucess {
+								if client.level < org_player_level  {
+								client.level = org_player_level + 1;
+							}
+							let level_to_send = client.level;
                             let _ = client
                                 .get_socket_mut()
-                                .write(format!("{}\n", org_player_level).as_bytes());
+                                .write(format!("niveau actuel : {}\n", level_to_send).as_bytes());
                         }
                     }
                     //graphic::event_incant_end(server, sucess, _c);
