@@ -85,13 +85,13 @@ impl Map {
             // 201..=220 => tile.strings.push(T4_MAT.into()), //5
             // 221..=240 => tile.strings.push(T5_MAT.into()), //6
             // 298..=300 => tile.strings.push(T6_MAT.into()), //1 tot
-            0..=100 => tile.string_tab[FOOD_INV] += 1,
-            100..=130 => tile.string_tab[T1_MAT_INV] += 1, //8 tot
-            131..=170 => tile.string_tab[T2_MAT_INV] += 1, //8 tot
-            171..=200 => tile.string_tab[T3_MAT_INV] += 1, //10 tot
-            201..=220 => tile.string_tab[T4_MAT_INV] += 1, //5
-            221..=240 => tile.string_tab[T5_MAT_INV] += 1, //6
-            298..=300 => tile.string_tab[T6_MAT_INV] += 1, //1 tot
+            0..=100 => if tile.string_tab[FOOD_INV] < 2 { tile.string_tab[FOOD_INV] += 1 },
+            100..=130 => if tile.string_tab[T1_MAT_INV] < 2 { tile.string_tab[T1_MAT_INV] += 1 },
+            131..=170 => if tile.string_tab[T2_MAT_INV] < 2 { tile.string_tab[T2_MAT_INV] += 1 }, //8 tot
+            171..=200 => if tile.string_tab[T3_MAT_INV] < 2 { tile.string_tab[T3_MAT_INV] += 1 }, //10 tot
+            201..=220 => if tile.string_tab[T4_MAT_INV] < 2 { tile.string_tab[T4_MAT_INV] += 1 }, //5
+            221..=240 => if tile.string_tab[T5_MAT_INV] < 2 { tile.string_tab[T5_MAT_INV] += 1 }, //6
+            298..=300 => if tile.string_tab[T6_MAT_INV] < 2 { tile.string_tab[T6_MAT_INV] += 1 }, //1 tot
             _ => (),
         }
     }
