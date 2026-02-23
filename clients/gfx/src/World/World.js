@@ -41,6 +41,8 @@ class World {
         this.themeManager = new ThemeManager()
         this.gameMap = new GameMap()
         this.players = new Players()
+
+        this.resizeView()
     }
 
     /**

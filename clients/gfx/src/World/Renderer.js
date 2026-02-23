@@ -23,7 +23,8 @@ class Renderer {
             antialias: true,
             canvas: this.canvas,
             alpha: true,
-            powerPreference: 'high-performance'
+            powerPreference: 'high-performance',
+            forceWebGL: true,
         })
         this.instance.setSize(this.world.sizes.width, this.world.sizes.height)
         this.instance.setPixelRatio(1)
