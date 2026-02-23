@@ -116,7 +116,7 @@ class ThemeManager {
             new THREE.SphereGeometry(2, 32, 32),
             new THREE.MeshBasicNodeMaterial()
         )
-        this.moonMesh.position.set(6, 14, -38)
+        this.moonMesh.position.set(25, 14, -70)
         this.moon.add(this.moonMesh)
         this.moonMesh.material.fragmentNode = Fn(() => {
             return texture(this.main.resources.items['default'].moonTexture.file, uv()).mul(vec3(1.0, 1.0, 1.0))
@@ -131,7 +131,7 @@ class ThemeManager {
                 depthWrite: false
             })
         )
-        this.moonGlowMesh.position.set(6, 14, -38)
+        this.moonGlowMesh.position.set(25, 14, -70)
         this.moon.add(this.moonGlowMesh)
 
         this.moonGlowMesh.material.fragmentNode = (() => {
