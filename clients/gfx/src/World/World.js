@@ -17,8 +17,8 @@ class World {
         this.canvas = document.getElementById('webgpu')
 
         this.sizes = {
-            width: window.innerWidth,
-            height: window.innerHeight
+            width: 1200,
+            height: 800
         }
 
         this.raycaster = new THREE.Raycaster()
@@ -41,8 +41,6 @@ class World {
         this.themeManager = new ThemeManager()
         this.gameMap = new GameMap()
         this.players = new Players()
-
-        this.resizeView()
     }
 
     /**
