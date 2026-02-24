@@ -91,8 +91,14 @@ class World {
 
         const intersection = this.castRay()
         if (!intersection) {
-            this.focusedMeshIndex = null
-            this.updateManager.remove(this, "world", "focusPlayer")
+            if (this.focusedMeshIndex) {
+                this.updateManager.remove(this, "world", "focusPlayer")
+                this.players.playerInstance.getMatrixAt(this.focusedMeshIndex, this.players.positionningMatrix)
+                this.players.positionningMatrix.decompose(this.players.dummyObject.position, this.players.dummyObject.quaternion, this.players.dummyObject.scale)
+                this.controls.target = this.players.dummyObject.position
+                this.controls.update()
+                this.focusedMeshIndex = null
+            }
 
             if (this.main.eventManager.modules.TileInfoManager.isTilesPlayerInfoOpen()) {
                 this.main.eventManager.modules.TileInfoManager.showHideTilesPlayerInfo()
