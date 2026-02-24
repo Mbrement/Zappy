@@ -1,3 +1,4 @@
+import process from 'node:process'
 import {
     BROADCAST_RECEIVED_REGEX,
     DEATH,
@@ -75,10 +76,19 @@ class CommandManager {
         }
 
         if (message === DEATH) {
-            // TODO: Define exit routine
             console.log('[COMMAND MANAGER] Server send death threat, Exiting...')
             process.exit(0)
         }
+
+        if (EXPULSION_REGEX.test(message)) {
+            console.log(`[COMMAND MANAGER] Player expulse from it's tile (${message})`);
+
+            GameManager.lastVisionRefresh = 0;
+
+            if (GameManager.followedBroadcast) {
+                GameManager.followedBroadcast.direction = -1;
+            }
+
             return;
         }
 
