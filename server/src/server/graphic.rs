@@ -156,7 +156,6 @@ pub(crate) fn egg_hatches(token: &Token, server: &Server) -> String {
         res += &format!("eht {}\n", player.was_egg);
     }
     res += &new_player(server.get_team_for_player(&player.token), player);
-    println!("{}\n", res);
     res
 }
 

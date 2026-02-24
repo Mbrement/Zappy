@@ -138,10 +138,6 @@ impl CommandManager {
                         .write(format!("{}", define::R_OK).as_bytes());
                     server.send_to_graph += &graphic::player_pos(client);
                 }
-                println!(
-                    "now facing {:?}",
-                    server._clients.get(&_c).unwrap().orientation
-                );
             },
         );
         self.register(
@@ -613,7 +609,7 @@ impl CommandManager {
                     "Server status:\nTick/s: {}\nTicks since game started : {}\nPlayers: {}\nGraphics clients: {}\nAdmins: {}\nTeams: {:?}\nMap size: {}x{}\nPlayers by team: {:?}\nMax players by team: {:?}\n",
                     ticks, tick, len, graphics, admins, teams, width, height, player_by_team, max_players_by_team
                 );
-				println!("{:?}", server._game.team);
+				//println!("{:?}", server._game.team);
                 for client in server.get_clients_by_type_mut(define::ROLE_ADMIN) {
                     let _ = client.get_socket_mut().write(response.as_bytes());
                 }

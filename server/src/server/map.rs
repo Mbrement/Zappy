@@ -227,6 +227,7 @@ impl Map {
         res
     }
 
+    #[cfg(feature = "log")]
     pub fn print_map(&self) {
         for row in &self.tiles {
             for tile in row {
