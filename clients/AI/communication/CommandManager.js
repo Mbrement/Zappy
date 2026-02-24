@@ -1,7 +1,7 @@
 import process from 'node:process'
 import {
     BROADCAST_RECEIVED_REGEX,
-    DEATH, EXPULSION_REGEX, INCANTATION_DONE,
+    DEATH, EXPULSION_REGEX, INCANTATION, INCANTATION_DONE,
     MAX_SERVER_MSG,
     NO_PROMISE_TO_RESOLVE, START_INCANTION,
     WELCOME
@@ -94,24 +94,34 @@ class CommandManager {
             return;
         }
 
-        if (this.#inProcessQueue.length <= 0 && message === START_INCANTION) {
-                console.log("[SERVER] Elevation has been started by an other player.");
+        if (message === START_INCANTION) {
+            const isIncantationFromThisAI = this.#inProcessQueue.length > 0 &&
+                this.#inProcessQueue[0].command === INCANTATION
+
+            if (!isIncantationFromThisAI) {
+                console.log("[SERVER] Elevation started by another player. Freezing current command.")
                 return
+            }
         }
 
-        if (this.#inProcessQueue.length <= 0 && INCANTATION_DONE.test(message)) {
-            const newLevel = parseInt(message.split(':')[1].trim());
-            console.log(`[SERVER] Elevation from an other player has been done: ${newLevel}`);
+        if (INCANTATION_DONE.test(message)) {
+            const isIncantationFromThisAI = this.#inProcessQueue.length > 0 &&
+                this.#inProcessQueue[0].command === INCANTATION
 
-            GameManager.updateLevel(newLevel);
-            GameManager.followedBroadcast = null
-            GameManager.lastVisionRefresh = 0;
-            GameManager.main.brain.think();
-            return
+            if (!isIncantationFromThisAI) {
+                const newLevel = parseInt(message.split(':')[1].trim());
+                console.log(`[SERVER] Elevation from an other player has been done: ${newLevel}`);
+
+                GameManager.updateLevel(newLevel);
+                GameManager.followedBroadcast = null
+                GameManager.lastVisionRefresh = 0;
+                GameManager.main.brain.think();
+                return
+            }
         }
 
         if (this.#inProcessQueue.length <= 0) {
-            console.error(NO_PROMISE_TO_RESOLVE)
+            console.error(NO_PROMISE_TO_RESOLVE, message)
             return
         }
 
