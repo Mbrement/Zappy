@@ -211,9 +211,9 @@ class World {
         instanceMesh.getColorAt( index, this.hoverColor );
         this.previousColor.copy(this.hoverColor)
         if (instanceMesh === this.players.playerInstance) {
-            this.hoverColor.r += 0.2
-            this.hoverColor.g += 0.2
-            this.hoverColor.b += 0.2
+            this.hoverColor.r -= 0.5
+            this.hoverColor.g -= 0.5
+            this.hoverColor.b -= 0.5
         }
         else {
             this.hoverColor.set(2, 2, 2)
