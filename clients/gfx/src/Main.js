@@ -71,7 +71,7 @@ class Main extends EventEmitter {
      * @description Got connection error - We show the connection menu
      */
     connectError() {
-        this.networkClient.closeSocket()
+        this.networkClient?.closeSocket()
         this.networkClient = null
         if (this.eventManager.modules.TileInfoManager.isTilesPlayerInfoOpen()) {
             this.eventManager.modules.TileInfoManager.showHideTilesPlayerInfo()
