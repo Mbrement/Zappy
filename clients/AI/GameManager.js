@@ -5,6 +5,7 @@ class GameManager {
     constructor() {
         this.main = new Main()
 
+        this.ready = false
         this.awaitRessourcesAvailableFromMain()
 
         this.inventory = {
@@ -34,6 +35,7 @@ class GameManager {
         this.teamName = this.main.config.teamName
         this.commandManager = this.main.commandManager
         this.responseParser = this.main.responseParser
+        this.ready = true
     }
 
     /**
@@ -68,6 +70,9 @@ class GameManager {
      * @description Do the handshake with the server.
      */
     async handshakeServer() {
+        while (!this.ready) {
+            await new Promise((resolve) => {setTimeout(resolve, 100)})
+        }
         const handskakeAnswer = await this.commandManager.sendCommand(`${this.teamName}\n`, 2)
         console.log('Handshake resolved with answer', handskakeAnswer)
 
