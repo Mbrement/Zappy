@@ -172,8 +172,8 @@ impl CommandManager {
                 let client = client.unwrap();
                 server._game.move_player(client);
                 // ? pourquoi la ligne suivante quand tu actualise déjà la position du joueur
-                //   dans la fonction précédente? //fixed
-                // client.position = server._game.get_player_position(_c);
+                //   dans la fonction précédente? //fixed //it was not fixed do not remove this line until we can change this
+                client.position = server._game.get_player_position(_c);
                 let _ = client
                     .get_socket_mut()
                     .write(format!("{}", define::R_OK).as_bytes());
@@ -391,20 +391,20 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 utils::debug_manager_register("incantation", _c, server, _arg);
-                let client = server._clients.get(&_c);
-                if client.is_none() {
-                    return;
-                }
-                let client = client.unwrap();
-                let client_list = server.get_clients_by_pos(client.position);
-                let mut token_list = Vec::new();
-                for token in client_list {
-                    println!("Found token {:?}", token.get_token());
-                    token_list.push(token.get_token());
-                }
-                server
-                    ._incantation_list
-                    .insert(client.get_token(), token_list);
+                // let client = server._clients.get(&_c);
+                // if client.is_none() {
+                //     return;
+                // }
+                // let client = client.unwrap();
+                // let client_list = server.get_clients_by_pos(client.position);
+                // let mut token_list = Vec::new();
+                // for token in client_list {
+                //     // println!("Found token {:?}", token.get_token());
+                //     token_list.push(token.get_token());
+                // }
+                // server
+                //     ._incantation_list
+                //     .insert(client.get_token(), token_list);
             },
         );
         self.register(
@@ -416,9 +416,13 @@ impl CommandManager {
                 println!("\n\nincantation_internal for token {:?}\n\n", _c);
                 let org_player_level = server._clients.get(&_c).unwrap().level;
                 let sucess = server.incantation_success(_c);
-
+                println!(
+                    "\n\nincantation_internal for token {:?} with success : {}\n\n",
+                    _c, sucess
+                );
                 if server._incantation_list.contains_key(&_c) {
                     let mut victory = String::new();
+                    println!("here 0");
                     //il faut vérifier pour chacune des teams qui ont un membre qui est passé lvl8 lors de l'incantation
                     //proposition de solution:
                     for player in server._incantation_list.get(&_c).unwrap() {
@@ -436,12 +440,13 @@ impl CommandManager {
                         server::exit_game(server);
                     }*/
                     let Some(tkn_list) = server._incantation_list.get(&_c) else {
+                        println!("here 1");
                         return;
                     };
                     // if tkn_list.is_none() {
                     //     return;
                     // }
-                    println!("Found tokens {:?}", tkn_list);
+                    // println!("Found tokens {:?}", tkn_list);
                     for client in tkn_list {
                         // if !client.contains(&_c) {
                         //     #[cfg(feature = "log")]
@@ -459,10 +464,12 @@ impl CommandManager {
                         client.is_incanting = Token(0);
                         let level_to_send: u8;
                         if sucess {
-                            if client.level < org_player_level {
+                            if client.level <= org_player_level {
+                                println!("here 2");
                                 client.level = org_player_level + 1;
                             }
                         }
+                        println!("here 3");
                         let level_to_send = client.level;
 
                         let _ = client
@@ -667,14 +674,14 @@ impl CommandManager {
                             }
                             "inventaire" => self.next_execute.insert(token, server._game._tick + 1),
                             "fork" => self.next_execute.insert(token, server._game._tick + 42),
-                            "incantation_internal" => {
-                                self.next_execute.insert(token, server._game._tick + 300)
-                            }
+                            // "incantation_internal" => {
+                            //     self.next_execute.insert(token, server._game._tick + 300)
+                            // }
                             "egg_waiting" => {
                                 self.next_execute.insert(token, server._game._tick + 42)
                             }
                             "egg_death" => self.next_execute.insert(token, server._game._tick),
-                            "connect_nbr" | "incantation" => {
+                            "connect_nbr" | "incantation" | "incantation_internal" => {
                                 self.next_execute.insert(token, server._game._tick)
                             }
                             _ => None,

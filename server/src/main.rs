@@ -108,7 +108,6 @@ fn main() -> std::io::Result<()> {
         }
     }
     if matches.opt_present("n") {
-        //TODO FIXE, IF LAST ARG TEAM ARE NOT ADDED
         let teams = matches.opt_positions("n");
         // let mut team_names: Vec<String> = Vec::new();
         let mut tmp = 0usize;
