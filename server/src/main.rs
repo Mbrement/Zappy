@@ -1,4 +1,4 @@
-// #![allow(warnings)]
+#![allow(warnings)]
 // extern crate getopts;
 use getopts::Options;
 use std::env;

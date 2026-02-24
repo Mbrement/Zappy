@@ -48,7 +48,7 @@ impl client::Client {
     pub fn get_token(&self) -> Token {
         self.token
     }
-	
+
     pub fn hunger_tick(&mut self) {
         if self.inventory[0] > 0 {
             self.inventory[0] -= 1;

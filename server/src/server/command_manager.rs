@@ -138,6 +138,10 @@ impl CommandManager {
                         .write(format!("{}", define::R_OK).as_bytes());
                     server.send_to_graph += &graphic::player_pos(client);
                 }
+                println!(
+                    "now facing {:?}",
+                    server._clients.get(&_c).unwrap().orientation
+                );
             },
         );
         self.register(
@@ -342,14 +346,7 @@ impl CommandManager {
                     return;
                 }
                 let (position_x, position_y) = tmp.unwrap();
-                // doublon ?
-                //if tmp.is_none() {
-                //    #[cfg(feature = "log")]
-                //    println!("No player found for token {:?}", _c);
-                //    return;
-                //}
-                // server._clients va envoyer a tous les clients dont ADMIN et graphic
-                // utilise plutot ca : get_clients_by_type_mut(define::ROLE_PLAYER)
+
                 let _ = server
                     ._clients
                     .get_mut(&_c)
@@ -358,6 +355,7 @@ impl CommandManager {
                     .write(format!("{}", define::R_OK).as_bytes());
                 for (token, client) in &mut server._clients {
                     if token != &_c {
+                        let dir = client.orientation;
                         let tmp = server._game.map.player_position.get(token);
                         if tmp.is_none() {
                             #[cfg(feature = "log")]
@@ -368,13 +366,14 @@ impl CommandManager {
                         let _ = client.get_socket_mut().write(
                             format!(
                                 "message {},{}\n",
-                                get_message_transmission_direction(
+                                get_message_transmission_direction_orientation(
                                     *position_x as i32,
                                     *position_y as i32,
                                     *target_x as i32,
                                     *target_y as i32,
                                     server._game.map.get_width() as i32,
-                                    server._game.map.get_height() as i32
+                                    server._game.map.get_height() as i32,
+                                    dir
                                 ),
                                 _arg
                             )
@@ -481,7 +480,12 @@ impl CommandManager {
                 // #[cfg(feature = "log")]
                 utils::debug_manager_register("connect_nbr", _c, server, _arg);
                 let tmp = server.get_team_for_player(&_c);
-                let d = server._max_clients[&tmp] - server._game.team[&tmp].len() as u32;
+                let d: u32;
+                if server._max_clients[&tmp] < server._game.team[&tmp].len() as u32 {
+                    d = 0;
+                } else {
+                    d = server._max_clients[&tmp] - server._game.team[&tmp].len() as u32;
+                }
                 let client = server._clients.get_mut(&_c);
                 if client.is_none() {
                     #[cfg(feature = "log")]
@@ -889,34 +893,91 @@ fn get_message_transmission_direction(
     let dx;
     let dy;
     let larger_delta;
-
     // println!("src {} {} dest {} {}", sourcex, sourcey, destx, desty);
     dx = distance_along_wrapped_dimension(sourcex, destx, map_width);
     dy = distance_along_wrapped_dimension(sourcey, desty, map_height);
     larger_delta = point_to_greater_abs_value(dx, dy);
-    if (dx == 0 && dy == 0) {
-        return (0);
+    if dx == 0 && dy == 0 {
+        return 0;
     }
-    if (larger_delta == dy) {
+    if larger_delta == dy {
         if dy > 0 {
-            return (1);
+            return 1;
         }
-        return (5);
+        return 5;
     }
-    if (larger_delta == 0) {
+    if larger_delta == 0 {
         if dx > 0 {
             if dy > 0 {
-                return (2);
+                return 2;
             }
-            return (4);
+            return 4;
         }
-        return (6);
+        return 6;
     }
-    if (larger_delta == dx) {
-        if (dy > 0) {
-            return (3);
+    if larger_delta == dx {
+        if dy > 0 {
+            return 3;
         }
-        return (7);
+        return 7;
     }
-    return (8);
+    return 8;
+}
+
+fn get_message_transmission_direction_orientation(
+    sourcex: i32,
+    sourcey: i32,
+    destx: i32,
+    desty: i32,
+    map_height: i32,
+    map_width: i32,
+    orientation: char,
+) -> i32 {
+    let dx;
+    let dy;
+    let larger_delta;
+    dx = distance_along_wrapped_dimension(sourcex, destx, map_width);
+    dy = distance_along_wrapped_dimension(sourcey, desty, map_height);
+    larger_delta = point_to_greater_abs_value(dx, dy);
+    if dx == 0 && dy == 0 {
+        return 0;
+    }
+    let dir = match orientation {
+        'N' => 0,
+        'E' => 2,
+        'S' => 4,
+        'O' => 6,
+        _ => 0, // Default case, should not happen if orientation is always valid
+    };
+    if larger_delta == dy {
+        if dy > 0 {
+            return 1 + dir;
+        }
+        return (5 + dir) % 8;
+    }
+    if larger_delta == 0 {
+        if dx > 0 {
+            if dy > 0 {
+                return 2 + dir;
+            }
+            if dir == 4 {
+                return 8;
+            }
+            return (4 + dir) % 8;
+        }
+        if dir == 2 {
+            return 8;
+        }
+        return (6 + dir) % 8;
+    }
+    if larger_delta == dx {
+        if dy > 0 {
+            return (3 + dir) % 8;
+        }
+        return (7 + dir) % 8;
+    }
+    if dir == 0 {
+        return 8;
+    }
+    return dir;
 }
