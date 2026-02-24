@@ -95,7 +95,7 @@ class World {
                 this.updateManager.remove(this, "world", "focusPlayer")
                 this.players.playerInstance.getMatrixAt(this.focusedMeshIndex, this.players.positionningMatrix)
                 this.players.positionningMatrix.decompose(this.players.dummyObject.position, this.players.dummyObject.quaternion, this.players.dummyObject.scale)
-                this.controls.target = this.players.dummyObject.position
+                this.controls.target.set(this.players.dummyObject.position.x, this.players.dummyObject.position.y, this.players.dummyObject.position.z)
                 this.controls.update()
                 this.focusedMeshIndex = null
             }
@@ -234,7 +234,7 @@ class World {
     focusPlayer() {
         this.players.playerInstance.getMatrixAt(this.focusedMeshIndex, this.players.positionningMatrix)
         this.players.positionningMatrix.decompose(this.players.dummyObject.position, this.players.dummyObject.quaternion, this.players.dummyObject.scale)
-        this.controls.target = this.players.dummyObject.position
+        this.controls.target = this.players.dummyObject.position.clone()
         this.controls.update()
     }
 
