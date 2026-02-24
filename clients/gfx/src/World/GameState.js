@@ -223,7 +223,7 @@ class GameState {
         const deletedPlayer = this.playerInfo.get(playerId)
         this.map[deletedPlayer.y][deletedPlayer.x].players = this.map[deletedPlayer.y][deletedPlayer.x].players.filter((player) => player.id !== playerId)
 
-        const main = window.worldInstance
+        const main = window.mainInstance
 
         if (main.selectedTile && main.selectedTile.x === deletedPlayer.x && main.selectedTile.y === deletedPlayer.y) {
             main.eventManager.modules.TileInfoManager.removePlayer(deletedPlayer.id)
