@@ -127,7 +127,7 @@ class Brain {
     buildItinerary(destinationIndex) {
         const itinerary = []
 
-        if (destinationIndex <= 0) {
+        if (destinationIndex <= 0 || destinationIndex >= GameManager.vision.length) {
             return itinerary
         }
         const Y =  Math.floor(Math.sqrt(destinationIndex))
