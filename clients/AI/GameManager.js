@@ -16,10 +16,12 @@ class GameManager {
             mendiane: 0,
             phiras: 0,
             thystame: 0
-        };
-        this.level = 1;
+        }
+        this.lastInventoryRefresh = 0
+        this.level = 1
         this.mapSize = {x: -1, y: -1}
         this.vision = []
+        this.lastVisionRefresh = 0
     }
 
     /**
@@ -41,10 +43,18 @@ class GameManager {
     /**
      * @author Corentin (ccharton) Charton
      * @description Update the internal inventory state based on server response.
-     * @param inventoryData {Object} - The parsed inventory object.
+     * @param inventoryData {String} - The new inventory to parse.
      */
     updateInventory(inventoryData) {
-        this.inventory = { ...this.inventory, ...inventoryData };
+        if (!inventoryData) {
+            return
+        }
+
+        const parsedInventory = this.responseParser.parseInventory(inventoryData)
+        if (parsedInventory) {
+            this.inventory = { ...this.inventory, ...parsedInventory }
+            this.lastInventoryRefresh = Date.now()
+        }
     }
 
     /**
@@ -53,16 +63,24 @@ class GameManager {
      * @param level {number} - The new level.
      */
     updateLevel(level) {
-        this.level = level;
+        this.level = level
     }
 
     /**
      * @author Corentin (ccharton) Charton
      * @description Update the player vision.
-     * @param vision {String[]} - The new vision array.
+     * @param vision {String} - The new vision to parse
      */
     updateVision(vision) {
-        this.vision = vision
+        if (!vision) {
+            return
+        }
+
+        const newVision = this.responseParser.parseVision(vision)
+        if (vision) {
+            this.vision = newVision
+            this.lastVisionRefresh = Date.now()
+        }
     }
 
     /**
