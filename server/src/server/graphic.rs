@@ -160,7 +160,7 @@ pub(crate) fn egg_hatches(token: &Token, server: &Server) -> String {
 }
 
 pub(crate) fn rotten_egg(egg_id: u128) -> String {
-    format!("edi {}", egg_id)
+    format!("eht {}", egg_id)
 }
 
 fn get_time_unit(tick: u64) -> String {
@@ -240,9 +240,10 @@ pub(crate) fn event_incant_end(server: &mut Server, success: bool, token: Token)
     let (x, y) = server._game.get_player_position(token);
     let tile: &Tile = &server.get_map().get_tiles()[y as usize][x as usize];
 
-    for player in server._incantation_list.get(&token).unwrap() {
-        let player: &Client = server._clients.get(player).unwrap();
-        res += &player_level(player);
+    for player_token in server._incantation_list.get(&token).unwrap() {
+        if let Some(player) = server._clients.get(player_token){
+            res += &player_level(player);
+        }
     }
     res += &content_tile(x, y, tile);
     res
