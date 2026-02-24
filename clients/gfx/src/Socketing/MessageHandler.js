@@ -73,7 +73,7 @@ class MessageHandler {
     handleMessage(msg) {
         const command = msg.split(" ")
         if (!this.commands[command[0]]) {
-            console.log(this.commands)
+            // console.log(this.commands)
             return
         }
 
@@ -338,6 +338,7 @@ class MessageHandler {
         }
 
         this.gameState.stopIncantation(integerArguments)
+        // console.log("Received end of incantation on tiles", {x: integerArguments[0], y:integerArguments[1]})
     }
 
     /**
@@ -351,7 +352,7 @@ class MessageHandler {
             return
         }
 
-        console.log(`Player ${parseInt(command[1])} has laid an egg`)
+        // console.log(`Player ${parseInt(command[1])} has laid an egg`)
     }
 
     /**

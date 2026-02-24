@@ -696,14 +696,12 @@ class Players {
 
         const index = this.getPlayerById(playerId)
         const orientation = window.mainInstance.gameState.playerInfo.get(playerId).orientation
-        console.log(orientation)
         const totalTime = actionTicks.prend * this.tickTime
 
         this.playerInstance.getMatrixAt(index, this.positionningMatrix)
         this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
 
         const resourceName = resourceTypes[resourceType]
-        console.log(resourceName, this.world.gameMap.resourceAssets.resourceMeshInfo)
         const pickUpGeometry = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].geometry
         const pickUpMaterial = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].material
         const pickUpMesh = new THREE.Mesh(pickUpGeometry, pickUpMaterial)
@@ -767,14 +765,12 @@ class Players {
 
         const index = this.getPlayerById(playerId)
         const orientation = window.mainInstance.gameState.playerInfo.get(playerId).orientation
-        console.log(orientation)
         const totalTime = actionTicks.prend * this.tickTime
 
         this.playerInstance.getMatrixAt(index, this.positionningMatrix)
         this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
 
         const resourceName = resourceTypes[resourceType]
-        console.log(resourceName, this.world.gameMap.resourceAssets.resourceMeshInfo)
         const DropGeometry = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].geometry
         const DropMaterial = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].material
         const DropMesh = new THREE.Mesh(DropGeometry, DropMaterial)

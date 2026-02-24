@@ -119,7 +119,7 @@ class GameState {
             window.mainInstance.eventManager.modules.TileInfoManager.addPlayer(playerObject)
         }
 
-        console.log("Added player", id, "Total players are", this.playerInfo)
+        // console.log("Added player", id, "Total players are", this.playerInfo)
     }
 
     /**
@@ -147,7 +147,7 @@ class GameState {
             window.mainInstance.eventManager.modules.TileInfoManager.addPlayer(player)
         }
 
-        console.log("updated player position", id, "Total players are", this.playerInfo)
+        // console.log("updated player position", id, "Total players are", this.playerInfo)
     }
 
     /**
@@ -162,7 +162,7 @@ class GameState {
         player.level = level
 
         window.mainInstance.playerInfoManager.changePlayerLevel(player.id.toString(), player.level)
-        console.log("updated player level", id, "Total players are", this.playerInfo)
+        // console.log("updated player level", id, "Total players are", this.playerInfo)
     }
 
     /**
@@ -187,7 +187,7 @@ class GameState {
         }
 
         window.mainInstance.playerInfoManager.changePlayerInventory(player.id.toString(), player.inventory)
-        console.log("updated player inventory", id, "Total players are", this.playerInfo)
+        // console.log("updated player inventory", id, "Total players are", this.playerInfo)
     }
 
     /**
@@ -207,7 +207,7 @@ class GameState {
             }
         }
 
-        console.log("Set incantation at", x, y, "for level", level, "with players", playerIds)
+        // console.log("Set incantation at", x, y, "for level", level, "with players", playerIds)
     }
 
     /**
@@ -220,7 +220,7 @@ class GameState {
 
         this.map[y][x].incantation = false
 
-        console.log("Stopped incantation at", x, y, "Map", this.map)
+        // console.log("Stopped incantation at", x, y, "Map", this.map)
     }
 
     deletePlayer(playerId) {
@@ -235,7 +235,7 @@ class GameState {
 
         this.playerInfo.delete(playerId)
 
-        console.log("Deleted player", playerId, "Total players are", this.playerInfo)
+        // console.log("Deleted player", playerId, "Total players are", this.playerInfo)
     }
 
     /**
@@ -250,7 +250,7 @@ class GameState {
         this.map[y][x].eggs.push({id: eggId, parentId})
         this.eggInfo.set(eggId, {id: eggId, parentId, x, y})
 
-        console.log("Added egg", eggId, "at", x, y, "by player", parentId, "Map", this.map)
+        // console.log("Added egg", eggId, "at", x, y, "by player", parentId, "Map", this.map)
     }
 
     /**
@@ -263,7 +263,7 @@ class GameState {
         this.map[egg.y][egg.x].eggs = this.map[egg.y][egg.x].eggs.filter(e => e.id !== eggId)
         this.eggInfo.delete(eggId)
 
-        console.log("Removed egg", eggId, "from", egg.x, egg.y, "Map", this.map)
+        // console.log("Removed egg", eggId, "from", egg.x, egg.y, "Map", this.map)
     }
 
     /**
