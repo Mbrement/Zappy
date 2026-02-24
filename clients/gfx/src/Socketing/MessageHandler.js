@@ -271,7 +271,6 @@ class MessageHandler {
      * @param {Array} command - the command and it's arguments
      */
     cmd_pex(command) {
-        // TODO : Animate #n player expelling
     }
 
     /**
@@ -284,8 +283,6 @@ class MessageHandler {
         if (command.length < 3) {
             return
         }
-
-        // TODO : Animate player #n broadcasting message
 
         let message = `#${command[1]}:`
         for (let i = 2; i < command.length; i++) {
@@ -340,8 +337,6 @@ class MessageHandler {
             return
         }
 
-        // TODO : Animate incantation end of players #n based on R
-
         this.gameState.stopIncantation(integerArguments)
     }
 
@@ -357,7 +352,6 @@ class MessageHandler {
         }
 
         console.log(`Player ${parseInt(command[1])} has laid an egg`)
-        // TODO : Animate player #n laying an egg
     }
 
     /**
@@ -407,8 +401,6 @@ class MessageHandler {
 
         const oldState = Object.assign({}, this.gameState.playerInfo.get(id))
         this.gameState.deletePlayer(id)
-
-        // TODO : Animate player #n dying
 
         this.world.players.removePlayer(id, oldState)
     }
@@ -487,7 +479,6 @@ class MessageHandler {
 
         this.world.displayResults(command[1])
     }
-
 }
 
 module.exports = MessageHandler

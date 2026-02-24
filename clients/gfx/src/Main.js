@@ -29,13 +29,6 @@ class Main extends EventEmitter {
         this.resources = new Resources(textures);
         this.fontLoader = new FontLoader()
 
-        // TODO : Remove this
-        // for (let i = 0; i < 50; i++) {
-        //     for (let j = 0; j < 50; j++) {
-        //         console.log(`bct ${j} ${i} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)} ${Math.floor(Math.random() * 5)}`)
-        //     }
-        // }
-
         this.world = new World()
         this.loadFont()
         this.once('loadedFonts', () => {
