@@ -1,6 +1,16 @@
 const THREE = require('three/webgpu')
 const { mergeGeometries } = require("three/addons/utils/BufferGeometryUtils.js");
 const {actionTicks} = require("./constants")
+const {
+    uniform,
+    Fn,
+    color,
+    vec4,
+    vec3,
+    float,
+    positionLocal,
+    If
+} = require("three/tsl");
 
 class Players {
     constructor() {
@@ -13,6 +23,7 @@ class Players {
         this.tickTime = 0.01
         this.animatedPlayersMove = []
         this.animatedPlayersRotate = []
+        this.animatedPlayerBroadcasts = []
 
         this.maxPlayers = 50
         this.maxEggs = 50
@@ -53,6 +64,14 @@ class Players {
         this.playerMaterial = new THREE.MeshBasicMaterial({side: THREE.DoubleSide})
 
         this.playerInstance = this.createInstance(this.playerGeometry, this.playerMaterial, this.maxPlayers)
+
+        this.broadcastGeometry = new THREE.CircleGeometry(0.3)
+        this.broadcastGeometry.rotateX(-90 * Math.PI / 180)
+        this.broadcastMaterial = new THREE.MeshBasicNodeMaterial({
+            color: 0xff0000,
+            side: THREE.DoubleSide,
+            transparent: true,
+        })
 
         this.eggGeometry = new THREE.CapsuleGeometry(0.05, 0.06, 1, 4, 1)
         this.eggMaterial = new THREE.MeshBasicMaterial()
@@ -389,6 +408,94 @@ class Players {
                 this.playerInstance.setMatrixAt(player.index, this.positionningMatrix)
                 this.playerInstance.instanceMatrix.needsUpdate = true
                 this.playerInstance.computeBoundingSphere()
+            }
+
+            return !remove
+        })
+    }
+
+    /**
+     * @authorEmma (epolitze) Politzer
+     * @description The broadcast shader
+     * @param uProgressArg - The progress uniform
+     * @returns {*}
+     */
+    broadcastShader(uProgressArg) {
+        return Fn(([uProgress]) => {
+            const waveColor = color(1.0, 0.0, 0.0).toConst()
+
+            const localPos = positionLocal.toConst()
+
+            let alpha = float(0.0).toVar()
+
+            If(localPos.distance(vec3(0, 0, 0)).greaterThan(uProgress)
+                .and(localPos.distance(vec3(0, 0, 0)).lessThan(uProgress.add(0.01))), () => {
+                alpha.assign(1.0)
+            })
+            .ElseIf(localPos.distance(vec3(0, 0, 0)).greaterThan(uProgress.mul(0.5))
+                .and(localPos.distance(vec3(0, 0, 0)).lessThan(uProgress.mul(0.5).add(0.01))), () => {
+                alpha.assign(1.0)
+            })
+
+            return vec4(waveColor, alpha)
+        })(uProgressArg)
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Add broadcast animation
+     * @param playerId - The id of the player that is broadcasting
+     */
+    addPlayerBroadcast(playerId) {
+        if (this.animatedPlayerBroadcasts.length === 0) {
+            this.world.updateManager.add(this, "world", "animatePlayerBroadcast")
+        }
+
+        const index = this.getPlayerById(playerId)
+        const totalTime = actionTicks.broadcast * this.tickTime
+
+        this.playerInstance.getMatrixAt(index, this.positionningMatrix)
+        this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+
+        const broadcastMesh = new THREE.Mesh(this.broadcastGeometry, this.broadcastMaterial.clone())
+        broadcastMesh.userData.uProgress = uniform(0.0)
+        broadcastMesh.material.fragmentNode = this.broadcastShader(broadcastMesh.userData.uProgress)
+        broadcastMesh.position.copy(this.dummyObject.position)
+        this.scene.add(broadcastMesh)
+
+        this.animatedPlayerBroadcasts.push({
+            index,
+            duration: totalTime,
+            passedTime: 0,
+            mesh: broadcastMesh
+        })
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Animates the player broadcasts
+     */
+    animatePlayerBroadcast() {
+        if (this.animatedPlayerBroadcasts.length < 1) {
+            this.world.updateManager.remove(this, "world", "animatePlayerBroadcast")
+        }
+
+        const deltaTime = this.world.updateManager.time.deltaInSecond
+
+        let broadcast
+        for (let i = 0; i < this.animatedPlayerBroadcasts.length; i++) {
+            broadcast = this.animatedPlayerBroadcasts[i]
+
+            broadcast.passedTime += deltaTime
+
+            broadcast.mesh.userData.uProgress.value = broadcast.passedTime / broadcast.duration
+        }
+
+        this.animatedPlayerBroadcasts = this.animatedPlayerBroadcasts.filter((broadcast) => {
+            const remove = broadcast.passedTime > broadcast.duration
+            if (remove) {
+                broadcast.mesh.material.dispose()
+                this.scene.remove(broadcast.mesh)
             }
 
             return !remove

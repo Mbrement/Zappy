@@ -292,6 +292,8 @@ class MessageHandler {
             message += " " + command[i]
         }
 
+        this.world.players.addPlayerBroadcast(parseInt(command[1]))
+
         this.broadcastManager.addBroadcast(message)
     }
 
