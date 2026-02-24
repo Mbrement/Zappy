@@ -224,7 +224,7 @@ impl Game {
                     .find(|(_, pos)| **pos == position)
                     .map(|(token, _)| *token)
                 {
-					if max_index == max_index_initial  {
+					if !(max_index == max_index_initial) && !(i == self.get_player_by_position((cell_x, cell_y)).unwrap_or(Token(usize::MAX))) {
 						visible_cells
 							.last_mut()
 							.unwrap()
