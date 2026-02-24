@@ -71,6 +71,17 @@ export const TAKE_MENDIANE = `prend ${MENDIANE}\n`
 export const TAKE_PHIRAS = `prend ${PHIRAS}\n`
 export const TAKE_THYSTAME = `prend ${THYSTAME}\n`
 
+
+export const TAKE_COMMANDS = {
+    [LINEMATE]: TAKE_LINEMATE,
+    [DERAUMERE]: TAKE_DERAUMERE,
+    [SIBUR]: TAKE_SIBUR,
+    [MENDIANE]: TAKE_MENDIANE,
+    [PHIRAS]: TAKE_PHIRAS,
+    [THYSTAME]: TAKE_THYSTAME,
+    [FOOD]: TAKE_FOOD
+};
+
 export const PUT_FOOD = `pose ${FOOD}\n`
 export const PUT_LINEMATE = `pose ${LINEMATE}\n`
 export const PUT_DERAUMERE = `pose ${DERAUMERE}\n`
