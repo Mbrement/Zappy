@@ -208,7 +208,6 @@ class TileInfoManager {
                         resolve()
                     }, 350)
                 })
-                // TODO: call cancel rayvast function HERE
             }
         }
     }
