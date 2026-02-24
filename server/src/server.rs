@@ -439,20 +439,29 @@ impl Server {
                                                     .map(|(k, v)| (*k, v.0, v.1, v.2, v.3));
                                                 let (egg_id, _, _, _, tick) =
                                                     found.unwrap_or((0, 0, 0, mio::Token(0), 0));
-                                                _command_manager
-                                                    .next_execute
-                                                    .insert(token, tick + 600); //get the tick of the hatching of the egg);
+                                                if egg_id != 0 {
+                                                    _command_manager
+                                                        .next_execute
+                                                        .insert(token, tick + 600); //get the tick of the hatching of the egg);
+                                                }
                                                 _command_manager.add_to_queue_internal(
                                                     "spawning".to_string(),
                                                     token,
                                                     egg_id.to_string(),
                                                 );
                                                 #[cfg(feature = "log")]
-                                                println!(
-                                                    "{:?}, {:?}",
-                                                    _command_manager.next_execute[&token],
-                                                    self._game._tick
-                                                );
+                                                {
+                                                    if _command_manager
+                                                        .next_execute
+                                                        .contains_key(&token)
+                                                    {
+                                                        println!(
+                                                            "{:?}, {:?}",
+                                                            _command_manager.next_execute[&token],
+                                                            self._game._tick
+                                                        );
+                                                    }
+                                                }
                                                 self._game.spawn_player(player_token, &cmd, found)
                                             };
 
