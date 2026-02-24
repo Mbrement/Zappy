@@ -140,7 +140,6 @@ class World {
         }
 
         this.updateManager.remove(this, "world", "updateEndGameHover")
-        this.main.broadcastManager.clearBroadcast()
         this.main.networkClient.closeSocket()
 
         this.scene.remove(this.backToMenuMesh, this.winMesh, this.teamNameMesh)
@@ -338,6 +337,8 @@ class World {
         window.removeEventListener('mousemove', this.onMouseMove.bind(this))
         window.removeEventListener('mousedown', this.onMouseDown.bind(this))
 
+        this.main.broadcastManager.clearBroadcast()
+
         this.gameMap.reset()
         this.players.reset()
         this.themeManager.reset()
@@ -346,8 +347,8 @@ class World {
         this.updateManager.remove(this.renderer, 'renderers')
         this.updateManager.remove(this, 'world','updateHover')
 
-        this.backToMenuMesh.geometry.dispose()
-        this.winMesh.geometry.dispose()
+        this.backToMenuMesh?.geometry.dispose()
+        this.winMesh?.geometry.dispose()
 
         this.camera?.cleanup()
         this.camera = null
