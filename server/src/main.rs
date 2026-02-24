@@ -1,12 +1,12 @@
-#![allow(warnings)]
+// #![allow(warnings)]
 // extern crate getopts;
-use getopts::{Options, ParsingStyle};
+use getopts::Options;
 use std::env;
-use std::io::{Read, Write};
+// use std::io::{Read, Write};
 mod server;
-use mio::net::{TcpListener, TcpStream};
-use mio::{Events, Interest, Poll, Token};
-use std::collections::HashMap;
+// use mio::net::{TcpListener, TcpStream};
+//use mio::Token;
+// use std::collections::HashMap;
 
 use crate::server::{Server, define};
 
@@ -14,7 +14,6 @@ fn print_usage(program: &str, opts: Options) {
     let brief = format!("Usage: {} [options]", program);
     print!("{}", opts.usage(&brief));
 }
-const SERVER: Token = Token(0);
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();

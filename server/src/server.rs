@@ -11,9 +11,9 @@ mod map;
 pub mod utils;
 use crate::server::client::Client;
 use crate::server::command_manager::CommandManager;
-use crate::server::{self};
-use rand::{rngs::SmallRng, *};
-use std::collections::VecDeque;
+//use crate::server::{self};
+use rand::*;
+//use std::collections::VecDeque;
 use std::{process, time};
 
 pub struct Server {
@@ -76,7 +76,7 @@ impl Server {
     }
 
     // ________________Setters
-
+    /*
     fn set_passwd(&mut self, passwd: String) {
         self.__pass__ = passwd;
     }
@@ -105,7 +105,7 @@ impl Server {
         #[cfg(feature = "log")]
         println!("Server port changed to: {}", self._port);
         self._socket = tmp_socket.unwrap();
-    }
+    }*/
 
     pub fn set_map_width(&mut self, width: u32) {
         self._game.map.set_width(width);
@@ -127,9 +127,10 @@ impl Server {
     }
 
     // ________________Getters
+    /*
     pub fn get_port(&self) -> u16 {
         self._port
-    }
+    }*/
 
     pub fn get_height(&self) -> u32 {
         self._game.map.get_height()
@@ -138,31 +139,31 @@ impl Server {
     pub fn get_width(&self) -> u32 {
         self._game.map.get_width()
     }
+    /*
+        pub fn get_address(&self) -> String {
+            self._address.clone()
+        }
 
-    pub fn get_address(&self) -> String {
-        self._address.clone()
-    }
+        pub fn get_events(&self) -> &Events {
+            &self._events
+        }
 
-    pub fn get_events(&self) -> &Events {
-        &self._events
-    }
+        pub fn get_events_mut(&mut self) -> &mut Events {
+            &mut self._events
+        }
 
-    pub fn get_events_mut(&mut self) -> &mut Events {
-        &mut self._events
-    }
+        pub fn get_poll(&self) -> &Poll {
+            &self._poll
+        }
 
-    pub fn get_poll(&self) -> &Poll {
-        &self._poll
-    }
+        pub fn get_poll_mut(&mut self) -> &mut Poll {
+            &mut self._poll
+        }
 
-    pub fn get_poll_mut(&mut self) -> &mut Poll {
-        &mut self._poll
-    }
-
-    pub fn get_clients(&self) -> &HashMap<Token, client::Client> {
-        &self._clients
-    }
-
+        pub fn get_clients(&self) -> &HashMap<Token, client::Client> {
+            &self._clients
+        }
+    */
     pub fn get_clients_by_type(&self, clients_type: &str) -> Vec<&Client> {
         self._clients
             .values()
@@ -176,13 +177,13 @@ impl Server {
             .filter(|client| client.r#type == clients_type)
             .collect()
     }
-
+    /*
     pub fn get_clients_by_pos(&self, clients_pos: (u32, u32)) -> Vec<&Client> {
         self._clients
             .values()
             .filter(|client| client.position == clients_pos)
             .collect()
-    }
+    }*/
 
     pub fn get_clients_by_pos_mut(&mut self, clients_pos: (u32, u32)) -> Vec<&mut Client> {
         self._clients
@@ -197,28 +198,28 @@ impl Server {
     pub fn get_ticks(&self) -> u64 {
         self._ticks
     }
+    /*
+        pub fn get_socket(&self) -> &mio::net::TcpListener {
+            &self._socket
+        }
 
-    pub fn get_socket(&self) -> &mio::net::TcpListener {
-        &self._socket
-    }
-
-    pub fn get_socket_mut(&mut self) -> &mut mio::net::TcpListener {
-        &mut self._socket
-    }
-
+        pub fn get_socket_mut(&mut self) -> &mut mio::net::TcpListener {
+            &mut self._socket
+        }
+    */
     pub fn get_map(&self) -> &map::Map {
         &self._game.map
     }
-
-    pub fn get_map_mut(&mut self) -> &mut map::Map {
-        &mut self._game.map
-    }
-
+    /*
+        pub fn get_map_mut(&mut self) -> &mut map::Map {
+            &mut self._game.map
+        }
+    */
     pub fn disconnect_client_by_token(&mut self, token: &Token) {
         // Remove the client first to avoid double mutable borrow
         let mut client = match self._clients.remove(token) {
             Some(client) => client,
-            None => {
+            _ => {
                 eprintln!("Client with token {:?} not found for disconnection", token);
                 return;
             }
@@ -271,7 +272,7 @@ impl Server {
     }
 
     pub fn run(&mut self) {
-        let mut _command_manager = CommandManager::new_server(self);
+        let mut _command_manager = CommandManager::new_server();
         let mut buf = [0; 1024];
         // #[cfg(feature = "log")]
         println!("Server is running...");
@@ -289,7 +290,7 @@ impl Server {
         loop {
             let check = self._poll.poll(
                 &mut self._events,
-                Some(time::Duration::from_millis((1000 / self._ticks))),
+                Some(time::Duration::from_millis(1000 / self._ticks)),
             );
             if check.is_err() {
                 eprintln!("Failed to poll events");
@@ -300,7 +301,7 @@ impl Server {
                 if event.token() == self._client_token {
                     // loop {
                     match self._socket.accept() {
-                        Ok((mut client_stream, _)) => {
+                        Ok((client_stream, _)) => {
                             let token = Token(self._next_token as usize);
                             if self._clients.contains_key(&token) {
                                 eprintln!("Client with token {:?} already exists", token);
@@ -417,7 +418,7 @@ impl Server {
                                             < self._max_clients[&cmd] as usize
                                         {
                                             let player_token = token;
-                                            drop(client);
+                                            //drop(client);
                                             // self._game
                                             //     .team
                                             //     .get_mut(&cmd)
@@ -596,7 +597,6 @@ impl Server {
                         }
                     }
                     if graphic_ok {
-                        let message = graphic::event_graph_connect(self);
                         let client = self._clients.get(&token).unwrap();
                         if client
                             .get_socket()
@@ -662,17 +662,11 @@ impl Server {
         let mut level_checker = 0;
         let player_level = match self._clients.get(&token) {
             Some(p) => p.level,
-            None => return false,
+            _ => return false,
         };
         if self._game.check_inventory(&token, self) {
             if let Some(player) = self._clients.get_mut(&token) {
                 for i in 1..6 {
-                    // println!(
-                    //     "{} {} - {}",
-                    //     i,
-                    //     define::INCANTATION_REQ[player_level as usize - 1][i] as u128,
-                    //     player.inventory[i]
-                    // );
                     player.inventory[i] -=
                         define::INCANTATION_REQ[player_level as usize - 1][i] as u128;
                 }
@@ -683,16 +677,16 @@ impl Server {
             return false;
         }
 
-        if (self._incantation_list.contains_key(&token)
+        if self._incantation_list.contains_key(&token)
             && (self._incantation_list[&token].len() as u128 + 1)
-                < define::INCANTATION_REQ[player_level as usize - 1][0])
+                < define::INCANTATION_REQ[player_level as usize - 1][0]
         {
             return false;
         }
         for token in self._incantation_list[&token].clone() {
             let target = match self._clients.get(&token) {
                 Some(p) => p,
-                None => continue,
+                _ => continue,
             };
             if target.level == self._clients[&token].level {
                 level_checker += 1;
@@ -711,7 +705,7 @@ impl Server {
         }
         let team_tokens = match self._game.team.get(&team_name) {
             Some(tokens) => tokens,
-            None => return false,
+            _ => return false,
         };
         let mut max_level_players = 0;
         for t in team_tokens {

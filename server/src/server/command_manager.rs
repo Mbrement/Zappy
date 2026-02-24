@@ -1,11 +1,9 @@
 use crate::server;
-use crate::server::utils::debug_manager_register;
-use crate::server::{Server, define, utils};
-use crate::server::{client, graphic};
+use crate::server::graphic;
+use crate::server::{Server, client::Client, define, utils};
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
-use std::process;
 
 pub type CommandFn = Box<dyn Fn(mio::Token, &mut Server, &str)>;
 pub type CommandArgs = (String, mio::Token, String);
@@ -60,14 +58,14 @@ impl CommandManager {
     }
 
     // This function is used to add commands to the queue without checking if the command is valid. it pop the current command in the queue and replace it with the new one
-
+    /*
     pub fn add_to_queue_admin(&mut self, name: String, arg: String) {
         let token: mio::Token = mio::Token(0); // Admin token
         self.order
             .entry(token)
             .or_insert_with(VecDeque::new)
             .push_back((name.clone(), token, arg.clone()));
-    }
+    }*/
 
     pub(crate) fn add_to_queue_internal(&mut self, name: String, token: mio::Token, arg: String) {
         // #[cfg(feature = "log")]
@@ -112,19 +110,19 @@ impl CommandManager {
         }
     }
     // default configuration of commande for a server
-    pub fn new_server(server: &mut Server) -> Self {
+    pub fn new_server() -> Self {
         let mut command_manager = CommandManager::new();
 
-        command_manager.admin_command(server);
-        command_manager.movement_command(server);
-        command_manager.default_command(server);
-        command_manager.fork_command(server);
+        command_manager.admin_command();
+        command_manager.movement_command();
+        command_manager.default_command();
+        command_manager.fork_command();
         #[cfg(feature = "debug")]
-        command_manager.debug_command(server);
+        command_manager.debug_command();
         command_manager
     }
 
-    fn movement_command(&mut self, server: &mut Server) {
+    fn movement_command(&mut self) {
         self.register(
             "droite",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
@@ -163,13 +161,13 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("avance", _c, server, _arg);
-                let mut client = server._clients.get_mut(&_c);
+                let client = server._clients.get_mut(&_c);
                 if client.is_none() {
                     #[cfg(feature = "log")]
                     println!("No client found for token {:?}", _c);
                     return;
                 }
-                let client = client.unwrap();
+                let client: &mut Client = client.unwrap();
                 server._game.move_player(client);
                 // ? pourquoi la ligne suivante quand tu actualise déjà la position du joueur
                 //   dans la fonction précédente? //fixed //it was not fixed do not remove this line until we can change this
@@ -182,7 +180,8 @@ impl CommandManager {
         );
     }
 
-    fn debug_command(&mut self, server: &mut Server) {
+    #[cfg(feature = "debug")]
+    fn debug_command(&mut self) {
         self.register(
             "position",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
@@ -206,11 +205,11 @@ impl CommandManager {
         );
     }
 
-    fn default_command(&mut self, server: &mut Server) {
+    fn default_command(&mut self) {
         self.register("voir", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             utils::debug_manager_register("voir", _c, server, _arg);
-            let mut client = server._clients.get_mut(&_c);
+            let client = server._clients.get_mut(&_c);
             if client.is_none() {
                 #[cfg(feature = "log")]
                 println!("No client found for token {:?}", _c);
@@ -224,14 +223,14 @@ impl CommandManager {
             #[cfg(feature = "log")]
             println!("{:?}", visible_cells);
             let response = format!("{{{}}}\n", visible_cells.join(", "));
-            let carrote = client.get_socket_mut().write(response.as_bytes());
+            let _ = client.get_socket_mut().write(response.as_bytes());
         });
         self.register(
             "inventaire",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 utils::debug_manager_register("inventaire", _c, server, _arg);
-                let mut client = server._clients.get_mut(&_c);
+                let client = server._clients.get_mut(&_c);
                 if client.is_none() {
                     #[cfg(feature = "log")]
                     println!("No client found for token {:?}", _c);
@@ -239,7 +238,7 @@ impl CommandManager {
                 }
                 let client = client.unwrap();
                 let inventory = client.get_inventory();
-                client.get_socket_mut().write(
+                let _ = client.get_socket_mut().write(
                     format!(
                         "{{{} {}, {} {}, {} {}, {} {}, {} {}, {} {}, {} {}}}\n",
                         define::FOOD,
@@ -351,7 +350,7 @@ impl CommandManager {
                 //}
                 // server._clients va envoyer a tous les clients dont ADMIN et graphic
                 // utilise plutot ca : get_clients_by_type_mut(define::ROLE_PLAYER)
-                server
+                let _ = server
                     ._clients
                     .get_mut(&_c)
                     .unwrap()
@@ -388,9 +387,9 @@ impl CommandManager {
         );
         self.register(
             "incantation",
-            |_c: mio::Token, server: &mut Server, _arg: &str| {
+            |_c: mio::Token, _server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
-                utils::debug_manager_register("incantation", _c, server, _arg);
+                utils::debug_manager_register("incantation", _c, _server, _arg);
                 // let client = server._clients.get(&_c);
                 // if client.is_none() {
                 //     return;
@@ -416,19 +415,16 @@ impl CommandManager {
                 println!("\n\nincantation_internal for token {:?}\n\n", _c);
                 let org_player_level = server._clients.get(&_c).unwrap().level;
                 let sucess = server.incantation_success(_c);
-                println!(
-                    "\n\nincantation_internal for token {:?} with success : {}\n\n",
-                    _c, sucess
-                );
                 if server._incantation_list.contains_key(&_c) {
                     let mut victory = String::new();
-                    println!("here 0");
                     //il faut vérifier pour chacune des teams qui ont un membre qui est passé lvl8 lors de l'incantation
                     //proposition de solution:
-                    for player in server._incantation_list.get(&_c).unwrap() {
-                        if sucess && org_player_level + 1 == 8 && server.check_win_condition(player)
-                        {
-                            victory = graphic::end_game(server.get_team_for_player(player));
+                    if sucess && org_player_level + 1 == 8 {
+                        for player in server._incantation_list.get(&_c).unwrap() {
+                            if server.check_win_condition(player) {
+                                victory = graphic::end_game(server.get_team_for_player(player));
+                                break;
+                            }
                         }
                     }
                     if !victory.is_empty() {
@@ -440,7 +436,6 @@ impl CommandManager {
                         server::exit_game(server);
                     }*/
                     let Some(tkn_list) = server._incantation_list.get(&_c) else {
-                        println!("here 1");
                         return;
                     };
                     // if tkn_list.is_none() {
@@ -454,7 +449,7 @@ impl CommandManager {
                         //     continue;
                         // }
                         // let client = client.get(0).unwrap();
-                        let mut client = server._clients.get_mut(client);
+                        let client = server._clients.get_mut(client);
                         if client.is_none() {
                             #[cfg(feature = "log")]
                             println!("No client found for token {:?}", _c);
@@ -462,14 +457,11 @@ impl CommandManager {
                         }
                         let client = client.unwrap();
                         client.is_incanting = Token(0);
-                        let level_to_send: u8;
                         if sucess {
                             if client.level <= org_player_level {
-                                println!("here 2");
                                 client.level = org_player_level + 1;
                             }
                         }
-                        println!("here 3");
                         let level_to_send = client.level;
 
                         let _ = client
@@ -490,7 +482,7 @@ impl CommandManager {
                 utils::debug_manager_register("connect_nbr", _c, server, _arg);
                 let tmp = server.get_team_for_player(&_c);
                 let d = server._max_clients[&tmp] - server._game.team[&tmp].len() as u32;
-                let mut client = server._clients.get_mut(&_c);
+                let client = server._clients.get_mut(&_c);
                 if client.is_none() {
                     #[cfg(feature = "log")]
                     println!("No client found for token {:?}", _c);
@@ -502,12 +494,12 @@ impl CommandManager {
         );
     }
 
-    fn fork_command(&mut self, server: &mut Server) {
+    fn fork_command(&mut self) {
         self.register("fork", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             utils::debug_manager_register("fork", _c, server, _arg);
             // server._game.fork_player(_c);
-            let mut client = server._clients.get_mut(&_c);
+            let client = server._clients.get_mut(&_c);
             if client.is_none() {
                 #[cfg(feature = "log")]
                 println!("No client found for token {:?}", _c);
@@ -520,7 +512,7 @@ impl CommandManager {
                 (x, y, client.get_token(), server._game._tick),
             );
             server._game.map.egg_id_counter += 1;
-            client
+            let _ = client
                 .get_socket_mut()
                 .write(format!("{}", define::R_OK).as_bytes());
 
@@ -533,7 +525,7 @@ impl CommandManager {
                 #[cfg(feature = "log")]
                 utils::debug_manager_register("spawning", _c, server, _arg);
                 //player hatch
-                let mut client = server._clients.get_mut(&_c).unwrap();
+                let client = server._clients.get_mut(&_c).unwrap();
                 //client.hunger = 1260; //this line scare me
                 client.inventory[0] = 1260;
                 client.was_egg = _arg.parse().unwrap_or(0);
@@ -565,7 +557,7 @@ impl CommandManager {
                 debug_manager_register("egg_death", _c, server, _arg);
                 // Collect ticks to remove first to avoid mutably borrowing egg_position
                 let mut ticks_to_remove: Vec<u128> = Vec::new();
-                for (egg_id, (x, y, token, tick)) in server._game.map.egg_position.iter() {
+                for (egg_id, (_, _, token, tick)) in server._game.map.egg_position.iter() {
                     if tick < &server._game._tick {
                         let team_name = server.get_team_for_player(&token);
                         let tmp = server._max_clients.get_mut(&team_name);
@@ -586,7 +578,7 @@ impl CommandManager {
         );
     }
 
-    fn admin_command(&mut self, server: &mut Server) {
+    fn admin_command(&mut self) {
         self.register(
             "status",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
@@ -645,7 +637,7 @@ impl CommandManager {
                 return;
             }
             let target_token = mio::Token(target_token.unwrap() as usize);
-            let mut client = server._clients.get_mut(&target_token);
+            let client = server._clients.get_mut(&target_token);
             if client.is_none() {
                 #[cfg(feature = "log")]
                 println!("No client found for token {:?}", target_token);
@@ -660,14 +652,14 @@ impl CommandManager {
     }
 
     pub fn process_queue(&mut self, server: &mut Server) {
-        let mut tokens: Vec<Token> = self.order.keys().cloned().collect();
+        let tokens: Vec<Token> = self.order.keys().cloned().collect();
         for token in tokens {
             if self.order.contains_key(&token) && self.next_execute.contains_key(&token) {
                 if let Some((command, tkn, arg)) =
                     self.order.get(&token).and_then(|queue| queue.front())
                 {
                     if self.next_execute.get(&token).unwrap() <= &server._game._tick {
-                        let res = match command.as_str() {
+                        let _ = match command.as_str() {
                             "voir" | "prend" | "pose" | "droite" | "gauche" | "avance"
                             | "expulse" | "broadcast" => {
                                 self.next_execute.insert(token, server._game._tick + 7)
@@ -686,7 +678,7 @@ impl CommandManager {
                             }
                             _ => None,
                         };
-                        if (token == mio::Token(0) || !server._clients.get(&token).is_none()) {
+                        if token == mio::Token(0) || !server._clients.get(&token).is_none() {
                             self.execute(&command, *tkn, &arg, server);
                         }
                         //TODO-mrozniec: recup command
@@ -716,7 +708,7 @@ impl CommandManager {
                                     ._incantation_list
                                     .insert(token, player_incanting.clone());
                                 for player in &player_incanting {
-                                    if (self.next_execute.get(&player).is_none()) {
+                                    if self.next_execute.get(&player).is_none() {
                                         self.next_execute.insert(*player, 0);
                                     }
                                     self.next_execute
@@ -726,7 +718,7 @@ impl CommandManager {
                                         *player,
                                         "".to_string(),
                                     );
-                                    let mut client = server._clients.get_mut(&player);
+                                    let client = server._clients.get_mut(&player);
                                     if client.is_none() {
                                         #[cfg(feature = "log")]
                                         println!("No client found for token {:?}", player);
@@ -795,35 +787,35 @@ impl CommandManager {
     // 	}
 
     // }
-
+    /*
     pub fn next_command_time(&self, token: &Token) -> Option<u128> {
         self.next_execute.get(token).cloned()
     }
     pub fn set_next_command_time(&mut self, token: Token, time: u128) {
         self.next_execute.insert(token, time);
-    }
+    }*/
 }
 
 fn distance_along_wrapped_dimension(p1: i32, p2: i32, dim: i32) -> i32 {
     let mut d;
 
     d = p2 - p1;
-    if (d.abs() > dim / 2) {
+    if d.abs() > dim / 2 {
         d = dim - d.abs();
-        if (p2 > p1) {
+        if p2 > p1 {
             d *= -1;
         }
     }
-    return (d);
+    return d;
 }
 
 fn point_to_greater_abs_value(a: i32, b: i32) -> i32 {
-    if (a.abs() == b.abs()) {
-        return (0);
-    } else if (a.abs() > b.abs()) {
-        return (a);
+    if a.abs() == b.abs() {
+        return 0;
+    } else if a.abs() > b.abs() {
+        return a;
     } else {
-        return (b);
+        return b;
     }
 }
 
@@ -838,7 +830,7 @@ fn expulse_player(server: &mut Server, token: Token) -> bool {
             'O' => (position.0.saturating_sub(1), position.1),
             _ => position,
         },
-        None => position,
+        _ => position,
     };
     /*
     let others: Vec<Token> = server
@@ -872,9 +864,9 @@ fn expulse_player(server: &mut Server, token: Token) -> bool {
     // j'ai fait une fonction pour récupérer les clients en fonction de leur position, utilise la
     let mut players = server.get_clients_by_pos_mut(position);
     for player in players.iter_mut() {
-        if (player.token != token) {
+        if player.token != token {
             player.position = next_pos;
-            player
+            let _ = player
                 .get_socket_mut()
                 .write(format!("kick {}\n", dir).as_bytes());
             expelled = true;

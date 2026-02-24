@@ -101,7 +101,7 @@ fn leonidas(token: &Token) -> String {
 }
 
 pub(crate) fn player_broadcast(token: &Token, message: &str) -> String {
-    format!("pbc {:?} {}", token.0, message)
+    format!("pbc {:?} {}\n", token.0, message)
 }
 
 pub(crate) fn start_incant(tokens: Vec<Token>, origin: Token, server: &Server) -> String {

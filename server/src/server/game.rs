@@ -277,8 +277,8 @@ impl Game {
             // }
 
             let mut inc: u128 = 1;
-            if (item == define::FOOD) {
-                inc = 126;
+            if item == define::FOOD {
+                inc = define::FOOD_VALUE;
             }
             client.inventory[define::ITEMS_DICT[item]] += inc;
             // match item {
