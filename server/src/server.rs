@@ -243,6 +243,9 @@ impl Server {
         let _ = client.get_socket_mut().shutdown(std::net::Shutdown::Both);
         // self._clients.remove(&client.get_token()); // Already removed in disconnect_client_by_token
         if client.r#type == define::ROLE_PLAYER {
+            if client.is_incanting != Token(0) {
+                self._incantation_list.get_mut(&client.is_incanting).expect("Failed to remove token from incantation list").retain(|t| t != &client.token);
+            }
             if let Some(team_name) = self._game.team.iter_mut().find_map(|(name, tokens)| {
                 if let Some(pos) = tokens.iter().position(|t| t == &client.get_token()) {
                     tokens.remove(pos);

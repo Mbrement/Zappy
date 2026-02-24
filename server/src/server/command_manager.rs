@@ -172,8 +172,8 @@ impl CommandManager {
                 let client = client.unwrap();
                 server._game.move_player(client);
                 // ? pourquoi la ligne suivante quand tu actualise déjà la position du joueur
-                //   dans la fonction précédente?
-                client.position = server._game.get_player_position(_c);
+                //   dans la fonction précédente? //fixed
+                // client.position = server._game.get_player_position(_c);
                 let _ = client
                     .get_socket_mut()
                     .write(format!("{}", define::R_OK).as_bytes());
@@ -436,12 +436,12 @@ impl CommandManager {
                         server::exit_game(server);
                     }*/
                     let Some(tkn_list) = server._incantation_list.get(&_c) else {
-						return;
-					};
+                        return;
+                    };
                     // if tkn_list.is_none() {
                     //     return;
                     // }
-					println!("Found tokens {:?}", tkn_list);
+                    println!("Found tokens {:?}", tkn_list);
                     for client in tkn_list {
                         // if !client.contains(&_c) {
                         //     #[cfg(feature = "log")]
@@ -456,7 +456,7 @@ impl CommandManager {
                             continue;
                         }
                         let client = client.unwrap();
-                        client.is_incanting = false;
+                        client.is_incanting = Token(0);
                         let level_to_send: u8;
                         if sucess {
                             if client.level < org_player_level {
@@ -700,10 +700,14 @@ impl CommandManager {
                                     .filter(|(tok, pos)| {
                                         *pos == &(x, y)
                                             && server._clients.get(tok).is_some()
-                                            && !server._clients.get(tok).unwrap().is_incanting
+                                            && server._clients.get(tok).unwrap().is_incanting
+                                                == Token(0)
                                     })
                                     .map(|(tok, _)| *tok)
                                     .collect();
+                                server
+                                    ._incantation_list
+                                    .insert(token, player_incanting.clone());
                                 for player in &player_incanting {
                                     if (self.next_execute.get(&player).is_none()) {
                                         self.next_execute.insert(*player, 0);
@@ -725,7 +729,7 @@ impl CommandManager {
                                     let _ = client
                                         .get_socket_mut()
                                         .write(format!("{}\n", "elevation en cours").as_bytes());
-                                    client.is_incanting = true;
+                                    client.is_incanting = token;
                                 }
                                 server.send_to_graph +=
                                     &graphic::start_incant(player_incanting, token, server);

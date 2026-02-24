@@ -11,7 +11,7 @@ pub struct Client {
     //pub(crate) hunger: u128,
     pub(crate) position: (u32, u32),
     pub(crate) orientation: char,
-    pub(crate) is_incanting: bool,
+    pub(crate) is_incanting: Token,
     pub(crate) was_egg: u128,
 }
 
@@ -26,7 +26,7 @@ impl client::Client {
             //hunger: 1260,
             position: (0, 0),
             orientation: ('N'),
-            is_incanting: false,
+            is_incanting: mio::Token(0),
             was_egg: 1,
         }
     }

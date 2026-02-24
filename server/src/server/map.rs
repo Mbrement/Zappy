@@ -174,10 +174,10 @@ impl Map {
     }
 
     pub fn remove_item_from_cell(&mut self, x: u32, y: u32, item: &str) -> bool {
-        // pourquoi ?
-        if x >= self.width || y >= self.height {
-            return false;
-        }
+        // pourquoi ? C programming in a nutshell, that's why
+        // if x >= self.width || y >= self.height {
+        //     return false;
+        // }
         let idx = match item {
             FOOD => FOOD_INV,
             T1_MAT => T1_MAT_INV,
