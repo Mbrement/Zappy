@@ -49,7 +49,9 @@ class CommandManager {
     trySend() {
         if (this.#inProcessQueue.length < MAX_SERVER_MSG && this.#waitingQueue.length > 0) {
             const request = this.#waitingQueue.shift()
-            this.#inProcessQueue.push(request)
+            if (request.expectedAnswerCount > 0) {
+                this.#inProcessQueue.push(request)
+            }
             this.networkClient.send(request.command)
 
             if (this.#inProcessQueue.length > 0) {
