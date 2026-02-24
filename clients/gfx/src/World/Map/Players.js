@@ -9,7 +9,19 @@ const {
     vec3,
     float,
     positionLocal,
-    If
+    If,
+    normalWorld,
+    cameraPosition,
+    dot,
+    positionWorld,
+    time,
+    mod,
+    pow,
+    smoothstep,
+    fract,
+    sin,
+    vec2,
+    abs
 } = require("three/tsl");
 
 class Players {
@@ -24,6 +36,7 @@ class Players {
         this.animatedPlayersMove = []
         this.animatedPlayersRotate = []
         this.animatedPlayerBroadcasts = []
+        this.animatedPlayerIncantations = []
 
         this.maxPlayers = 50
         this.maxEggs = 50
@@ -71,6 +84,14 @@ class Players {
             color: 0xff0000,
             side: THREE.DoubleSide,
             transparent: true,
+        })
+
+        this.incantationGeometry = new THREE.SphereGeometry(0.15)
+        this.incantationMaterial = new THREE.MeshBasicNodeMaterial({
+            side: THREE.DoubleSide,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
         })
 
         this.eggGeometry = new THREE.CapsuleGeometry(0.05, 0.06, 1, 4, 1)
@@ -415,6 +436,51 @@ class Players {
     }
 
     /**
+     * @author Emma (epolitze) Politzer
+     * @description Animates the player rotations
+     */
+    animatePlayerRotate() {
+        if (this.animatedPlayersRotate.length < 1) {
+            this.world.updateManager.remove(this, "world", "animatePlayerRotate")
+        }
+
+        const deltaTime = this.world.updateManager.time.deltaInSecond
+
+        let player
+        for (let i = 0; i < this.animatedPlayersRotate.length; i++) {
+            player = this.animatedPlayersRotate[i]
+
+            this.playerInstance.getMatrixAt(player.index, this.positionningMatrix)
+            this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+
+            this.dummyQuaternion.slerpQuaternions(player.startRotation, player.endRotation, player.passedTime / player.duration)
+            this.dummyObject.quaternion.copy(this.dummyQuaternion)
+            this.dummyObject.updateMatrix()
+
+            this.playerInstance.setMatrixAt(player.index, this.dummyObject.matrix)
+            this.playerInstance.instanceMatrix.needsUpdate = true
+            this.playerInstance.computeBoundingSphere()
+
+            player.passedTime += deltaTime
+        }
+
+        this.animatedPlayersRotate = this.animatedPlayersRotate.filter((player) => {
+            const remove = player.passedTime > player.duration
+            if (remove) {
+                this.playerInstance.getMatrixAt(player.index, this.positionningMatrix)
+                this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+                this.dummyObject.quaternion.copy(player.endRotation)
+                this.dummyObject.updateMatrix()
+                this.playerInstance.setMatrixAt(player.index, this.dummyObject.matrix)
+                this.playerInstance.instanceMatrix.needsUpdate = true
+                this.playerInstance.computeBoundingSphere()
+            }
+
+            return !remove
+        })
+    }
+
+    /**
      * @authorEmma (epolitze) Politzer
      * @description The broadcast shader
      * @param uProgressArg - The progress uniform
@@ -503,44 +569,112 @@ class Players {
     }
 
     /**
-     * @author Emma (epolitze) Politzer
-     * @description Animates the player rotations
+     * @authorEmma (epolitze) Politzer
+     * @description The incantation position shader
      */
-    animatePlayerRotate() {
-        if (this.animatedPlayersRotate.length < 1) {
-            this.world.updateManager.remove(this, "world", "animatePlayerRotate")
+    incantationPositionShader() {
+        const random2D = Fn(([value]) => {
+            return fract(sin(dot(value.xy, vec2(12.9898, 78.233))).mul(43758.5453123))
+        })
+
+        return Fn(() => {
+            const position = positionLocal.toVar()
+
+            const glitchTime = time.sub(positionWorld.y).toVar()
+            const glitchStrength = sin(glitchTime).add(sin(glitchTime.mul(3.45))).add(sin(glitchTime.mul(8.76))).div(3.0).toVar()
+            glitchStrength.assign(smoothstep(0.3, 1.0, glitchStrength).mul(0.1))
+            position.x.addAssign(random2D(position.xz.add(time)).sub(0.5).mul(glitchStrength))
+            position.z.addAssign(random2D(position.zx.add(time)).sub(0.5).mul(glitchStrength))
+
+            return position
+        })()
+    }
+
+    /**
+     * @authorEmma (epolitze) Politzer
+     * @description The incantation fragment shader
+     * @param uColorArg - The color uniform
+     */
+    incantationFragmentShader(uColorArg) {
+        return Fn(([uColor]) => {
+            const viewDirection = positionWorld.sub(cameraPosition).normalize().toVar()
+
+            const normal = normalWorld.toVar()
+            If(dot(viewDirection, normal).greaterThan(0.0), () => {
+                normal.mulAssign(-1.0)
+            })
+
+            const stripes = mod(positionWorld.y.sub(time.mul(0.02)).mul(20), 1.0).toVar()
+            stripes.assign(pow(stripes, 3.0))
+
+            const fresnel = abs(dot(viewDirection, normalWorld)).mul(-1.0).add(1.0).toVar()
+            fresnel.assign(pow(fresnel, 4.0))
+
+            const falloff = smoothstep(0.8, 0.0, fresnel).toVar()
+
+            const holographic = stripes.mul(fresnel).toVar()
+            holographic.addAssign(fresnel.mul(1.25))
+            holographic.mulAssign(falloff)
+
+            return vec4(uColor, holographic)
+        })(uColorArg)
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Add incantation animation
+     * @param playerId - The id of the player
+     * @param playerColor - The color of the player
+     */
+    addPlayerIncantation(playerId, playerColor) {
+        if (this.animatedPlayerIncantations.length === 0) {
+            this.world.updateManager.add(this, "world", "animatePlayerIncantation")
+        }
+
+        const index = this.getPlayerById(playerId)
+        const totalTime = actionTicks.incantation * this.tickTime
+
+        this.playerInstance.getMatrixAt(index, this.positionningMatrix)
+        this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+
+        const incantationMesh = new THREE.Mesh(this.incantationGeometry, this.incantationMaterial.clone())
+        incantationMesh.position.copy(this.dummyObject.position)
+        incantationMesh.userData.uColor = color(playerColor)
+        incantationMesh.material.positionNode = this.incantationPositionShader()
+        incantationMesh.material.fragmentNode = this.incantationFragmentShader(incantationMesh.userData.uColor)
+        this.scene.add(incantationMesh)
+
+        this.animatedPlayerIncantations.push({
+            index,
+            duration: totalTime,
+            passedTime: 0,
+            mesh: incantationMesh
+        })
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Animates the player incantations
+     */
+    animatePlayerIncantation() {
+        if (this.animatedPlayerIncantations.length < 1) {
+            this.world.updateManager.remove(this, "world", "animatePlayerIncantation")
         }
 
         const deltaTime = this.world.updateManager.time.deltaInSecond
 
-        let player
-        for (let i = 0; i < this.animatedPlayersRotate.length; i++) {
-            player = this.animatedPlayersRotate[i]
+        let incantation
+        for (let i = 0; i < this.animatedPlayerIncantations.length; i++) {
+            incantation = this.animatedPlayerIncantations[i]
 
-            this.playerInstance.getMatrixAt(player.index, this.positionningMatrix)
-            this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
-
-            this.dummyQuaternion.slerpQuaternions(player.startRotation, player.endRotation, player.passedTime / player.duration)
-            this.dummyObject.quaternion.copy(this.dummyQuaternion)
-            this.dummyObject.updateMatrix()
-
-            this.playerInstance.setMatrixAt(player.index, this.dummyObject.matrix)
-            this.playerInstance.instanceMatrix.needsUpdate = true
-            this.playerInstance.computeBoundingSphere()
-
-            player.passedTime += deltaTime
+            incantation.passedTime += deltaTime
         }
 
-        this.animatedPlayersRotate = this.animatedPlayersRotate.filter((player) => {
-            const remove = player.passedTime > player.duration
+        this.animatedPlayerIncantations = this.animatedPlayerIncantations.filter((incantation) => {
+            const remove = incantation.passedTime > incantation.duration
             if (remove) {
-                this.playerInstance.getMatrixAt(player.index, this.positionningMatrix)
-                this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
-                this.dummyObject.quaternion.copy(player.endRotation)
-                this.dummyObject.updateMatrix()
-                this.playerInstance.setMatrixAt(player.index, this.dummyObject.matrix)
-                this.playerInstance.instanceMatrix.needsUpdate = true
-                this.playerInstance.computeBoundingSphere()
+                incantation.mesh.material.dispose()
+                this.scene.remove(incantation.mesh)
             }
 
             return !remove

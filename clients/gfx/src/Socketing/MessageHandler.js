@@ -317,6 +317,12 @@ class MessageHandler {
         // TODO : Animate incantation start of players #n
 
         this.gameState.setIncantation(integerArguments)
+
+        for (let i = 3; i < integerArguments.length; i++) {
+            const playerId = integerArguments[i]
+            const playerColor = this.gameState.playerInfo.get(playerId).color
+            this.world.players.addPlayerIncantation(playerId, playerColor)
+        }
     }
 
     /**
