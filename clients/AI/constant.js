@@ -122,6 +122,9 @@ export const BROAD_NEED_PLAYER = 'NEED'
 export const BROAD_COMING = 'OMW'
 export const BROAD_WITH_PLAYER = 'HERE'
 export const BROAD_INCANTATION = 'CAST'
+export const BROAD_PING = 'PING';
+export const BROAD_PONG = 'PONG';
+
 
 export const BROADCAST_MSG_OBJECT = {
     direction: null,

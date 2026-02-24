@@ -22,6 +22,9 @@ class GameManager {
         this.mapSize = {x: -1, y: -1}
         this.vision = []
         this.lastVisionRefresh = 0
+
+
+        this.needToFork = false
     }
 
     /**
@@ -122,6 +125,23 @@ class GameManager {
         }
     }
 
+    evaluatePopulationNeed() {
+        const teamSize = this.activeTeamMembers.size
+        console.log(`[POPULATION] Actual team size: ${teamSize}`)
+
+        if (teamSize < 10) {
+            console.log(`[POPULATION] < 10 population need to increase`)
+            this.needToFork = true
+        } else if (teamSize >= 20) {
+            console.log(`[POPULATION] >= 20 population need to stop increasing`)
+            this.needToFork = false
+        } else {
+            const randomChance = Math.random() > 0.5
+            console.log(`[POPULATION] Stabilising population between (10-19). Random result : ${randomChance ? 'Reproduction' : 'Nothing'}`)
+            this.needToFork = randomChance
+        }
+    }
+
     /**
      * @author Corentin (ccharton) Charton
      * @description Handle an unparsed broadcast message and decide action to take.
@@ -133,6 +153,16 @@ class GameManager {
         console.log('Broadcast', parsedBroadcast)
 
         if (!parsedBroadcast || parsedBroadcast.teamName !== this.teamName) {
+            return
+        }
+
+        if (parsedBroadcast.action === BROAD_PING) {
+            this.commandManager.sendCommand(this.buildBroadcastMessage(BROAD_PONG, parsedBroadcast.senderID))
+            return
+        }
+
+        if (parsedBroadcast.action === BROAD_PONG && parsedBroadcast.argument === this.main.config.broadcastID) {
+            this.activeTeamMembers.add(parsedBroadcast.senderID)
             return
         }
 
