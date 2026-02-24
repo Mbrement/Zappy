@@ -145,7 +145,7 @@ class World {
         this.updateManager.start()
 
         this.updateManager.add(this.renderer, 'renderers')
-        this.updateManager.add(this, 'world')
+        this.updateManager.add(this, 'world', "updateHover")
         this.resizeView()
     }
 
@@ -194,7 +194,7 @@ class World {
      * @author Emma (epolitze) Politzer
      * @description Updates the world
      */
-    update() {
+    updateHover() {
         if (this.previousHover.mesh) {
             this.previousHover.mesh.setColorAt(this.previousHover.index, this.previousColor)
             this.previousHover.mesh.instanceColor.needsUpdate = true;

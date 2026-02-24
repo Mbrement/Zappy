@@ -431,8 +431,6 @@ class MessageHandler {
             return
         }
 
-        // TODO : Animate egg #e being laid by player #n at position (x, y)
-
         this.gameState.addEgg(integerArguments)
 
         this.world.players.addEgg(integerArguments)
@@ -455,7 +453,6 @@ class MessageHandler {
             return
         }
 
-        // TODO : Animate egg #e hatching
 
         const oldState = Object.assign({}, this.gameState.eggInfo.get(id))
         this.gameState.removeEgg(id)

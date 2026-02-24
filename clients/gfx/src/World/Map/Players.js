@@ -516,7 +516,7 @@ class Players {
      */
     addPlayerBroadcast(playerId) {
         if (this.animatedPlayerBroadcasts.length === 0) {
-            this.world.updateManager.add(this, "world", "animatePlayerBroadcast")
+            this.world.updateManager.add(this, "shaders", "animatePlayerBroadcast")
         }
 
         const index = this.getPlayerById(playerId)
@@ -545,7 +545,7 @@ class Players {
      */
     animatePlayerBroadcast() {
         if (this.animatedPlayerBroadcasts.length < 1) {
-            this.world.updateManager.remove(this, "world", "animatePlayerBroadcast")
+            this.world.updateManager.remove(this, "shaders", "animatePlayerBroadcast")
         }
 
         const deltaTime = this.world.updateManager.time.deltaInSecond
@@ -630,7 +630,7 @@ class Players {
      */
     addPlayerIncantation(playerId, playerColor) {
         if (this.animatedPlayerIncantations.length === 0) {
-            this.world.updateManager.add(this, "world", "animatePlayerIncantation")
+            this.world.updateManager.add(this, "shaders", "animatePlayerIncantation")
         }
 
         const index = this.getPlayerById(playerId)
@@ -660,7 +660,7 @@ class Players {
      */
     animatePlayerIncantation() {
         if (this.animatedPlayerIncantations.length < 1) {
-            this.world.updateManager.remove(this, "world", "animatePlayerIncantation")
+            this.world.updateManager.remove(this, "shaders", "animatePlayerIncantation")
         }
 
         const deltaTime = this.world.updateManager.time.deltaInSecond
@@ -691,7 +691,7 @@ class Players {
      */
     addPlayerPickUp(playerId, resourceType) {
         if (this.animatedPlayerPickUp.length === 0) {
-            this.world.updateManager.add(this, "world", "animatePlayerPickUp")
+            this.world.updateManager.add(this, "shaders", "animatePlayerPickUp")
         }
 
         const index = this.getPlayerById(playerId)
@@ -727,7 +727,7 @@ class Players {
      */
     animatePlayerPickUp() {
         if (this.animatedPlayerPickUp.length < 1) {
-            this.world.updateManager.remove(this, "world", "animatePlayerPickUp")
+            this.world.updateManager.remove(this, "shaders", "animatePlayerPickUp")
         }
 
         const deltaTime = this.world.updateManager.time.deltaInSecond
@@ -762,7 +762,7 @@ class Players {
      */
     addPlayerDrop(playerId, resourceType) {
         if (this.animatedPlayerDrop.length === 0) {
-            this.world.updateManager.add(this, "world", "animatePlayerDrop")
+            this.world.updateManager.add(this, "shaders", "animatePlayerDrop")
         }
 
         const index = this.getPlayerById(playerId)
@@ -798,7 +798,7 @@ class Players {
      */
     animatePlayerDrop() {
         if (this.animatedPlayerDrop.length < 1) {
-            this.world.updateManager.remove(this, "world", "animatePlayerDrop")
+            this.world.updateManager.remove(this, "shaders", "animatePlayerDrop")
         }
 
         const deltaTime = this.world.updateManager.time.deltaInSecond
