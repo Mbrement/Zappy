@@ -424,7 +424,7 @@ impl CommandManager {
                     // }
                     // if !victory.is_empty() {
                     //     graphic::send_graphic_clients(victory, server);
-					// 	std::thread::sleep(std::time::Duration::from_secs(1)); // wait for the message to be sent to all clients before exiting the game
+                    // 	std::thread::sleep(std::time::Duration::from_secs(1)); // wait for the message to be sent to all clients before exiting the game
                     //     server::exit_game(server);
                     // }
                     /*
@@ -464,7 +464,7 @@ impl CommandManager {
                             .get_socket_mut()
                             .write(format!("niveau actuel : {}\n", level_to_send).as_bytes());
                     }
-					                    if sucess && org_player_level + 1 == 8 {
+                    if sucess && org_player_level + 1 == 8 {
                         for player in server._incantation_list.get(&_c).unwrap() {
                             if server.check_win_condition(player) {
                                 victory = graphic::end_game(server.get_team_for_player(player));
@@ -474,9 +474,9 @@ impl CommandManager {
                     }
                     if !victory.is_empty() {
                         graphic::send_graphic_clients(victory, server);
-						println!("Team {} wins!", server.get_team_for_player(&_c));
-						println!("{:?}",server._game.team[&server.get_team_for_player(&_c)]);
-						std::thread::sleep(std::time::Duration::from_secs(1)); // wait for the message to be sent to all clients before exiting the game
+                        println!("Team {} wins!", server.get_team_for_player(&_c));
+                        println!("{:?}", server._game.team[&server.get_team_for_player(&_c)]);
+                        std::thread::sleep(std::time::Duration::from_secs(1)); // wait for the message to be sent to all clients before exiting the game
                         server::exit_game(server);
                     }
                     //graphic::event_incant_end(server, sucess, _c);

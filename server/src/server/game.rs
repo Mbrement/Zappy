@@ -187,6 +187,14 @@ impl Game {
         true
     }
 
+    pub fn get_player_by_position(&self, position: (u32, u32)) -> Option<Token> {
+        self.map
+            .player_position
+            .iter()
+            .find(|(_, pos)| **pos == position)
+            .map(|(token, _)| *token)
+    }
+
     pub fn get_visible_cells(
         &self,
         position: (u32, u32),
@@ -203,14 +211,27 @@ impl Game {
         };
 
         let mut max_index = (level + 1).pow(2) as usize;
+		let mut max_index_initial = max_index;
         for (dx, dy) in directions {
             let cell_x = (position.0 as i32 + dx).rem_euclid(self.map.get_width() as i32) as u32;
             let cell_y = (position.1 as i32 + dy).rem_euclid(self.map.get_height() as i32) as u32;
             if let Some(cell) = self.map.get_tile_content(cell_x, cell_y) {
                 visible_cells.push(cell.iter().cloned().collect::<Vec<String>>().join(" "));
-				// for player in self.get_player_position(Token){
-					
-				// }
+                for i in self
+                    .map
+                    .player_position
+                    .iter()
+                    .find(|(_, pos)| **pos == position)
+                    .map(|(token, _)| *token)
+                {
+					if max_index == max_index_initial  {
+						visible_cells
+							.last_mut()
+							.unwrap()
+							.push_str(&format!(" player"));
+					}
+                }
+
                 max_index -= 1;
                 if max_index == 0 {
                     break;
