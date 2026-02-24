@@ -145,7 +145,8 @@ export const SOUND_MAPPING = {
  * STATE MACHINE *
  *****************/
 
-const STATE = Object.freeze({
+export const STATE = Object.freeze({
+    INIT: Symbol('INIT'),
     SURVIVAL: Symbol('SURVIVAL'),
     FARMING: Symbol('FARMING'),
     HOMING: Symbol('HOMING'),
