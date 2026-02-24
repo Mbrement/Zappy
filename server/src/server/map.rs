@@ -7,7 +7,7 @@ pub struct Map {
     pub(crate) rng: SmallRng,
     width: u32,
     height: u32,
-	pub(crate) egg_id_counter: u128,
+    pub(crate) egg_id_counter: u128,
     tiles: Vec<Vec<Tile>>,
     pub(crate) egg_position: HashMap<u128, (u32, u32, Token, u128)>,
     pub(crate) player_position: HashMap<Token, (u32, u32)>,
@@ -44,7 +44,7 @@ impl Map {
             tiles: vec![vec![Tile::new(); width as usize]; height as usize],
             player_position: HashMap::new(),
             egg_position: HashMap::new(),
-			egg_id_counter: 0,
+            egg_id_counter: 0,
         }
     }
     pub fn set_width(&mut self, width: u32) {
@@ -85,13 +85,41 @@ impl Map {
             // 201..=220 => tile.strings.push(T4_MAT.into()), //5
             // 221..=240 => tile.strings.push(T5_MAT.into()), //6
             // 298..=300 => tile.strings.push(T6_MAT.into()), //1 tot
-            0..=100 => if tile.string_tab[FOOD_INV] < 2 { tile.string_tab[FOOD_INV] += 1 },
-            100..=130 => if tile.string_tab[T1_MAT_INV] < 2 { tile.string_tab[T1_MAT_INV] += 1 },
-            131..=170 => if tile.string_tab[T2_MAT_INV] < 2 { tile.string_tab[T2_MAT_INV] += 1 }, //8 tot
-            171..=200 => if tile.string_tab[T3_MAT_INV] < 2 { tile.string_tab[T3_MAT_INV] += 1 }, //10 tot
-            201..=220 => if tile.string_tab[T4_MAT_INV] < 2 { tile.string_tab[T4_MAT_INV] += 1 }, //5
-            221..=240 => if tile.string_tab[T5_MAT_INV] < 2 { tile.string_tab[T5_MAT_INV] += 1 }, //6
-            298..=300 => if tile.string_tab[T6_MAT_INV] < 2 { tile.string_tab[T6_MAT_INV] += 1 }, //1 tot
+            0..=100 => {
+                if tile.string_tab[FOOD_INV] < 2 {
+                    tile.string_tab[FOOD_INV] += 1
+                }
+            }
+            100..=130 => {
+                if tile.string_tab[T1_MAT_INV] < 2 {
+                    tile.string_tab[T1_MAT_INV] += 1
+                }
+            }
+            131..=170 => {
+                if tile.string_tab[T2_MAT_INV] < 2 {
+                    tile.string_tab[T2_MAT_INV] += 1
+                }
+            } //8 tot
+            171..=200 => {
+                if tile.string_tab[T3_MAT_INV] < 2 {
+                    tile.string_tab[T3_MAT_INV] += 1
+                }
+            } //10 tot
+            201..=220 => {
+                if tile.string_tab[T4_MAT_INV] < 2 {
+                    tile.string_tab[T4_MAT_INV] += 1
+                }
+            } //5
+            221..=240 => {
+                if tile.string_tab[T5_MAT_INV] < 2 {
+                    tile.string_tab[T5_MAT_INV] += 1
+                }
+            } //6
+            298..=300 => {
+                if tile.string_tab[T6_MAT_INV] < 2 {
+                    tile.string_tab[T6_MAT_INV] += 1
+                }
+            } //1 tot
             _ => (),
         }
     }
@@ -188,7 +216,7 @@ impl Map {
                 if (tile_nb + row_nb) % 4 == ticks as u32 {
                     let rng: i32 = self.rng.random_range(0..=300);
                     Self::fill_case(tile, rng);
-                    res  += &graphic::content_tile(tile_nb, row_nb, tile);
+                    res += &graphic::content_tile(tile_nb, row_nb, tile);
                 }
                 tile_nb += 1;
             }

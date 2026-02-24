@@ -12,7 +12,7 @@ pub struct Client {
     pub(crate) position: (u32, u32),
     pub(crate) orientation: char,
     pub(crate) is_incanting: bool,
-	pub(crate) was_egg: u128,
+    pub(crate) was_egg: u128,
 }
 
 impl client::Client {
@@ -27,7 +27,7 @@ impl client::Client {
             position: (0, 0),
             orientation: ('N'),
             is_incanting: false,
-			was_egg: 1,
+            was_egg: 1,
         }
     }
 

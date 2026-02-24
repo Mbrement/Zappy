@@ -89,7 +89,7 @@ impl Server {
             eprintln!("Failed to bind to address");
             process::exit(1);
         }
-        // #[cfg(feature = "log")]
+        #[cfg(feature = "log")]
         println!("Server address changed to: {}", self._address);
         self._socket = tmp_socket.unwrap();
     }
@@ -102,7 +102,7 @@ impl Server {
             eprintln!("Failed to bind to address");
             process::exit(1);
         }
-        // #[cfg(feature = "log")]
+        #[cfg(feature = "log")]
         println!("Server port changed to: {}", self._port);
         self._socket = tmp_socket.unwrap();
     }
@@ -251,10 +251,11 @@ impl Server {
                     None
                 }
             }) {
-                println!("Decreasing max clients for team ");
                 if let Some(max) = self._max_clients.get_mut(&team_name)
                     && self._max_clients_per_team < *max
                 {
+                    #[cfg(feature = "log")]
+                    println!("Decreasing max clients for team {}", team_name);
                     *max -= 1;
                 }
             }
@@ -358,19 +359,21 @@ impl Server {
                                 println!("Received {} bytes from {:?} 1", n, token);
                                 if client.r#type == define::ROLE_PLAYER {
                                     let cmd = String::from_utf8_lossy(&buf[..n]).trim().to_string();
-                                    let mut parts = cmd.splitn(2, ' ');
-                                    let name = parts.next().unwrap_or("");
-                                    let arg = parts.next().unwrap_or("");
-                                    #[cfg(feature = "debug")]
-                                    println!("Received command '{}' from {:?}", cmd, token);
-                                    let token = client.get_token();
-                                    drop(client);
-                                    // let mut s = Server::new(5555);
-                                    _command_manager.add_to_queue(
-                                        name.to_string(),
-                                        token,
-                                        arg.to_string(),
-                                    );
+                                    for line in cmd.lines() {
+                                        let mut parts = line.splitn(2, ' ');
+                                        let name = parts.next().unwrap_or("");
+                                        let arg = parts.next().unwrap_or("");
+                                        #[cfg(feature = "debug")]
+                                        println!("Received command '{}' from {:?}", cmd, token);
+                                        let token = client.get_token();
+                                        // drop(client);
+                                        // let mut s = Server::new(5555);
+                                        _command_manager.add_to_queue(
+                                            name.to_string(),
+                                            token,
+                                            arg.to_string(),
+                                        );
+                                    }
                                 } else if client.r#type == define::ROLE_WELCOMED {
                                     let cmd = String::from_utf8_lossy(&buf[..n]).trim().to_string();
                                     if cmd == define::GRAPHICAL_CLIENT {
@@ -391,16 +394,19 @@ impl Server {
                                         }*/
                                         graphic_ok = true;
                                     } else if self._game.team.contains_key(&cmd) {
-                                        println!(
-                                            "Client {:?} wants to join team '{}' = cmd",
-                                            token, cmd
-                                        );
-                                        println!("Current teams: {:?}", self._game.team);
-                                        println!(
-                                            "Max clients for team '{}': {:?}",
-                                            cmd,
-                                            self._max_clients.get(&cmd)
-                                        );
+                                        #[cfg(feature = "log")]
+                                        {
+                                            println!(
+                                                "Client {:?} wants to join team '{}' = cmd",
+                                                token, cmd
+                                            );
+                                            println!("Current teams: {:?}", self._game.team);
+                                            println!(
+                                                "Max clients for team '{}': {:?}",
+                                                cmd,
+                                                self._max_clients.get(&cmd)
+                                            );
+                                        }
                                         if self._game.team[&cmd].len()
                                             < self._max_clients[&cmd] as usize
                                         {
@@ -431,14 +437,22 @@ impl Server {
                                                         cmd == self.get_team_for_player(&pos.2)
                                                     })
                                                     .map(|(k, v)| (*k, v.0, v.1, v.2, v.3));
-                                                let (egg_id, _, _, _, tick) = found .unwrap_or((0, 0,0,mio::Token(0), 0));
-                                                _command_manager.next_execute.insert(token, tick + 600); //get the tick of the hatching of the egg);
+                                                let (egg_id, _, _, _, tick) =
+                                                    found.unwrap_or((0, 0, 0, mio::Token(0), 0));
+                                                _command_manager
+                                                    .next_execute
+                                                    .insert(token, tick + 600); //get the tick of the hatching of the egg);
                                                 _command_manager.add_to_queue_internal(
                                                     "spawning".to_string(),
                                                     token,
                                                     egg_id.to_string(),
                                                 );
-                                                println!("{:?}, {:?}", _command_manager.next_execute[&token], self._game._tick);
+                                                #[cfg(feature = "log")]
+                                                println!(
+                                                    "{:?}, {:?}",
+                                                    _command_manager.next_execute[&token],
+                                                    self._game._tick
+                                                );
                                                 self._game.spawn_player(player_token, &cmd, found)
                                             };
 
@@ -478,7 +492,10 @@ impl Server {
                                                     self._clients.remove(&player_token);
                                                 }
                                                 if !self._game.starting {
-                                                    graphic::send_graphic_clients(graphic::egg_hatches(&player_token, self), self);
+                                                    graphic::send_graphic_clients(
+                                                        graphic::egg_hatches(&player_token, self),
+                                                        self,
+                                                    );
                                                 }
                                             }
                                             self._game.starting = true;
@@ -503,6 +520,7 @@ impl Server {
                                     } else if cmd
                                         == format!("{} {}", define::ADMIN_CLIENT, self.__pass__)
                                     {
+                                        #[cfg(feature = "log")]
                                         println!("Received command '{}' from {:?} 2", cmd, token);
                                         client.r#type = define::ADMIN_CLIENT.to_string();
                                         let response =
@@ -550,8 +568,7 @@ impl Server {
                                     let arg = parts.next().unwrap_or("");
                                     #[cfg(feature = "log")]
                                     println!("Received command '{}' from {:?} 3", cmd, token);
-                                    _command_manager
-                                        .execute(name, token, arg, self);
+                                    _command_manager.execute(name, token, arg, self);
                                 }
                             }
                             Err(_) => {
@@ -596,7 +613,11 @@ impl Server {
                 for client in self.get_clients_by_type_mut(define::ROLE_PLAYER) {
                     client.hunger_tick();
                     #[cfg(feature = "debug")]
-                    println!("Client {:?} hunger: {}", client.get_token(), client.inventory[0]);
+                    println!(
+                        "Client {:?} hunger: {}",
+                        client.get_token(),
+                        client.inventory[0]
+                    );
                     if client.inventory[0] == 0 {
                         let _ = client.get_socket_mut().write(b"mort\n");
                         to_disconnect.push(client.get_token());
@@ -627,7 +648,8 @@ impl Server {
             if let Some(player) = self._clients.get_mut(&token) {
                 let player_level = player.level;
                 for i in 1..7 {
-                    player.inventory[i] -= define::INCANTATION_REQ[player_level as usize - 1][i] as u128;
+                    player.inventory[i] -=
+                        define::INCANTATION_REQ[player_level as usize - 1][i] as u128;
                 }
             } else {
                 eprintln!("Player with token {:?} not found", token);

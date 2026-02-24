@@ -48,7 +48,12 @@ pub(crate) fn new_player(team: String, player: &Client) -> String {
     let (x, y) = player.position;
     format!(
         "pnw {:?} {} {} {} {} {}\n",
-        player.token.0, x, y, define::CARDINAL_DICT[&player.orientation], player.level, team
+        player.token.0,
+        x,
+        y,
+        define::CARDINAL_DICT[&player.orientation],
+        player.level,
+        team
     )
 }
 
@@ -56,7 +61,10 @@ pub(crate) fn player_pos(player: &Client) -> String {
     let (x, y) = player.position;
     format!(
         "ppo {:?} {} {} {}\n",
-        player.token.0, x, y, define::CARDINAL_DICT[&player.orientation]
+        player.token.0,
+        x,
+        y,
+        define::CARDINAL_DICT[&player.orientation]
     )
 }
 
@@ -96,10 +104,15 @@ pub(crate) fn player_broadcast(token: &Token, message: &str) -> String {
     format!("pbc {:?} {}", token.0, message)
 }
 
-pub(crate) fn start_incant(tokens:Vec<Token>, origin: Token, server: &Server) -> String {
+pub(crate) fn start_incant(tokens: Vec<Token>, origin: Token, server: &Server) -> String {
     let mut res = String::new();
     let (x, y) = server._game.get_player_position(origin);
-    res += &format!("pic {} {} {}", x, y, server._clients.get(&origin).unwrap().level);
+    res += &format!(
+        "pic {} {} {}",
+        x,
+        y,
+        server._clients.get(&origin).unwrap().level
+    );
     for token in tokens {
         res += &format!(" {:?}", token.0);
     }
@@ -142,8 +155,8 @@ pub(crate) fn egg_hatches(token: &Token, server: &Server) -> String {
     if player.was_egg > 0 {
         res += &format!("eht {}\n", player.was_egg);
     }
-    res += &new_player(server.get_team_for_player(&player.token),player);
-    println!("{}\n",res);
+    res += &new_player(server.get_team_for_player(&player.token), player);
+    println!("{}\n", res);
     res
 }
 

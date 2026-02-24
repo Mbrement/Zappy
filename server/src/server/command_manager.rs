@@ -221,6 +221,7 @@ impl CommandManager {
                 server
                     ._game
                     .get_visible_cells(client.position, client.orientation, client.level);
+            #[cfg(feature = "log")]
             println!("{:?}", visible_cells);
             let response = format!("{{{}}}\n", visible_cells.join(", "));
             let carrote = client.get_socket_mut().write(response.as_bytes());
@@ -429,10 +430,10 @@ impl CommandManager {
                         let client = client.unwrap();
                         client.is_incanting = false;
                         if sucess {
-								if client.level < org_player_level  {
-								client.level = org_player_level + 1;
-							}
-							let level_to_send = client.level;
+                            if client.level < org_player_level {
+                                client.level = org_player_level + 1;
+                            }
+                            let level_to_send = client.level;
                             let _ = client
                                 .get_socket_mut()
                                 .write(format!("niveau actuel : {}\n", level_to_send).as_bytes());
@@ -477,12 +478,11 @@ impl CommandManager {
             }
             let client = client.unwrap();
             let (x, y) = client.position;
-            server
-                ._game
-                .map
-                .egg_position
-                .insert( server._game.map.egg_id_counter, (x, y, client.get_token(),server._game._tick));
-			server._game.map.egg_id_counter += 1;
+            server._game.map.egg_position.insert(
+                server._game.map.egg_id_counter,
+                (x, y, client.get_token(), server._game._tick),
+            );
+            server._game.map.egg_id_counter += 1;
             client
                 .get_socket_mut()
                 .write(format!("{}", define::R_OK).as_bytes());
@@ -496,13 +496,11 @@ impl CommandManager {
                 #[cfg(feature = "log")]
                 utils::debug_manager_register("spawning", _c, server, _arg);
                 //player hatch
-                println!("pouet1502\n");
                 let mut client = server._clients.get_mut(&_c).unwrap();
                 //client.hunger = 1260; //this line scare me
                 client.inventory[0] = 1260;
-				client.was_egg = _arg.parse().unwrap_or(0);
+                client.was_egg = _arg.parse().unwrap_or(0);
                 server.send_to_graph += &graphic::egg_hatches(&_c, server);
-
             },
         );
         self.register(
@@ -510,7 +508,6 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("egg_waiting", _c, server, _arg);
-                // println!("\n\nhere in egg_waiting\n\n");
                 for (egg_id, (x, y, token, tick)) in &server._game.map.egg_position {
                     if tick < &server._game._tick {
                         let team_name = server.get_team_for_player(&token);
@@ -544,13 +541,10 @@ impl CommandManager {
                         break;
                     }
                 }
-                println!("{:?}", server._game.map.egg_position);
                 for t in ticks_to_remove {
                     server.send_to_graph += &graphic::rotten_egg(t);
                     server._game.map.egg_position.remove(&t);
-                    // self.egg_waiting.remove(&t);
                 }
-                println!("{:?}", server._game.map.egg_position);
             },
         );
     }
@@ -703,7 +697,8 @@ impl CommandManager {
                                         .write(format!("{}\n", "elevation en cours").as_bytes());
                                     client.is_incanting = true;
                                 }
-                                server.send_to_graph += &graphic::start_incant(player_incanting, token, server);
+                                server.send_to_graph +=
+                                    &graphic::start_incant(player_incanting, token, server);
                             }
                             // self.add_to_queue_internal(
                             //     "incantation_internal".to_string(),
@@ -862,7 +857,7 @@ fn get_message_transmission_direction(
     let dy;
     let larger_delta;
 
-    println!("src {} {} dest {} {}", sourcex, sourcey, destx, desty);
+    // println!("src {} {} dest {} {}", sourcex, sourcey, destx, desty);
     dx = distance_along_wrapped_dimension(sourcex, destx, map_width);
     dy = distance_along_wrapped_dimension(sourcey, desty, map_height);
     larger_delta = point_to_greater_abs_value(dx, dy);
