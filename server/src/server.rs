@@ -654,22 +654,29 @@ impl Server {
 
     pub fn incantation_success(&mut self, token: Token) -> bool {
         let mut level_checker = 0;
-        let player = match self._clients.get(&token) {
-            Some(p) => p,
+        let player_level = match self._clients.get(&token) {
+            Some(p) => p.level,
             None => return false,
         };
-        let player_level = player.level;
-        if !self._game.check_inventory(&token, self) {
+        if self._game.check_inventory(&token, self) {
             if let Some(player) = self._clients.get_mut(&token) {
-                for i in 1..7 {
+                for i in 1..6 {
+                    println!(
+                        "{} {} - {}",
+                        i,
+                        define::INCANTATION_REQ[player_level as usize - 1][i] as u128,
+                        player.inventory[i]
+                    );
                     player.inventory[i] -=
                         define::INCANTATION_REQ[player_level as usize - 1][i] as u128;
                 }
             } else {
                 eprintln!("Player with token {:?} not found", token);
             }
+        } else {
             return false;
         }
+
         if (self._incantation_list.contains_key(&token)
             && (self._incantation_list[&token].len() as u128 + 1)
                 < define::INCANTATION_REQ[player_level as usize - 1][0])
@@ -679,16 +686,15 @@ impl Server {
         for token in self._incantation_list[&token].clone() {
             if level_checker < define::INCANTATION_REQ[player_level as usize - 1][0] {
                 let target = match self._clients.get(&token) {
-                	Some(p) => p,
-                	None => break,
+                    Some(p) => p,
+                    None => break,
                 };
-				if target.level == player.level{
-					level_checker += 1;
-				}
+                if target.level == target.level {
+                    level_checker += 1;
+                }
+            } else {
+                return true;
             }
-			else{
-				return true
-			}
         }
 
         false
