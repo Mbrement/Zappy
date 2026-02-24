@@ -116,11 +116,13 @@ export const COMMAND_COST = {
 export const WELCOME = 'BIENVENUE'
 export const VISION_REGEX =  /^\{([\w\s]*,?)*}$/
 export const INVENTORY_REGEX = /^\{(\s*\w+\s+\d+,?)*\s*}$/
+export const EXPULSION_REGEX = /^deplacement [1-8]$/
 export const OK = 'ok'
 export const KO = 'ko'
 export const START_INCANTION = 'elevation en cours'
 export const INCANTATION_DONE = /^niveau actuel : \d$/
 export const DEATH = 'mort'
+
 
 /*****************
  * BROADCAST MSG *

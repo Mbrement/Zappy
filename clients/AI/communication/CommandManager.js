@@ -1,9 +1,9 @@
 import process from 'node:process'
 import {
     BROADCAST_RECEIVED_REGEX,
-    DEATH,
+    DEATH, EXPULSION_REGEX, INCANTATION_DONE,
     MAX_SERVER_MSG,
-    NO_PROMISE_TO_RESOLVE,
+    NO_PROMISE_TO_RESOLVE, START_INCANTION,
     WELCOME
 } from "../constant.js";
 import GameManager from "../GameManager.js";
@@ -92,6 +92,22 @@ class CommandManager {
             }
 
             return;
+        }
+
+        if (this.#inProcessQueue.length <= 0 && message === START_INCANTION) {
+                console.log("[SERVER] Elevation has been started by an other player.");
+                return
+        }
+
+        if (this.#inProcessQueue.length <= 0 && INCANTATION_DONE.test(message)) {
+            const newLevel = parseInt(message.split(':')[1].trim());
+            console.log(`[SERVER] Elevation from an other player has been done: ${newLevel}`);
+
+            GameManager.updateLevel(newLevel);
+            GameManager.followedBroadcast = null
+            GameManager.lastVisionRefresh = 0;
+            GameManager.main.brain.think();
+            return
         }
 
         if (this.#inProcessQueue.length <= 0) {
