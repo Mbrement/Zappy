@@ -1,5 +1,7 @@
 export const DEFAULT_HOSTNAME = 'localhost';
 export const MAX_SERVER_MSG = 10
+export const VISION_REFRESH_RATE = 500
+export const INVENTORY_REFRESH_RATE = 5000
 
 /*****************
  *     ERROR     *
