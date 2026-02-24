@@ -76,6 +76,9 @@ class CommandManager {
 
         if (message === DEATH) {
             // TODO: Define exit routine
+            console.log('[COMMAND MANAGER] Server send death threat, Exiting...')
+            process.exit(0)
+        }
             return;
         }
 
