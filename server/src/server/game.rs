@@ -208,6 +208,9 @@ impl Game {
             let cell_y = (position.1 as i32 + dy).rem_euclid(self.map.get_height() as i32) as u32;
             if let Some(cell) = self.map.get_tile_content(cell_x, cell_y) {
                 visible_cells.push(cell.iter().cloned().collect::<Vec<String>>().join(" "));
+				// for player in self.get_player_position(Token){
+					
+				// }
                 max_index -= 1;
                 if max_index == 0 {
                     break;

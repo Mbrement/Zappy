@@ -22,7 +22,7 @@ impl client::Client {
             token,
             r#type: String::from("unknown"),
             inventory: [1260, 0, 0, 0, 0, 0, 0],
-            level: 1,
+            level: 7,
             //hunger: 1260,
             position: (0, 0),
             orientation: ('N'),
