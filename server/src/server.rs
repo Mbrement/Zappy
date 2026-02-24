@@ -694,7 +694,7 @@ impl Server {
             if target.level == self._clients[&token].level {
                 level_checker += 1;
             }
-            if level_checker == define::INCANTATION_REQ[player_level as usize - 1][0] {
+            if level_checker >= define::INCANTATION_REQ[player_level as usize - 1][0] {
                 return true;
             }
         }
