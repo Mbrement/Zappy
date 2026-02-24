@@ -73,6 +73,9 @@ class Main extends EventEmitter {
     connectError() {
         this.networkClient.closeSocket()
         this.networkClient = null
+        if (this.eventManager.modules.TileInfoManager.isTilesPlayerInfoOpen()) {
+            this.eventManager.modules.TileInfoManager.showHideTilesPlayerInfo()
+        }
         this.switchToConnectionMenu()
         this.eventManager.modules.ConnectMenu.addError("Failed to connect")
     }
@@ -83,6 +86,9 @@ class Main extends EventEmitter {
      */
     connectionClosed() {
         this.networkClient = null
+        if (this.eventManager.modules.TileInfoManager.isTilesPlayerInfoOpen()) {
+            this.eventManager.modules.TileInfoManager.showHideTilesPlayerInfo()
+        }
         this.switchToConnectionMenu()
         this.eventManager.modules.ConnectMenu.addError("Connection closed")
     }
