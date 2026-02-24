@@ -1,5 +1,14 @@
 import Main from "./Main.js";
-import {BROAD_WITH_PLAYER, BROADCAST, COMMAND_COST, ONLY_NUMBER_REGEX, SOUND_MAPPING} from "./constant.js";
+import {
+    BROAD_CANCEL,
+    BROAD_NEED_PLAYER,
+    BROAD_PING,
+    BROAD_PONG,
+    BROAD_WITH_PLAYER,
+    BROADCAST,
+    COMMAND_COST,
+    ONLY_NUMBER_REGEX,
+} from "./constant.js"
 
 class GameManager {
     constructor() {
@@ -23,7 +32,9 @@ class GameManager {
         this.vision = []
         this.lastVisionRefresh = 0
 
+        this.followedBroadcast = null
 
+        this.activeTeamMembers = new Set()
         this.needToFork = false
     }
 
@@ -174,6 +185,13 @@ class GameManager {
         for (const message of SOUND_MAPPING[parsedBroadcast.direction]) {
             console.log(message)
             this.commandManager.sendCommand(message)
+        if (parsedBroadcast.action === BROAD_NEED_PLAYER && parsedBroadcast.direction === 0) {
+            this.commandManager.sendCommand(this.buildBroadcastMessage(BROAD_WITH_PLAYER, parsedBroadcast.senderID))
+            return
+        }
+
+        if (parsedBroadcast.action === BROAD_NEED_PLAYER && Number(parsedBroadcast.argument) - 1 === this.level) {
+            this.followedBroadcast = parsedBroadcast
         }
     }
 
