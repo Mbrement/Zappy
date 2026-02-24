@@ -33,9 +33,11 @@ class GameManager {
         this.lastVisionRefresh = 0
 
         this.followedBroadcast = null
+        this.elevationReadyPlayers = new Set()
 
         this.activeTeamMembers = new Set()
         this.needToFork = false
+        this.elevationCooldown = 0
     }
 
     /**
@@ -178,15 +180,25 @@ class GameManager {
         }
 
         if (parsedBroadcast.action === 'NEED' && parsedBroadcast.direction === 0) {
-            this.commandManager.sendCommand(this.buildBroadcastMessage(BROAD_WITH_PLAYER))
+            this.commandManager.sendCommand(this.buildBroadcastMessage(BROAD_WITH_PLAYER, parsedBroadcast.senderID))
             return
         }
 
-        for (const message of SOUND_MAPPING[parsedBroadcast.direction]) {
-            console.log(message)
-            this.commandManager.sendCommand(message)
+        if (parsedBroadcast.action === BROAD_CANCEL) {
+            if (this.followedBroadcast && this.followedBroadcast.senderID === parsedBroadcast.senderID) {
+                console.log(`[GAMEMANAGER] Leader ${parsedBroadcast.senderID} has cancel elevation...`)
+                this.followedBroadcast = null
+            }
+            return
+        }
+
         if (parsedBroadcast.action === BROAD_NEED_PLAYER && parsedBroadcast.direction === 0) {
             this.commandManager.sendCommand(this.buildBroadcastMessage(BROAD_WITH_PLAYER, parsedBroadcast.senderID))
+            return
+        }
+
+        if (parsedBroadcast.action === BROAD_WITH_PLAYER && parsedBroadcast.argument === this.main.config.broadcastID) {
+            this.elevationReadyPlayers.add(parsedBroadcast.senderID)
             return
         }
 
