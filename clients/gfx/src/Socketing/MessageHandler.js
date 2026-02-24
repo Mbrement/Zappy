@@ -485,11 +485,7 @@ class MessageHandler {
             return
         }
 
-        // TODO : Animate end of game and display winning team #n
-
-        this.broadcastManager.clearBroadcast()
-
-        this.networkClient.closeSocket()
+        this.world.displayResults(command[1])
     }
 
 }

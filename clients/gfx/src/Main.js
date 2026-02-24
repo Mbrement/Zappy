@@ -1,3 +1,5 @@
+const EventEmitter = require('node:events')
+const { FontLoader } = require('three/addons/loaders/FontLoader.js')
 const NetworkClient = require('./Socketing/NetworkClient');
 const MessageHandler = require("./Socketing/MessageHandler");
 const EventManager = require('./Interfaces/js/EventManager')
@@ -9,8 +11,10 @@ const GameState = require("./World/GameState");
 const {textures} = require("./World/sources");
 const Resources = require("./World/Utils/Resources");
 
-class Main {
+class Main extends EventEmitter {
     constructor() {
+        super()
+
         if (window.mainInstance) {
             return window.mainInstance
         }
@@ -23,6 +27,7 @@ class Main {
         this.playerInfoManager = new PlayerInfoManager()
         this.messageHandler = new MessageHandler();
         this.resources = new Resources(textures);
+        this.fontLoader = new FontLoader()
 
         // TODO : Remove this
         // for (let i = 0; i < 50; i++) {
@@ -32,11 +37,29 @@ class Main {
         // }
 
         this.world = new World()
-        this.musicManager.once('loaded', () => {
-            this.resources.once('loaded', () => {
-                this.switchToConnectionMenu(true)
+        this.loadFont()
+        this.once('loadedFonts', () => {
+            this.musicManager.once('loaded', () => {
+                this.resources.once('loaded', () => {
+                    this.switchToConnectionMenu(true)
+                })
             })
         })
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * Edited by: Corentin (ccharton) Charton
+     * @description Loads the Poppins SemiBold font
+     */
+    loadFont() {
+        this.fontLoader.load(
+            "static://fonts/PoppinsSemiBold.json",
+            (font) => {
+                window.font = font
+                this.emit('loadedFonts')
+            }
+        )
     }
 
     /**

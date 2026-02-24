@@ -192,7 +192,15 @@ class GameMap {
     }
 
     /**
-     * Emma (epolitze) Politzer
+     * @author Emma (epolitze) Politzer
+     * @description resets resource instances
+     */
+    removeResources() {
+        this.resourceAssets.reset()
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
      * @description resets map tile instances
      */
     reset() {
@@ -201,7 +209,7 @@ class GameMap {
         this.scene.remove(this.evenInstance)
         this.evenInstance = null
 
-        this.resourceAssets.reset()
+        this.removeResources()
     }
 }
 

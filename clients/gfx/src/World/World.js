@@ -7,6 +7,7 @@ const UpdateManager = require("./UpdateManager");
 const ThemeManager = require("./ThemeManager");
 const GameMap = require("./Map/GameMap");
 const Players = require("./Map/Players")
+const { createTextGeometry } = require("./threeUtils");
 
 class World {
     constructor() {
@@ -32,6 +33,9 @@ class World {
         }
         this.focusedMeshIndex = null
         this.selectedTile = null
+        this.gameEnded = false
+        this.teamMaterial = new THREE.MeshBasicMaterial()
+        this.backToMenuMaterial = new THREE.MeshBasicMaterial()
 
         this.time = new Time()
         this.updateManager = new UpdateManager()
@@ -99,7 +103,7 @@ class World {
         const instanceMesh = intersection.object
         const index = intersection.instanceId;
 
-        if (instanceMesh === this.gameMap.evenInstance || instanceMesh === this.gameMap.oddInstance) {
+        if (!this.gameEnded && (instanceMesh === this.gameMap.evenInstance || instanceMesh === this.gameMap.oddInstance)) {
             this.focusedMeshIndex = null
             this.updateManager.remove(this, "world", "focusPlayer")
 
@@ -112,8 +116,9 @@ class World {
             }
 
             this.main.eventManager.modules.TileInfoManager.switchToTileInfoView(tileInfo.resources, tileInfo.players)
+            return
         }
-        else {
+        else if (!this.gameEnded) {
             this.selectedTile = null
 
             this.focusedMeshIndex = index
@@ -125,7 +130,18 @@ class World {
             const playerCopy = Object.assign({}, player)
             playerCopy.id = playerCopy.id.toString()
             this.main.playerInfoManager.switchToPlayerInfoView(playerCopy, playerCopy.inventory)
+            return
         }
+
+        this.updateManager.remove(this, "world", "updateEndGameHover")
+        this.main.broadcastManager.clearBroadcast()
+        this.main.networkClient.closeSocket()
+
+        this.scene.remove(this.backToMenuMesh, this.winMesh, this.teamNameMesh)
+        this.teamNameMesh.geometry.dispose()
+
+        this.reset()
+        this.gameEnded = false
     }
 
     /**
@@ -137,10 +153,30 @@ class World {
         window.addEventListener('mousemove', this.onMouseMove.bind(this))
         window.addEventListener('mousedown', this.onMouseDown.bind(this))
 
+        this.previousHover = {
+            index: null,
+            mesh: null,
+            color: null,
+        }
+
         this.camera = new Camera(this.scene)
         await this.renderer.init()
 
         this.controls = new OrbitControls(this.camera.instance, this.canvas)
+
+        this.winMesh = new THREE.Mesh(
+            createTextGeometry(0.1, "Winner is", 0.5),
+            this.teamMaterial
+        )
+        this.winMesh.position.set(0, 1.2, 0)
+
+        const backToMenuGeometry = createTextGeometry(0.05, "back to menu", 0.4)
+        backToMenuGeometry.rotateX(-Math.PI * 0.5)
+        this.backToMenuMesh = new THREE.Mesh(
+            backToMenuGeometry,
+            this.backToMenuMaterial
+        )
+        this.backToMenuMesh.position.set(0, -0.1, 1)
 
         this.updateManager.start()
 
@@ -161,7 +197,13 @@ class World {
 
         this.raycaster.setFromCamera( this.mouse, this.camera.instance );
 
-        const intersection = this.raycaster.intersectObjects( [this.gameMap.evenInstance, this.gameMap.oddInstance, this.players.playerInstance], false);
+        let intersection
+        if (!this.gameEnded) {
+            intersection = this.raycaster.intersectObjects( [this.gameMap.evenInstance, this.gameMap.oddInstance, this.players.playerInstance], false);
+        }
+        else {
+            intersection = this.raycaster.intersectObject( this.backToMenuMesh, false);
+        }
 
         if ( intersection.length > 0 ) {
             return intersection[0]
@@ -192,7 +234,7 @@ class World {
 
     /**
      * @author Emma (epolitze) Politzer
-     * @description Updates the world
+     * @description Updates the hovering of elements
      */
     updateHover() {
         if (this.previousHover.mesh) {
@@ -225,7 +267,60 @@ class World {
         this.previousHover.mesh = instanceMesh
         this.previousHover.index = index
         this.previousHover.color = this.previousColor
+    }
 
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Updates the hovering of elements when the game has ended
+     */
+    updateEndGameHover() {
+        if (this.previousHover.mesh) {
+            this.previousHover.mesh.material.color.set(this.previousColor)
+        }
+
+        const intersection = this.castRay()
+        if (!intersection) {
+            return
+        }
+
+        const mesh = intersection.object
+
+        this.hoverColor.set(mesh.material.color)
+        this.previousColor.copy(this.hoverColor)
+
+        this.hoverColor.r -= 0.5
+        this.hoverColor.g -= 0.5
+        this.hoverColor.b -= 0.5
+
+        mesh.material.color.set(this.hoverColor)
+
+        this.previousHover.mesh = mesh
+        this.previousHover.index = null
+        this.previousHover.color = this.previousColor
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Display the winning team
+     * @param winningTeam - The name of the winning team
+     */
+    displayResults(winningTeam) {
+        this.updateManager.remove(this, 'world','updateHover')
+        this.gameEnded = true
+        this.players.reset()
+        this.gameMap.removeResources()
+
+        this.teamNameMesh = new THREE.Mesh(
+            createTextGeometry(0.1, winningTeam, 1),
+            this.teamMaterial
+        )
+        this.teamNameMesh.position.set(0, 0.3, 0)
+
+        this.teamMaterial.color.set(this.gameState.teams.get(winningTeam))
+        this.backToMenuMaterial.color.set(this.gameState.teams.get(winningTeam))
+        this.scene.add(this.backToMenuMesh, this.winMesh, this.teamNameMesh)
+
+        this.updateManager.add(this, "world", "updateEndGameHover")
     }
 
     /**
@@ -243,7 +338,10 @@ class World {
 
         this.updateManager.remove(this, "world", "focusPlayer")
         this.updateManager.remove(this.renderer, 'renderers')
-        this.updateManager.remove(this, 'world')
+        this.updateManager.remove(this, 'world','updateHover')
+
+        this.backToMenuMesh.geometry.dispose()
+        this.winMesh.geometry.dispose()
 
         this.camera?.cleanup()
         this.camera = null
