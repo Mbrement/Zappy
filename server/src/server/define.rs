@@ -27,7 +27,7 @@ pub static CARDINAL_DICT: phf::Map<char, u8> = phf_map! {
 };
 
 pub const INCANTATION_REQ: [[u128; 7]; 7] = [
-    [1, 0, 0, 0, 0, 0, 0],
+    [1, 1, 0, 0, 0, 0, 0],
     [2, 1, 1, 1, 0, 0, 0],
     [2, 2, 0, 1, 0, 2, 0],
     [4, 1, 1, 2, 0, 1, 0],

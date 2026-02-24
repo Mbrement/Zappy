@@ -653,9 +653,14 @@ impl Server {
     }
 
     pub fn incantation_success(&mut self, token: Token) -> bool {
+        let mut level_checker = 0;
+        let player = match self._clients.get(&token) {
+            Some(p) => p,
+            None => return false,
+        };
+        let player_level = player.level;
         if !self._game.check_inventory(&token, self) {
             if let Some(player) = self._clients.get_mut(&token) {
-                let player_level = player.level;
                 for i in 1..7 {
                     player.inventory[i] -=
                         define::INCANTATION_REQ[player_level as usize - 1][i] as u128;
@@ -665,18 +670,28 @@ impl Server {
             }
             return false;
         }
-        let player = match self._clients.get(&token) {
-            Some(p) => p,
-            None => return false,
-        };
-        let player_level = player.level;
         if (self._incantation_list.contains_key(&token)
             && (self._incantation_list[&token].len() as u128 + 1)
                 < define::INCANTATION_REQ[player_level as usize - 1][0])
         {
             return false;
         }
-        true
+        for token in self._incantation_list[&token].clone() {
+            if level_checker < define::INCANTATION_REQ[player_level as usize - 1][0] {
+                let target = match self._clients.get(&token) {
+                	Some(p) => p,
+                	None => break,
+                };
+				if target.level == player.level{
+					level_checker += 1;
+				}
+            }
+			else{
+				return true
+			}
+        }
+
+        false
     }
 
     pub fn check_win_condition(&self, token: &Token) -> bool {
