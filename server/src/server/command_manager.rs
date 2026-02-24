@@ -351,6 +351,12 @@ impl CommandManager {
                 //}
                 // server._clients va envoyer a tous les clients dont ADMIN et graphic
                 // utilise plutot ca : get_clients_by_type_mut(define::ROLE_PLAYER)
+                server
+                    ._clients
+                    .get_mut(&_c)
+                    .unwrap()
+                    .get_socket_mut()
+                    .write(format!("{}", define::R_OK).as_bytes());
                 for (token, client) in &mut server._clients {
                     if token != &_c {
                         let tmp = server._game.map.player_position.get(token);
