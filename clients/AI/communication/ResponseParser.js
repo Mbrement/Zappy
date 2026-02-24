@@ -19,7 +19,8 @@ class ResponseParser {
      * @returns {Object|null} - The parsed inventory object or null if string passed was not valid
      */
     parseInventory(inventory) {
-        if (!inventory.match(INVENTORY_REGEX)) {
+        if (!INVENTORY_REGEX.test(inventory)) {
+            console.log('[RESPONSE PARSER] Inventory is invalid', inventory)
             return null
         }
 
@@ -50,6 +51,7 @@ class ResponseParser {
      */
     parseVision(vision) {
         if (!VISION_REGEX.test(vision)) {
+            console.log('[RESPONSE PARSER] Vision is invalid', vision)
             return null
         }
 
@@ -73,6 +75,7 @@ class ResponseParser {
      */
     parseBroadcastMessage(broadcast) {
         if (!BROADCAST_RECEIVED_REGEX.test(broadcast)) {
+            console.log('[RESPONSE PARSER] Broadcast is invalid', broadcast)
             return null
         }
 
@@ -86,7 +89,7 @@ class ResponseParser {
         parsedBroadcast.teamName = message[0]
         parsedBroadcast.senderID = message[1]
         parsedBroadcast.action = message[2]
-        parsedBroadcast.argument = Number(message[3]) || null
+        parsedBroadcast.argument = message[3] || null
 
         return parsedBroadcast
     }
