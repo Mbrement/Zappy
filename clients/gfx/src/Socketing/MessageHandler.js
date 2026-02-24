@@ -314,8 +314,6 @@ class MessageHandler {
             return
         }
 
-        // TODO : Animate incantation start of players #n
-
         this.gameState.setIncantation(integerArguments)
 
         for (let i = 3; i < integerArguments.length; i++) {
@@ -358,6 +356,7 @@ class MessageHandler {
             return
         }
 
+        console.log(`Player ${parseInt(command[1])} has laid an egg`)
         // TODO : Animate player #n laying an egg
     }
 
@@ -372,7 +371,7 @@ class MessageHandler {
             return
         }
 
-        // TODO : Animate player #n dropping resource i
+        this.world.players.addPlayerDrop(parseInt(command[1]), parseInt(command[2]))
     }
 
     /**
@@ -386,7 +385,7 @@ class MessageHandler {
             return
         }
 
-        // TODO : Animate player #n taking resource i
+        this.world.players.addPlayerPickUp(parseInt(command[1]), parseInt(command[2]))
     }
 
     /**

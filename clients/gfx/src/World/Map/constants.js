@@ -1,3 +1,4 @@
+const THREE = require('three/webgpu')
 
 const resourceTypes = {
     0: 'food',
@@ -23,5 +24,13 @@ const actionTicks = {
     fork: "42",
 }
 
+const directions = {
+    1: new THREE.Vector3(0, 0, -0.25),
+    3: new THREE.Vector3(0, 0, 0.25),
+    2: new THREE.Vector3(0.25, 0, 0),
+    4: new THREE.Vector3(-0.25, 0, 0),
+}
+
 module.exports.resourceTypes = resourceTypes
 module.exports.actionTicks = actionTicks
+module.exports.directions = directions

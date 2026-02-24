@@ -1,6 +1,6 @@
 const THREE = require('three/webgpu')
 const { mergeGeometries } = require("three/addons/utils/BufferGeometryUtils.js");
-const {actionTicks} = require("./constants")
+const {resourceTypes, actionTicks, directions} = require("./constants")
 const {
     uniform,
     Fn,
@@ -37,6 +37,8 @@ class Players {
         this.animatedPlayersRotate = []
         this.animatedPlayerBroadcasts = []
         this.animatedPlayerIncantations = []
+        this.animatedPlayerPickUp = []
+        this.animatedPlayerDrop = []
 
         this.maxPlayers = 50
         this.maxEggs = 50
@@ -675,6 +677,146 @@ class Players {
             if (remove) {
                 incantation.mesh.material.dispose()
                 this.scene.remove(incantation.mesh)
+            }
+
+            return !remove
+        })
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Add picking up object animation
+     * @param playerId - The id of the player
+     * @param resourceType - The type of resource
+     */
+    addPlayerPickUp(playerId, resourceType) {
+        if (this.animatedPlayerPickUp.length === 0) {
+            this.world.updateManager.add(this, "world", "animatePlayerPickUp")
+        }
+
+        const index = this.getPlayerById(playerId)
+        const orientation = window.mainInstance.gameState.playerInfo.get(playerId).orientation
+        console.log(orientation)
+        const totalTime = actionTicks.prend * this.tickTime
+
+        this.playerInstance.getMatrixAt(index, this.positionningMatrix)
+        this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+
+        const resourceName = resourceTypes[resourceType]
+        console.log(resourceName, this.world.gameMap.resourceAssets.resourceMeshInfo)
+        const pickUpGeometry = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].geometry
+        const pickUpMaterial = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].material
+        const pickUpMesh = new THREE.Mesh(pickUpGeometry, pickUpMaterial)
+
+        pickUpMesh.position.copy(this.dummyObject.position.clone().add(directions[orientation]))
+        this.scene.add(pickUpMesh)
+
+        this.animatedPlayerPickUp.push({
+            index,
+            duration: totalTime,
+            passedTime: 0,
+            mesh: pickUpMesh,
+            startPosition: pickUpMesh.position,
+            endPosition: this.dummyObject.position,
+        })
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Animates the player picking up object
+     */
+    animatePlayerPickUp() {
+        if (this.animatedPlayerPickUp.length < 1) {
+            this.world.updateManager.remove(this, "world", "animatePlayerPickUp")
+        }
+
+        const deltaTime = this.world.updateManager.time.deltaInSecond
+
+        let pickUp
+        for (let i = 0; i < this.animatedPlayerPickUp.length; i++) {
+            pickUp = this.animatedPlayerPickUp[i]
+
+            this.dummyVector.lerpVectors(pickUp.startPosition, pickUp.endPosition, pickUp.passedTime / pickUp.duration)
+            pickUp.mesh.position.copy(this.dummyVector)
+            pickUp.mesh.scale.setScalar(1 - pickUp.passedTime / pickUp.duration)
+
+            pickUp.passedTime += deltaTime
+        }
+
+        this.animatedPlayerPickUp = this.animatedPlayerPickUp.filter((pickUp) => {
+            const remove = pickUp.passedTime > pickUp.duration
+            if (remove) {
+                this.scene.remove(pickUp.mesh)
+            }
+
+            return !remove
+        })
+    }
+
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Add drop object animation
+     * @param playerId - The id of the player
+     * @param resourceType - The type of resource
+     */
+    addPlayerDrop(playerId, resourceType) {
+        if (this.animatedPlayerDrop.length === 0) {
+            this.world.updateManager.add(this, "world", "animatePlayerDrop")
+        }
+
+        const index = this.getPlayerById(playerId)
+        const orientation = window.mainInstance.gameState.playerInfo.get(playerId).orientation
+        console.log(orientation)
+        const totalTime = actionTicks.prend * this.tickTime
+
+        this.playerInstance.getMatrixAt(index, this.positionningMatrix)
+        this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+
+        const resourceName = resourceTypes[resourceType]
+        console.log(resourceName, this.world.gameMap.resourceAssets.resourceMeshInfo)
+        const DropGeometry = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].geometry
+        const DropMaterial = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].material
+        const DropMesh = new THREE.Mesh(DropGeometry, DropMaterial)
+
+        DropMesh.position.copy(this.dummyObject.position)
+        this.scene.add(DropMesh)
+
+        this.animatedPlayerDrop.push({
+            index,
+            duration: totalTime,
+            passedTime: 0,
+            mesh: DropMesh,
+            startPosition: DropMesh.position,
+            endPosition: this.dummyObject.position.add(directions[orientation]),
+        })
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Animates the player dropping an object
+     */
+    animatePlayerDrop() {
+        if (this.animatedPlayerDrop.length < 1) {
+            this.world.updateManager.remove(this, "world", "animatePlayerDrop")
+        }
+
+        const deltaTime = this.world.updateManager.time.deltaInSecond
+
+        let Drop
+        for (let i = 0; i < this.animatedPlayerDrop.length; i++) {
+            Drop = this.animatedPlayerDrop[i]
+
+            this.dummyVector.lerpVectors(Drop.startPosition, Drop.endPosition, Drop.passedTime / Drop.duration)
+            Drop.mesh.position.copy(this.dummyVector)
+
+            Drop.passedTime += deltaTime
+        }
+
+        this.animatedPlayerDrop = this.animatedPlayerDrop.filter((Drop) => {
+            const remove = Drop.passedTime > Drop.duration
+            if (remove) {
+                this.scene.remove(Drop.mesh)
             }
 
             return !remove
