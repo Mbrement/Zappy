@@ -242,8 +242,9 @@ pub(crate) fn event_incant_end(server: &mut Server, success: bool, token: Token)
     let tile: &Tile = &server.get_map().get_tiles()[y as usize][x as usize];
 
     for player in server._incantation_list.get(&token).unwrap() {
-        let player: &Client = server._clients.get(player).unwrap();
-        res += &player_level(player);
+        if let Some(player) = server._clients.get(player){
+            res += &player_level(player);
+        }
     }
     res += &content_tile(x, y, tile);
     res
