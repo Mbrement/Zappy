@@ -74,7 +74,7 @@ class Players {
         })
 
         this.eggGeometry = new THREE.CapsuleGeometry(0.05, 0.06, 1, 4, 1)
-        this.eggMaterial = new THREE.MeshBasicMaterial()
+        this.eggMaterial = new THREE.MeshBasicMaterial({wireframe: true})
 
         this.eggInstance = this.createInstance(this.eggGeometry, this.eggMaterial, this.maxEggs)
     }
