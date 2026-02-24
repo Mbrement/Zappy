@@ -123,6 +123,8 @@ class GameManager {
 
         this.mapSize.x = mapSize[0]
         this.mapSize.y = mapSize[1]
+
+        this.main.brain.start()
     }
 
     /**
