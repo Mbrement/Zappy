@@ -37,6 +37,10 @@ class Main {
         import('./communication/ResponseParser.js').then(({ default: ResponseParser }) => {
             this.responseParser = new ResponseParser()
         })
+        import('./FSM/Brain.js').then(({ default: Brain }) => {
+            this.brain = new Brain()
+        })
+
         import('./ProcessManager.js').then(({ default: ProcessManager }) => {
             this.processManager = new ProcessManager(this.config.teamName, this.config.port, this.config.hostname)
         })
