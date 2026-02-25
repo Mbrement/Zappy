@@ -506,13 +506,13 @@ impl Server {
                                                 {
                                                     self._clients.remove(&player_token);
                                                 }
-                                                if self._clients[&player_token].was_egg > 0 {
+                                                // if self._clients[&player_token].was_egg > 0 {
 
                                                 graphic::send_graphic_clients(
                                                     graphic::egg_hatches(&player_token, self),
                                                     self,
                                                 );
-											}
+											// }
                                                 if self._clients.get(&player_token).unwrap().was_egg
                                                     > 0
                                                 {
