@@ -89,7 +89,9 @@ class Main extends EventEmitter {
      * @description Connection was closed - We show the connection menu
      */
     connectionClosed() {
-        this.quitApp()
+        if (this.world.gameEnded === false) {
+            this.quitApp()
+        }
     }
 
     /**
