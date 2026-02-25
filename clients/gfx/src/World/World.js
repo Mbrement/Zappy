@@ -307,7 +307,11 @@ class World {
     displayResults(winningTeam) {
         this.gameEnded = true
         this.updateManager.remove(this, 'world','updateHover')
-        this.gameEnded = true
+        this.updateManager.remove(this, "world", "focusPlayer")
+
+        this.controls.target = new THREE.Vector3()
+        this.controls.update()
+
         this.players.clear()
         this.gameMap.clear()
 
@@ -320,9 +324,6 @@ class World {
         this.teamMaterial.color.set(this.gameState.teams.get(winningTeam))
         this.backToMenuMaterial.color.set(this.gameState.teams.get(winningTeam))
         this.scene.add(this.backToMenuMesh, this.winMesh, this.teamNameMesh)
-
-        this.controls.target = new THREE.Vector3()
-        this.controls.update()
 
         this.updateManager.add(this, "world", "updateEndGameHover")
     }
