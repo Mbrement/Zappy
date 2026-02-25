@@ -534,6 +534,8 @@ impl CommandManager {
                 //client.hunger = 1260; //this line scare me
                 client.inventory[0] = 1260;
                 client.was_egg = _arg.parse().unwrap_or(0);
+				client.level = 1;
+				client.was_egg = 0;
                 server.send_to_graph += &graphic::egg_hatches(&_c, server);
             },
         );
@@ -549,7 +551,7 @@ impl CommandManager {
                         if let Some(v) = tmp {
                             *v += 1;
                         }
-                        server.send_to_graph += &graphic::end_fork(team_name, *egg_id, *x, *y);
+                        server.send_to_graph += &graphic::end_fork(team_name, *egg_id, *x, *y); // TODO move this line, it send ALL THE EGG not the only the one we want to send
                     }
                 }
                 //end fork
@@ -560,7 +562,6 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("egg_death", _c, server, _arg);
-                // Collect ticks to remove first to avoid mutably borrowing egg_position
                 let mut ticks_to_remove: Vec<u128> = Vec::new();
                 for (egg_id, (_, _, token, tick)) in server._game.map.egg_position.iter() {
                     if tick < &server._game._tick {
@@ -584,6 +585,26 @@ impl CommandManager {
     }
 
     fn admin_command(&mut self) {
+		self.register(
+			"levelup",
+			|_c: mio::Token, server: &mut Server, _arg: &str| {
+ 			let target_token = _arg.parse::<u128>();
+            if target_token.is_err() {
+                #[cfg(feature = "log")]
+                println!("Invalid token provided for levelup command: {}", _arg);
+                return;
+            }
+            let target_token = mio::Token(target_token.unwrap() as usize);
+            let client = server._clients.get_mut(&target_token);
+            if client.is_none() {
+                #[cfg(feature = "log")]
+                println!("No client found for token {:?}", target_token);
+                return;
+            }
+			let client = client.unwrap();
+			client.level += 1;
+				}
+				);
         self.register(
             "status",
             |_c: mio::Token, server: &mut Server, _arg: &str| {

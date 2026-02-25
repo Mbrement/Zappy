@@ -250,6 +250,7 @@ impl Server {
                     .expect("Failed to remove token from incantation list")
                     .retain(|t| t != &client.token);
             }
+			self._game.map.player_position.remove(&client.token);
             if let Some(team_name) = self._game.team.iter_mut().find_map(|(name, tokens)| {
                 if let Some(pos) = tokens.iter().position(|t| t == &client.get_token()) {
                     tokens.remove(pos);
@@ -266,6 +267,7 @@ impl Server {
                     *max -= 1;
                 }
             }
+
         }
         #[cfg(feature = "log")]
         println!("Client {:?} disconnected", client.get_token());
@@ -373,8 +375,6 @@ impl Server {
                                         #[cfg(feature = "debug")]
                                         println!("Received command '{}' from {:?}", cmd, token);
                                         let token = client.get_token();
-                                        // drop(client);
-                                        // let mut s = Server::new(5555);
                                         _command_manager.add_to_queue(
                                             name.to_string(),
                                             token,
@@ -464,14 +464,11 @@ impl Server {
                                                 }
                                                 self._game.spawn_player(player_token, &cmd, found)
                                             };
-
-                                            // re-borrow the client to set its fields and write responses
                                             if let Some(client) =
                                                 self._clients.get_mut(&player_token)
                                             {
-                                                client.r#type = define::ROLE_PLAYER.to_string();
+												client.r#type = define::ROLE_PLAYER.to_string();
                                                 client.position = position;
-
                                                 self._game.update_player_position(
                                                     player_token,
                                                     client.position,
@@ -532,11 +529,11 @@ impl Server {
 														),
 														self,
 													);
-                                                }
+
+												}
                                             }
                                             self._game.starting = true;
                                         } else {
-                                            // still need to use the client; re-borrow it
                                             if let Some(client) = self._clients.get_mut(&token) {
                                                 let _ = client.get_socket_mut().write(
                                                     format!(
@@ -547,10 +544,6 @@ impl Server {
                                                     .as_bytes(),
                                                 );
                                             }
-
-                                            // let _ = client
-                                            //     .get_socket_mut()
-                                            //     .shutdown(std::net::Shutdown::Both);
                                             to_disconnect.push(token);
                                         }
                                     } else if cmd
@@ -568,11 +561,11 @@ impl Server {
                                         {
                                             to_disconnect.push(token);
                                         }
-                                        let response = format!(
-                                            "0\n{} {}\n\n",
-                                            self._game.map.get_height(),
-                                            self._game.map.get_width()
-                                        );
+                                        // let response = format!(					//uncessesary
+                                        //     "0\n{} {}\n\n",
+                                        //     self._game.map.get_height(),
+                                        //     self._game.map.get_width()
+                                        // );
                                         if client
                                             .get_socket_mut()
                                             .write(response.as_bytes())
