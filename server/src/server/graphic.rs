@@ -132,8 +132,8 @@ pub(crate) fn fork(token: &Token) -> String {
     format!("pfk {:?}\n", token.0)
 }
 
-pub(crate) fn end_fork(token: &Token, egg_id: u128, x: u32, y: u32) -> String {
-    format!("enw {} {:?} {} {}\n", egg_id, token.0, x, y)
+pub(crate) fn end_fork(team: String, egg_id: u128, x: u32, y: u32) -> String {
+    format!("enw {} {:?} {} {}\n", egg_id, team, x, y)
 }
 
 fn player_drop_item(player: &Client, item_num: usize) -> String {
@@ -194,7 +194,7 @@ pub(crate) fn event_graph_connect(server: &Server) -> String {
         res += &new_player(server.get_team_for_player(&player.token), player);
     }
     for (egg_id, (x, y, token, tick)) in &server._game.map.egg_position {
-        res += &end_fork(token, *egg_id, *x, *y);
+        res += &end_fork(server.get_team_for_player(token), *egg_id, *x, *y);
     }
     res
 }
