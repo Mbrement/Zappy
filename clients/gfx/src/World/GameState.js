@@ -259,17 +259,6 @@ class GameState {
 
         // console.log("Removed egg", eggId, "from", egg.x, egg.y, "Map", this.map)
     }
-
-    /**
-     * @author Emma (epolitze) Politzer
-     * @description Resets the game state
-     */
-    reset() {
-        this.map = null
-        this.teams = new Map()
-        this.playerInfo = new Map()
-        this.eggInfo = new Map()
-    }
 }
 
 module.exports = GameState

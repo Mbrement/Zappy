@@ -287,10 +287,10 @@ class Players {
 
             this.animatedPlayersRotate.push({
                 index,
-                    duration: totalTime,
-                    passedTime: 0,
-                    startRotation,
-                    endRotation,
+                duration: totalTime,
+                passedTime: 0,
+                startRotation,
+                endRotation,
             })
         }
     }
@@ -942,29 +942,6 @@ class Players {
         this.restackEggs(eggState.x, eggState.y)
 
         this.restackPlayers(eggState.x, eggState.y)
-    }
-
-    /**
-     * @author Emma (epolitze) Politzer
-     * @description resets the player and egg instances
-     */
-    reset() {
-        this.playerMeshes.forEach((index) => {
-            this.playerInstance.getMatrixAt(index, this.positionningMatrix)
-            this.positionningMatrix.setPosition(9999, 9999, 9999)
-            this.playerInstance.setMatrixAt(index, this.positionningMatrix)
-            this.playerInstance.instanceMatrix.needsUpdate = true
-        })
-
-        this.eggMeshes.forEach((index) => {
-            this.eggInstance.getMatrixAt(index, this.positionningMatrix)
-            this.positionningMatrix.setPosition(9999, 9999, 9999)
-            this.eggInstance.setMatrixAt(index, this.positionningMatrix)
-            this.eggInstance.instanceMatrix.needsUpdate = true
-        })
-
-        this.nullifyMap(this.playerMeshes, 0, this.maxPlayers)
-        this.nullifyMap(this.eggMeshes, 0, this.maxEggs)
     }
 }
 

@@ -1,7 +1,12 @@
-const { app, BrowserWindow, protocol, net } = require('electron')
+const { app, BrowserWindow, protocol, net, ipcMain } = require('electron')
 const path = require('path')
 const url = require('url')
 
+/**
+ * @author Emma (epolitze) Politzer
+ * @description Registers the static scheme to have
+ * sufficient privileges to load media content
+ */
 protocol.registerSchemesAsPrivileged([
     {
         scheme: 'static',
@@ -15,6 +20,10 @@ protocol.registerSchemesAsPrivileged([
     }
 ]);
 
+/**
+ * @author Emma (epolitze) Politzer
+ * @description Create the electron window
+ */
 function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 1200,
@@ -35,6 +44,11 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
 }
 
+/**
+ * @author Emma (epolitze) Politzer
+ * @description Defines a protocol so that the static can be called
+ * without leading '../'
+ */
 app.whenReady().then(() => {
     protocol.handle('static', async (request) => {
         let filePath = request.url.slice('static://'.length);
@@ -50,3 +64,11 @@ app.whenReady().then(() => {
 
     createWindow();
 });
+
+/**
+ * @author Emma (epolitze) Politzer
+ * @description Closes the electron window upon receiving close-app event
+ */
+ipcMain.on('close-app', () => {
+    app.quit()
+})

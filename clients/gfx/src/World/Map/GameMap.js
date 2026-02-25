@@ -190,27 +190,6 @@ class GameMap {
         resourceInstance.setMatrixAt(index, this.positioningMatrix)
         resourceInstance.instanceMatrix.needsUpdate = true
     }
-
-    /**
-     * @author Emma (epolitze) Politzer
-     * @description resets resource instances
-     */
-    removeResources() {
-        this.resourceAssets.reset()
-    }
-
-    /**
-     * @author Emma (epolitze) Politzer
-     * @description resets map tile instances
-     */
-    reset() {
-        this.scene.remove(this.oddInstance)
-        this.oddInstance = null
-        this.scene.remove(this.evenInstance)
-        this.evenInstance = null
-
-        this.removeResources()
-    }
 }
 
 module.exports = GameMap

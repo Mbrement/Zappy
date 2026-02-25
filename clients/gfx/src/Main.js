@@ -10,6 +10,7 @@ const World = require("./World/World");
 const GameState = require("./World/GameState");
 const {textures} = require("./World/sources");
 const Resources = require("./World/Utils/Resources");
+const { ipcRenderer } = require('electron');
 
 class Main extends EventEmitter {
     constructor() {
@@ -34,7 +35,7 @@ class Main extends EventEmitter {
         this.once('loadedFonts', () => {
             this.musicManager.once('loaded', () => {
                 this.resources.once('loaded', () => {
-                    this.switchToConnectionMenu(true)
+                    this.switchToConnectionMenu()
                 })
             })
         })
@@ -71,6 +72,9 @@ class Main extends EventEmitter {
      * @description Got connection error - We show the connection menu
      */
     connectError() {
+        if (this.world.gameRunning === true) {
+            this.quitApp()
+        }
         this.networkClient?.closeSocket()
         this.networkClient = null
         if (this.eventManager.modules.TileInfoManager.isTilesPlayerInfoOpen()) {
@@ -85,27 +89,15 @@ class Main extends EventEmitter {
      * @description Connection was closed - We show the connection menu
      */
     connectionClosed() {
-        this.networkClient = null
-        if (this.eventManager.modules.TileInfoManager.isTilesPlayerInfoOpen()) {
-            this.eventManager.modules.TileInfoManager.showHideTilesPlayerInfo()
-        }
-        this.switchToConnectionMenu()
-        this.eventManager.modules.ConnectMenu.addError("Connection closed")
+        this.quitApp()
     }
 
     /**
      * @author Emma (epolitze) Politzer
      * @description Switch UI to connection menu
-     * @param init - If it is called right after initialization or not
      */
-    switchToConnectionMenu(init=false) {
+    switchToConnectionMenu() {
         this.eventManager.modules.ConnectMenu.showConnectMenu()
-
-        if (!init) {
-            this.world.reset()
-            this.musicManager.turnOffSoundtrack()
-            this.gameState.reset()
-        }
 
         const broadcastContainer = document.getElementById('broadcastContainer')
         broadcastContainer.classList.add('hidden')
@@ -145,6 +137,14 @@ class Main extends EventEmitter {
         this.world.createWorld()
         this.messageHandler.world = window.worldInstance
         this.networkClient.send("GRAPHIC\n")
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Sends event to the electron instance to close
+     */
+    quitApp() {
+        ipcRenderer.send('close-app')
     }
 }
 

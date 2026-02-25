@@ -168,38 +168,6 @@ class ThemeManager {
             this.ambientLight.color.setHex(0xd6f8ff)
         }
     }
-
-    /**
-     * @author Emma (epolitze) Politzer
-     * @description Removes theme
-     */
-    reset() {
-        this.scene.remove(this.nightSky)
-        this.scene.remove(this.sky)
-    }
-
-    /**
-     * @author Emma (epolitze) Politzer
-     * @description Cleans up the ThemeManager class
-     */
-    cleanup() {
-        if (this.starMaterial) {
-            this.starMaterial.dispose()
-        }
-
-        if (this.starGeometry) {
-            this.starGeometry.dispose()
-        }
-
-        if (this.moonMesh) {
-            this.moonMesh.material.dispose()
-            this.moonMesh.geometry.dispose()
-        }
-        if (this.moonGlowMesh) {
-            this.moonGlowMesh.material.dispose()
-            this.moonGlowMesh.geometry.dispose()
-        }
-    }
 }
 
 module.exports = ThemeManager

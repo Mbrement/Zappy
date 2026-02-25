@@ -170,20 +170,6 @@ class ResourceAssets {
         instance.instanceMatrix.needsUpdate = true
         return instance
     }
-
-    /**
-     * @author Emma (epolitze) Politzer
-     * @description Resets the resource instances
-     */
-    reset() {
-        Object.entries(this.resourceInstances).forEach(([_, resource]) => {
-            this.scene.remove(resource.singleInstance, resource.duoInstance, resource.trioInstance)
-
-            resource.singleInstance = null
-            resource.duoInstance = null
-            resource.trioInstance = null
-        })
-    }
 }
 
 module.exports = ResourceAssets

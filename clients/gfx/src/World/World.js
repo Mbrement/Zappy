@@ -34,6 +34,7 @@ class World {
         this.focusedMeshIndex = null
         this.selectedTile = null
         this.gameEnded = false
+        this.gameRunning = false
         this.teamMaterial = new THREE.MeshBasicMaterial()
         this.backToMenuMaterial = new THREE.MeshBasicMaterial()
 
@@ -138,15 +139,7 @@ class World {
             this.main.playerInfoManager.switchToPlayerInfoView(playerCopy, playerCopy.inventory)
             return
         }
-
-        this.updateManager.remove(this, "world", "updateEndGameHover")
-        this.main.networkClient.closeSocket()
-
-        this.scene.remove(this.backToMenuMesh, this.winMesh, this.teamNameMesh)
-        this.teamNameMesh.geometry.dispose()
-
-        this.reset()
-        this.gameEnded = false
+        this.main.quitApp()
     }
 
     /**
@@ -154,6 +147,8 @@ class World {
      * @description Creates the world
      */
     async createWorld() {
+        this.gameRunning = true
+
         window.addEventListener('resize', this.resizeView.bind(this))
         window.addEventListener('mousemove', this.onMouseMove.bind(this))
         window.addEventListener('mousedown', this.onMouseDown.bind(this))
@@ -175,7 +170,7 @@ class World {
         )
         this.winMesh.position.set(0, 1.2, 0)
 
-        const backToMenuGeometry = createTextGeometry(0.05, "back to menu", 0.4)
+        const backToMenuGeometry = createTextGeometry(0.05, "exit", 0.4)
         backToMenuGeometry.rotateX(-Math.PI * 0.5)
         this.backToMenuMesh = new THREE.Mesh(
             backToMenuGeometry,
@@ -312,8 +307,6 @@ class World {
     displayResults(winningTeam) {
         this.updateManager.remove(this, 'world','updateHover')
         this.gameEnded = true
-        this.players.reset()
-        this.gameMap.removeResources()
 
         this.teamNameMesh = new THREE.Mesh(
             createTextGeometry(0.1, winningTeam, 1),
@@ -325,38 +318,10 @@ class World {
         this.backToMenuMaterial.color.set(this.gameState.teams.get(winningTeam))
         this.scene.add(this.backToMenuMesh, this.winMesh, this.teamNameMesh)
 
+        this.controls.target = new THREE.Vector3()
+        this.controls.update()
+
         this.updateManager.add(this, "world", "updateEndGameHover")
-    }
-
-    /**
-     * @author Emma (epolitze) Politzer
-     * @description Resets the world
-     */
-    reset() {
-        window.removeEventListener('resize', this.resizeView.bind(this))
-        window.removeEventListener('mousemove', this.onMouseMove.bind(this))
-        window.removeEventListener('mousedown', this.onMouseDown.bind(this))
-
-        this.main.broadcastManager.clearBroadcast()
-
-        this.gameMap.reset()
-        this.players.reset()
-        this.themeManager.reset()
-
-        this.updateManager.remove(this, "world", "focusPlayer")
-        this.updateManager.remove(this.renderer, 'renderers')
-        this.updateManager.remove(this, 'world','updateHover')
-
-        this.backToMenuMesh?.geometry.dispose()
-        this.winMesh?.geometry.dispose()
-
-        this.camera?.cleanup()
-        this.camera = null
-        this.controls = null
-
-        this.updateManager?.stop()
-
-        this.renderer.instance.clear()
     }
 }
 
