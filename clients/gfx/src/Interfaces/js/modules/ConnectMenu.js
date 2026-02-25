@@ -1,8 +1,30 @@
 class ConnectMenu {
     constructor() {
+        this.onKeyDownBind = this.onKeyDown.bind(this)
         this.instance = document.getElementById("connectMenu");
         this.address = "";
         this.port = "";
+
+        this.setEventListener()
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Sets the connection menu event listener
+     */
+    setEventListener() {
+        window.addEventListener('keydown', this.onKeyDownBind)
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description If enter is pressed, we try to connect
+     * @param event - The keydown event
+     */
+    onKeyDown(event) {
+        if (event.key === "Enter") {
+            this.connect()
+        }
     }
 
     /**
@@ -53,10 +75,6 @@ class ConnectMenu {
      * This is called when the "connect" button is clicked
      */
     connect() {
-        // window.mainInstance.connectToServer("localhost", 4242) // TEMPORARY
-        // window.mainInstance.startVisualisation() // TEMPORARY
-        // return // TEMPORARY
-
         this.address = document.getElementById("address").value || "localhost"
         this.port = document.getElementById("port").value || "4242"
 
@@ -76,6 +94,7 @@ class ConnectMenu {
         }
 
         window.mainInstance.connectToServer(this.address, this.port)
+        window.removeEventListener('keydown', this.onKeyDownBind)
     }
 
     /**

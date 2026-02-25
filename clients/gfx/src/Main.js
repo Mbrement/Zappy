@@ -75,11 +75,14 @@ class Main extends EventEmitter {
         if (this.world.gameRunning === true) {
             this.quitApp()
         }
+
         this.networkClient?.closeSocket()
         this.networkClient = null
+
         if (this.eventManager.modules.TileInfoManager.isTilesPlayerInfoOpen()) {
             this.eventManager.modules.TileInfoManager.showHideTilesPlayerInfo()
         }
+
         this.switchToConnectionMenu()
         this.eventManager.modules.ConnectMenu.addError("Failed to connect")
     }
@@ -99,6 +102,7 @@ class Main extends EventEmitter {
      * @description Switch UI to connection menu
      */
     switchToConnectionMenu() {
+        this.eventManager.modules.ConnectMenu.setEventListener()
         this.eventManager.modules.ConnectMenu.showConnectMenu()
 
         const broadcastContainer = document.getElementById('broadcastContainer')
