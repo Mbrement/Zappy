@@ -467,7 +467,7 @@ impl CommandManager {
                         std::thread::sleep(std::time::Duration::from_secs(1)); // wait for the message to be sent to all clients before exiting the game
                         server::exit_game(server);
                     }
-                    //graphic::event_incant_end(server, sucess, _c);
+                    // graphic::event_incant_end(server, sucess, _c);
                     let send_to_graph: String = graphic::event_incant_end(server, sucess, _c);
                     server.send_to_graph += &send_to_graph;
                 }

@@ -236,7 +236,6 @@ impl Game {
                             .push_str(&format!(" player"));
                     }
                 }
-
                 max_index -= 1;
                 if max_index == 0 {
                     break;
