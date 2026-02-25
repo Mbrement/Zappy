@@ -57,8 +57,8 @@ class ConnectMenu {
         // window.mainInstance.startVisualisation() // TEMPORARY
         // return // TEMPORARY
 
-        this.address = document.getElementById("address").value;
-        this.port = document.getElementById("port").value;
+        this.address = document.getElementById("address").value || "localhost"
+        this.port = document.getElementById("port").value || "4242"
 
         this.removeError()
 
