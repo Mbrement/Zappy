@@ -507,12 +507,12 @@ impl Server {
                                                 {
                                                     self._clients.remove(&player_token);
                                                 }
-                                                if !self._game.starting {
-                                                    graphic::send_graphic_clients(
-                                                        graphic::egg_hatches(&player_token, self),
-                                                        self,
-                                                    );
-                                                }
+                                                //if !self._game.starting {
+                                                graphic::send_graphic_clients(
+                                                    graphic::egg_hatches(&player_token, self),
+                                                    self,
+                                                );
+                                                //}
                                             }
                                             self._game.starting = true;
                                         } else {
