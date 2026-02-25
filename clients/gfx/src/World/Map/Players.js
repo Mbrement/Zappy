@@ -266,7 +266,6 @@ class Players {
      */
     rotatePlayer(init, playerId, orientation) {
         const index = this.getPlayerById(playerId)
-        const totalTime = actionTicks.droite * this.tickTime
 
         this.playerInstance.getMatrixAt(index, this.positionningMatrix)
         this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
@@ -287,7 +286,6 @@ class Players {
 
             this.animatedPlayersRotate.push({
                 index,
-                duration: totalTime,
                 passedTime: 0,
                 startRotation,
                 endRotation,
@@ -344,7 +342,6 @@ class Players {
      */
     positionPlayer(init, playerId, x, y, playerState) {
         const index = this.getPlayerById(playerId)
-        const totalTime = actionTicks.avance * this.tickTime
 
         this.playerInstance.getMatrixAt(index, this.positionningMatrix)
         this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
@@ -369,7 +366,6 @@ class Players {
 
             this.animatedPlayersMove.push({
                 index,
-                duration: totalTime,
                 passedTime: 0,
                 startPosition,
                 endPosition,
@@ -413,7 +409,7 @@ class Players {
             player = this.animatedPlayersMove[i]
 
             this.playerInstance.getMatrixAt(player.index, this.positionningMatrix)
-            this.dummyVector.lerpVectors(player.startPosition, player.endPosition, player.passedTime / player.duration)
+            this.dummyVector.lerpVectors(player.startPosition, player.endPosition, player.passedTime / (actionTicks.avance * this.tickTime))
             this.positionningMatrix.setPosition(this.dummyVector)
             this.playerInstance.setMatrixAt(player.index, this.positionningMatrix)
 
@@ -424,7 +420,7 @@ class Players {
         }
 
         this.animatedPlayersMove = this.animatedPlayersMove.filter((player) => {
-            const remove = player.passedTime > player.duration
+            const remove = player.passedTime > (actionTicks.avance * this.tickTime)
             if (remove) {
                 this.playerInstance.getMatrixAt(player.index, this.positionningMatrix)
                 this.positionningMatrix.setPosition(player.endPosition)
@@ -455,7 +451,7 @@ class Players {
             this.playerInstance.getMatrixAt(player.index, this.positionningMatrix)
             this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
 
-            this.dummyQuaternion.slerpQuaternions(player.startRotation, player.endRotation, player.passedTime / player.duration)
+            this.dummyQuaternion.slerpQuaternions(player.startRotation, player.endRotation, player.passedTime / (actionTicks.droite * this.tickTime))
             this.dummyObject.quaternion.copy(this.dummyQuaternion)
             this.dummyObject.updateMatrix()
 
@@ -467,7 +463,7 @@ class Players {
         }
 
         this.animatedPlayersRotate = this.animatedPlayersRotate.filter((player) => {
-            const remove = player.passedTime > player.duration
+            const remove = player.passedTime > (actionTicks.droite * this.tickTime)
             if (remove) {
                 this.playerInstance.getMatrixAt(player.index, this.positionningMatrix)
                 this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
@@ -520,7 +516,6 @@ class Players {
         }
 
         const index = this.getPlayerById(playerId)
-        const totalTime = actionTicks.broadcast * this.tickTime
 
         this.playerInstance.getMatrixAt(index, this.positionningMatrix)
         this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
@@ -550,7 +545,6 @@ class Players {
 
         this.animatedPlayerBroadcasts.push({
             index,
-            duration: totalTime,
             passedTime: 0,
             mesh: broadcastMesh
         })
@@ -573,11 +567,11 @@ class Players {
 
             broadcast.passedTime += deltaTime
 
-            broadcast.mesh.userData.uProgress.value = broadcast.passedTime / broadcast.duration
+            broadcast.mesh.userData.uProgress.value = broadcast.passedTime / (actionTicks.broadcast * this.tickTime)
         }
 
         this.animatedPlayerBroadcasts = this.animatedPlayerBroadcasts.filter((broadcast) => {
-            const remove = broadcast.passedTime > broadcast.duration
+            const remove = broadcast.passedTime > (actionTicks.broadcast * this.tickTime)
             if (remove) {
                 broadcast.mesh.material.dispose()
                 this.scene.remove(broadcast.mesh)
@@ -709,7 +703,6 @@ class Players {
 
         const index = this.getPlayerById(playerId)
         const orientation = window.mainInstance.gameState.playerInfo.get(playerId).orientation
-        const totalTime = actionTicks.prend * this.tickTime
 
         const resourceName = resourceTypes[resourceType]
         const pickUpGeometry = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].geometry
@@ -735,7 +728,6 @@ class Players {
 
         this.animatedPlayerPickUp.push({
             index,
-            duration: totalTime,
             passedTime: 0,
             mesh: pickUpMesh,
             startPosition: pickUpMesh.position,
@@ -758,15 +750,15 @@ class Players {
         for (let i = 0; i < this.animatedPlayerPickUp.length; i++) {
             pickUp = this.animatedPlayerPickUp[i]
 
-            this.dummyVector.lerpVectors(pickUp.startPosition, pickUp.endPosition, pickUp.passedTime / pickUp.duration)
+            this.dummyVector.lerpVectors(pickUp.startPosition, pickUp.endPosition, pickUp.passedTime / (actionTicks.prend * this.tickTime))
             pickUp.mesh.position.copy(this.dummyVector)
-            pickUp.mesh.scale.setScalar(1 - pickUp.passedTime / pickUp.duration)
+            pickUp.mesh.scale.setScalar(1 - (actionTicks.prend * this.tickTime))
 
             pickUp.passedTime += deltaTime
         }
 
         this.animatedPlayerPickUp = this.animatedPlayerPickUp.filter((pickUp) => {
-            const remove = pickUp.passedTime > pickUp.duration
+            const remove = pickUp.passedTime > (actionTicks.prend * this.tickTime)
             if (remove) {
                 this.scene.remove(pickUp.mesh)
             }
@@ -789,7 +781,6 @@ class Players {
 
         const index = this.getPlayerById(playerId)
         const orientation = window.mainInstance.gameState.playerInfo.get(playerId).orientation
-        const totalTime = actionTicks.prend * this.tickTime
 
         const resourceName = resourceTypes[resourceType]
         const DropGeometry = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].geometry
@@ -815,7 +806,6 @@ class Players {
 
         this.animatedPlayerDrop.push({
             index,
-            duration: totalTime,
             passedTime: 0,
             mesh: DropMesh,
             startPosition: DropMesh.position,
@@ -838,14 +828,14 @@ class Players {
         for (let i = 0; i < this.animatedPlayerDrop.length; i++) {
             Drop = this.animatedPlayerDrop[i]
 
-            this.dummyVector.lerpVectors(Drop.startPosition, Drop.endPosition, Drop.passedTime / Drop.duration)
+            this.dummyVector.lerpVectors(Drop.startPosition, Drop.endPosition, Drop.passedTime / (actionTicks.pose * this.tickTime))
             Drop.mesh.position.copy(this.dummyVector)
 
             Drop.passedTime += deltaTime
         }
 
         this.animatedPlayerDrop = this.animatedPlayerDrop.filter((Drop) => {
-            const remove = Drop.passedTime > Drop.duration
+            const remove = Drop.passedTime > (actionTicks.pose * this.tickTime)
             if (remove) {
                 this.scene.remove(Drop.mesh)
             }
