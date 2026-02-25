@@ -31,6 +31,10 @@ class BroadcastManager {
         const broadcastContainer = document.getElementById('broadcastContainer')
         if (broadcastContainer) {
             broadcastContainer.appendChild(para)
+            broadcastContainer.scrollTop = broadcastContainer.scrollHeight;
+            if (broadcastContainer.children.length > 200) {
+                this.clearBroadcast()
+            }
         }
     }
 }
