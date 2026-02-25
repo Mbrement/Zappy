@@ -24,11 +24,11 @@ pub struct Server {
     _poll: Poll,
     _events: Events,
     __pass__: String,
-    _clients: HashMap<Token, client::Client>,
+    _clients: HashMap<Token, Client>,
     // pub teams: HashMap<String, Vec<Token>>,
     pub(crate) _max_clients: HashMap<String, u32>,
     pub _max_clients_per_team: u32,
-    _socket: mio::net::TcpListener,
+    _socket: TcpListener,
     _ticks: u64,
     _incantation_list: HashMap<Token, Vec<Token>>,
     // _command_manager: CommandManager,
@@ -385,20 +385,6 @@ impl Server {
                                     let cmd = String::from_utf8_lossy(&buf[..n]).trim().to_string();
                                     if cmd == define::GRAPHICAL_CLIENT {
                                         client.r#type = define::GRAPHICAL_CLIENT.to_string();
-
-                                        //TODO : Mrozniec : start the routine for comunicate with graphical interface
-                                        //je ne peut pas le faire ici, j'ai besoin de self hors a cet endroit il est déjà utiliser a la ligne 330
-                                        /*if client
-                                            .get_socket_mut()
-                                            .write(
-                                                event_graph_connect(self)
-                                                    .as_bytes(),
-                                            )
-                                            .is_err()
-                                        {
-                                            self._clients.remove(&token);
-                                            to_disconnect.push(token);
-                                        }*/
                                         graphic_ok = true;
                                     } else if self._game.team.contains_key(&cmd) {
                                         #[cfg(feature = "log")]
@@ -438,11 +424,11 @@ impl Server {
                                                     })
                                                     .map(|(k, v)| (*k, v.0, v.1, v.2, v.3));
                                                 let (egg_id, _, _, _, tick) =
-                                                    found.unwrap_or((0, 0, 0, mio::Token(0), 0));
+                                                    found.unwrap_or((0, 0, 0, Token(0), 0));
                                                 if egg_id != 0 {
                                                     _command_manager
                                                         .next_execute
-                                                        .insert(token, tick + 600); //get the tick of the hatching of the egg);
+                                                        .insert(token, tick + 600); //get the tick of the hatching of the egg ??? ca n'est pas bon, tu attend pas 600s après l'eclosion de l'oeuf
                                                 }
                                                 _command_manager.add_to_queue_internal(
                                                     "spawning".to_string(),
@@ -503,34 +489,12 @@ impl Server {
                                                 {
                                                     self._clients.remove(&player_token);
                                                 }
-                                                // if self._clients[&player_token].was_egg > 0 {
-
-                                                graphic::send_graphic_clients(
-                                                    graphic::egg_hatches(&player_token, self),
-                                                    self,
-                                                );
-											// }
-                                                if self._clients.get(&player_token).unwrap().was_egg
-                                                    > 0
-                                                {
-                                                    self._game.map.egg_position.remove(
-                                                        &self
-                                                            ._clients
-                                                            .get(&player_token)
-                                                            .unwrap()
-                                                            .was_egg,
-                                                    );
+                                                if !self._game.starting {
                                                     graphic::send_graphic_clients(
-														graphic::rotten_egg(
-															self._clients
-																.get(&player_token)
-																.unwrap()
-																.was_egg,
-														),
-														self,
-													);
-
-												}
+                                                        graphic::egg_hatches(&player_token, self),
+                                                        self,
+                                                    );
+                                                }
                                             }
                                             self._game.starting = true;
                                         } else {
@@ -668,7 +632,7 @@ impl Server {
                 return team_name.clone();
             }
         }
-        return "unknown".to_string();
+        "unknown".to_string()
     }
 
     pub fn incantation_success(&mut self, token: Token) -> bool {
@@ -746,8 +710,6 @@ pub fn exit_game(server: &mut Server) {
         let _ = client
             .get_socket_mut()
             .write(format!("{}\n", "mort").as_bytes());
-
-        // TODO Mrozniec : send end game to graphical client
     }
     process::exit(0);
 }

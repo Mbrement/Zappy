@@ -1,8 +1,6 @@
 use crate::server;
 use crate::server::graphic;
-use crate::server::utils::debug_manager_register;
 use crate::server::{Server, client::Client, define, utils};
-use getopts::Options;
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
@@ -511,12 +509,13 @@ impl CommandManager {
                 return;
             }
             let client = client.unwrap();
+            /*
             let (x, y) = client.position;
             server._game.map.egg_position.insert(
                 server._game.map.egg_id_counter,
                 (x, y, client.get_token(), server._game._tick),
             );
-            server._game.map.egg_id_counter += 1;
+            server._game.map.egg_id_counter += 1;*/
             let _ = client
                 .get_socket_mut()
                 .write(format!("{}", define::R_OK).as_bytes());
@@ -531,12 +530,35 @@ impl CommandManager {
                 utils::debug_manager_register("spawning", _c, server, _arg);
                 //player hatch
                 let client = server._clients.get_mut(&_c).unwrap();
-                //client.hunger = 1260; //this line scare me
                 client.inventory[0] = 1260;
                 client.was_egg = _arg.parse().unwrap_or(0);
 				client.level = 1;
 				client.was_egg = 0;
                 server.send_to_graph += &graphic::egg_hatches(&_c, server);
+            },
+        );
+        self.register(
+            "end_fork",
+            |_c: mio::Token, server: &mut Server, _arg: &str| {
+                #[cfg(feature = "log")]
+                debug_manager_register("end_fork", _c, server, _arg);
+                let client = server._clients.get_mut(&_c);
+                if client.is_none() {
+                    #[cfg(feature = "log")]
+                    println!("No client found for token {:?}", _c);
+                    return;
+                }
+                let client = client.unwrap();
+                let (x, y) = client.position;
+                server._game.map.egg_position.insert(
+                    server._game.map.egg_id_counter,
+                    (x, y, client.get_token(), server._game._tick + 600),
+                );
+                server._game.map.egg_id_counter += 1;
+                if let Some(max_player) = server._max_clients.get_mut(&server.get_team_for_player(&_c)) {
+                    *max_player += 1;
+                }
+                //end fork
             },
         );
         self.register(
@@ -727,7 +749,7 @@ impl CommandManager {
 								// Options::new()
                             }
                             "egg_waiting" => {
-                                self.next_execute.insert(token, server._game._tick + 42)
+                                self.next_execute.insert(token, server._game._tick + 600)
                             }
                             "egg_death" => self.next_execute.insert(token, server._game._tick),
                             "connect_nbr" | "incantation" | "incantation_internal" => {
@@ -802,14 +824,15 @@ impl CommandManager {
                             // );
                         } else if command.as_str() == "fork" {
                             // For fork, we want to add the new command to the front of the queue, so we use add_to_queue_internal
-
+/*
                             self.egg_waiting
                                 .entry(server.get_team_for_player(&token))
                                 .or_insert_with(Vec::new)
                                 .push(server._game._tick + 642);
+*/
                             self.order.get_mut(&token).unwrap().pop_front();
                             self.add_to_queue_internal(
-                                "egg_waiting".to_string(),
+                                "end_fork".to_string(),
                                 token,
                                 "".to_string(),
                             );
@@ -823,6 +846,7 @@ impl CommandManager {
             }
         }
         // self.execute_admin_commands(server);
+        /*
         let mut egg_remove = Vec::new();
         for (team, eggs) in self.egg_waiting.iter() {
             for egg in eggs {
@@ -837,7 +861,7 @@ impl CommandManager {
             self.egg_waiting.iter_mut().for_each(|(_team, eggs)| {
                 eggs.retain(|e| e != &egg);
             });
-        }
+        }*/
         graphic::send_graphic_clients(server.send_to_graph.clone(), server);
         server.send_to_graph.clear();
     }
