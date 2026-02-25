@@ -629,17 +629,21 @@ impl CommandManager {
                     let _ = client
                         .get_socket_mut()
                         .write(format!("A admin change the tick to {}\n", _arg).as_bytes());
-                }
+				}
             } else {
-                for client in server.get_clients_by_type_mut(define::ROLE_ADMIN) {
-                    let _ = client.get_socket_mut().write(
-                        format!(
-                            "A admin try to set tick with a {} argument, bully them !\n",
+				for client in server.get_clients_by_type_mut(define::ROLE_ADMIN) {
+					let _ = client.get_socket_mut().write(
+						format!(
+							"A admin try to set tick with a {} argument, bully them !\n",
                             _arg
                         )
                         .as_bytes(),
                     );
                 }
+				let tick = server.get_ticks();
+				for client in server.get_clients_by_type_mut(define::GRAPHICAL_CLIENT) {
+					let _ = client.get_socket_mut().write(format!("sgt {}\n", tick).as_bytes());
+				}
             }
         });
         self.register("stop", |_c: mio::Token, server: &mut Server, _arg: &str| {
