@@ -702,13 +702,24 @@ class Players {
         const orientation = window.mainInstance.gameState.playerInfo.get(playerId).orientation
         const totalTime = actionTicks.prend * this.tickTime
 
-        this.playerInstance.getMatrixAt(index, this.positionningMatrix)
-        this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
-
         const resourceName = resourceTypes[resourceType]
         const pickUpGeometry = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].geometry
         const pickUpMaterial = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].material
         const pickUpMesh = new THREE.Mesh(pickUpGeometry, pickUpMaterial)
+
+        let player = null
+        for (let i = 0; i < this.animatedPlayersMove.length; i++) {
+            if (this.animatedPlayersMove[i].index === index) {
+                player = this.animatedPlayersMove[i]
+                this.dummyObject.position.copy(player.endPosition)
+                break
+            }
+        }
+
+        if (!player) {
+            this.playerInstance.getMatrixAt(index, this.positionningMatrix)
+            this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+        }
 
         pickUpMesh.position.copy(this.dummyObject.position.clone().add(directions[orientation]))
         this.scene.add(pickUpMesh)
@@ -719,7 +730,7 @@ class Players {
             passedTime: 0,
             mesh: pickUpMesh,
             startPosition: pickUpMesh.position,
-            endPosition: this.dummyObject.position,
+            endPosition: this.dummyObject.position.clone(),
         })
     }
 
@@ -771,13 +782,24 @@ class Players {
         const orientation = window.mainInstance.gameState.playerInfo.get(playerId).orientation
         const totalTime = actionTicks.prend * this.tickTime
 
-        this.playerInstance.getMatrixAt(index, this.positionningMatrix)
-        this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
-
         const resourceName = resourceTypes[resourceType]
         const DropGeometry = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].geometry
         const DropMaterial = this.world.gameMap.resourceAssets.resourceMeshInfo[resourceName].material
         const DropMesh = new THREE.Mesh(DropGeometry, DropMaterial)
+
+        let player = null
+        for (let i = 0; i < this.animatedPlayersMove.length; i++) {
+            if (this.animatedPlayersMove[i].index === index) {
+                player = this.animatedPlayersMove[i]
+                this.dummyObject.position.copy(player.endPosition)
+                break
+            }
+        }
+
+        if (!player) {
+            this.playerInstance.getMatrixAt(index, this.positionningMatrix)
+            this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+        }
 
         DropMesh.position.copy(this.dummyObject.position)
         this.scene.add(DropMesh)
@@ -788,7 +810,7 @@ class Players {
             passedTime: 0,
             mesh: DropMesh,
             startPosition: DropMesh.position,
-            endPosition: this.dummyObject.position.add(directions[orientation]),
+            endPosition: this.dummyObject.position.add(directions[orientation]).clone(),
         })
     }
 
