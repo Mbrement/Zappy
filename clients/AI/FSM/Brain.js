@@ -45,15 +45,19 @@ class Brain {
     evaluateNextState() {
         const food = GameManager.inventory.nourriture
 
-        if (food < 1890) {
-            return STATE.SURVIVAL
+        if (food < 1890 && !GameManager.followedBroadcast && this.currentState !== STATE.ELEVATION) {
+            return STATE.SURVIVAL;
         }
 
-        if (this.canElevate()) {
+        if (food < 1000 && (GameManager.followedBroadcast || this.currentState === STATE.ELEVATION)) {
+            return STATE.SURVIVAL;
+        }
+
+        if (this.canElevate() && !GameManager.followedBroadcast) {
             return STATE.ELEVATION
         }
 
-        if (GameManager.followedBroadcast !== null && food >= 2500) {
+        if (GameManager.followedBroadcast !== null) {
             return STATE.HOMING
         }
 
