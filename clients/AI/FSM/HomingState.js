@@ -37,7 +37,9 @@ export default class HomingState extends IState {
             });
             await Promise.all(sequencePromises);
 
-            GameManager.followedBroadcast.direction = -1;
+            if (GameManager.followedBroadcast && GameManager.followedBroadcast.direction) {
+                GameManager.followedBroadcast.direction = -1;
+            }
 
             GameManager.lastVisionRefresh = 0;
         }
