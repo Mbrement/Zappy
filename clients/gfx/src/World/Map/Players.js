@@ -884,15 +884,10 @@ class Players {
      * @author Emma (epolitze) Politzer
      * @description Adds an egg to the map
      * @param eggInfo - The info of the egg
+     * @param eggTeam - The team of the egg
      */
-    addEgg(eggInfo) {
-        const [eggId, parentId, x, y] = eggInfo
-
-        if (!this.main.gameState.playerInfo.has(parentId)) {
-            return
-        }
-
-        const eggTeam = this.main.gameState.playerInfo.get(parentId).team
+    addEgg(eggInfo, eggTeam) {
+        const [eggId, x, y] = eggInfo
 
         let unusedIndex = null
         for (let i = 0; i < this.maxEggs; i++) {

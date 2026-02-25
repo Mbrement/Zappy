@@ -418,16 +418,12 @@ class MessageHandler {
             return
         }
 
-        const integerArguments = command.slice(1).map(Number)
-
-        if (!this.gameState.isCorrectCoordinates(integerArguments[2], integerArguments[3]) ||
-            !this.gameState.playerInfo.has(integerArguments[1]) ) {
-            return
-        }
+        const integerArguments = command.slice(3).map(Number)
+        integerArguments.unshift(parseInt(command[1]))
 
         this.gameState.addEgg(integerArguments)
 
-        this.world.players.addEgg(integerArguments)
+        this.world.players.addEgg(integerArguments, command[2])
     }
 
     /**

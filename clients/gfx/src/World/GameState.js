@@ -239,10 +239,10 @@ class GameState {
      * and the coordinates of the tile where the egg is located
      */
     addEgg(eggInfo) {
-        const [eggId, parentId, x, y] = eggInfo
+        const [eggId, x, y] = eggInfo
 
-        this.map[y][x].eggs.push({id: eggId, parentId})
-        this.eggInfo.set(eggId, {id: eggId, parentId, x, y})
+        this.map[y][x].eggs.push({id: eggId})
+        this.eggInfo.set(eggId, {id: eggId, x, y})
 
         // console.log("Added egg", eggId, "at", x, y, "by player", parentId, "Map", this.map)
     }
