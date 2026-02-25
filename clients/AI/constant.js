@@ -9,7 +9,7 @@ export const INVENTORY_REFRESH_RATE = 5000
 
 export const ARGV_ERROR = 'Usage: ./client -n <team> -p <port> [-h <hostname>]\n-n team_name\n-p port\n-h name of the host, by default localhost';
 export const NO_PROMISE_TO_RESOLVE = 'Server has send a message but no promise found to resolve'
-
+export const NO_SPACE_AVAILABLE = 'No space available in the team... Exiting.'
 /*****************
  *     REGEX     *
  ****************/

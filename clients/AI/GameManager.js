@@ -6,7 +6,7 @@ import {
     BROAD_PONG,
     BROAD_WITH_PLAYER,
     BROADCAST,
-    COMMAND_COST,
+    COMMAND_COST, NO_SPACE_AVAILABLE,
     ONLY_NUMBER_REGEX,
 } from "./constant.js"
 
@@ -110,8 +110,8 @@ class GameManager {
         const handskakeAnswer = await this.commandManager.sendCommand(`${this.teamName}\n`, 2)
         console.log('Handshake resolved with answer', handskakeAnswer)
 
-        if (!ONLY_NUMBER_REGEX.test(handskakeAnswer[0]) && Number(handskakeAnswer[0]) < 1) {
-            // TODO: Cleanly exit
+        if (ONLY_NUMBER_REGEX.test(handskakeAnswer[0]) && Number(handskakeAnswer[0]) < 1) {
+            console.error(NO_SPACE_AVAILABLE)
             process.exit(1)
         }
 
