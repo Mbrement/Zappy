@@ -193,7 +193,7 @@ class GameManager {
             return
         }
 
-        if (parsedBroadcast.action === BROAD_NEED_PLAYER && parsedBroadcast.direction === 0) {
+        if (parsedBroadcast.action === BROAD_NEED_PLAYER && parsedBroadcast.direction === 0 && Number(parsedBroadcast.argument) === (this.level + 1)) {
             this.commandManager.sendCommand(this.buildBroadcastMessage(BROAD_WITH_PLAYER, parsedBroadcast.senderID))
             return
         }
@@ -203,7 +203,7 @@ class GameManager {
             return
         }
 
-        if (parsedBroadcast.action === BROAD_NEED_PLAYER && Number(parsedBroadcast.argument) - 1 === this.level) {
+        if (parsedBroadcast.action === BROAD_NEED_PLAYER && Number(parsedBroadcast.argument) === (this.level + 1)) {
             this.followedBroadcast = parsedBroadcast
         }
     }
