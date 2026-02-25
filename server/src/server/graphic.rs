@@ -133,7 +133,7 @@ pub(crate) fn fork(token: &Token) -> String {
 }
 
 pub(crate) fn end_fork(team: String, egg_id: u128, x: u32, y: u32) -> String {
-    format!("enw {} {:?} {} {}\n", egg_id, team, x, y)
+    format!("enw {} {} {} {}\n", egg_id, team, x, y)
 }
 
 fn player_drop_item(player: &Client, item_num: usize) -> String {
