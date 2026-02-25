@@ -27,7 +27,7 @@ impl client::Client {
             position: (0, 0),
             orientation: ('N'),
             is_incanting: mio::Token(0),
-            was_egg: 1,
+            was_egg: 0,
         }
     }
 
