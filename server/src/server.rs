@@ -660,9 +660,9 @@ impl Server {
 
     pub fn incantation_success(&mut self, token: Token) -> bool {
         let mut level_checker = 0;
-		if !self._incantation_list.contains_key(&token) {
-			return false;
-		}
+        if !self._incantation_list.contains_key(&token) {
+            return false;
+        }
         let player_level = match self._clients.get(&token) {
             Some(p) => p.level,
             _ => return false,
@@ -680,9 +680,8 @@ impl Server {
             return false;
         }
 
-        if self._incantation_list.contains_key(&token)
-            && (self._incantation_list[&token].len() as u128 + 1)
-                < define::INCANTATION_REQ[player_level as usize - 1][0]
+        if self._incantation_list[&token].len() as u128 + 1
+            < define::INCANTATION_REQ[player_level as usize - 1][0]
         {
             return false;
         }

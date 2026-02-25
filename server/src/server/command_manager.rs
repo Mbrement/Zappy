@@ -1,5 +1,6 @@
 use crate::server;
 use crate::server::graphic;
+use crate::server::utils::debug_manager_register;
 use crate::server::{Server, client::Client, define, utils};
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
@@ -414,19 +415,6 @@ impl CommandManager {
                     let mut victory = String::new();
                     //il faut vérifier pour chacune des teams qui ont un membre qui est passé lvl8 lors de l'incantation
                     //proposition de solution:
-                    // if sucess && org_player_level + 1 == 8 {
-                    //     for player in server._incantation_list.get(&_c).unwrap() {
-                    //         if server.check_win_condition(player) {
-                    //             victory = graphic::end_game(server.get_team_for_player(player));
-                    //             break;
-                    //         }
-                    //     }
-                    // }
-                    // if !victory.is_empty() {
-                    //     graphic::send_graphic_clients(victory, server);
-                    // 	std::thread::sleep(std::time::Duration::from_secs(1)); // wait for the message to be sent to all clients before exiting the game
-                    //     server::exit_game(server);
-                    // }
                     /*
                     if sucess && org_player_level + 1 == 8 && server.check_win_condition(&_c) {
                         server::exit_game(server);
@@ -717,6 +705,8 @@ impl CommandManager {
                                             && server._clients.get(tok).is_some()
                                             && server._clients.get(tok).unwrap().is_incanting
                                                 == Token(0)
+                                            && server._clients.get(tok).unwrap().level
+                                                == server._clients.get(&token).unwrap().level
                                     })
                                     .map(|(tok, _)| *tok)
                                     .collect();

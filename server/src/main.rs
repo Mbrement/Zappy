@@ -53,8 +53,6 @@ fn main() -> std::io::Result<()> {
         password = "ADMIN".to_string();
     }
     server = Server::new(port, password);
-    #[cfg(feature = "log")]
-    println!("Server running on port: {}", server.get_port());
 
     if matches.opt_present("h") {
         print_usage(&program, opts);

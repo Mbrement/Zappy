@@ -4,6 +4,7 @@ use crate::server::map::Map;
 use crate::server::{self, Server, define};
 use mio::Token;
 use rand::RngExt;
+use rand::seq::index::IndexVec;
 use std::collections::HashMap;
 use std::io::Write;
 use std::time;
@@ -211,7 +212,7 @@ impl Game {
         };
 
         let mut max_index = (level + 1).pow(2) as usize;
-		let mut max_index_initial = max_index;
+        let mut max_index_initial = max_index;
         for (dx, dy) in directions {
             let cell_x = (position.0 as i32 + dx).rem_euclid(self.map.get_width() as i32) as u32;
             let cell_y = (position.1 as i32 + dy).rem_euclid(self.map.get_height() as i32) as u32;
@@ -221,15 +222,19 @@ impl Game {
                     .map
                     .player_position
                     .iter()
-                    .find(|(_, pos)| **pos == position)
+                    .filter(|(_, pos)| **pos == (cell_x, cell_y))
                     .map(|(token, _)| *token)
+                    .collect::<Vec<Token>>()
                 {
-					if !(max_index == max_index_initial) && !(i == self.get_player_by_position((cell_x, cell_y)).unwrap_or(Token(usize::MAX))) {
-						visible_cells
-							.last_mut()
-							.unwrap()
-							.push_str(&format!(" player"));
-					}
+                    // println!("saw a player at ({}, {}), it is {:?}", cell_x, cell_y, i);
+                    if max_index == max_index_initial {
+                        max_index_initial += 1;
+                    } else {
+                        visible_cells
+                            .last_mut()
+                            .unwrap()
+                            .push_str(&format!(" player"));
+                    }
                 }
 
                 max_index -= 1;
