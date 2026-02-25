@@ -24,22 +24,22 @@ const textures = [
 const soundtracks = [
     {
         name: 'It\'s_showtime!_8bits',
-        volume: 0.05,
+        volume: 0.15,
         path: 'static://soundtracks/showtime.mp3',
     },
     {
         name: 'Dwarf_fortress_OST',
-        volume: 0.05,
+        volume: 0.15,
         path: 'static://soundtracks/dwarf_fortress.mp3',
     },
     {
         name: 'Ghost_n’_Goblins_(CPC_6128)_OST',
-        volume: 0.05,
+        volume: 0.15,
         path: 'static://soundtracks/Ghostsn_Goblins_Amstrad_CPC.mp3',
     },
     {
         name: 'Sonic_Green_Hill_Zone_OST',
-        volume: 0.05,
+        volume: 0.15,
         path: 'static://soundtracks/sonic_ost.mp3',
     },
 ]
