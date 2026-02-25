@@ -619,6 +619,29 @@ impl CommandManager {
                 }
             },
         );
+        self.register("tick", |_c: mio::Token, server: &mut Server, _arg: &str| {
+            #[cfg(feature = "log")]
+            debug_manager_register("tick", _c, server, _arg);
+            if _arg.parse::<u32>().is_ok() {
+                let arg = _arg.parse::<u64>().unwrap();
+                server.set_ticks(arg);
+                for client in server.get_clients_by_type_mut(define::ROLE_ADMIN) {
+                    let _ = client
+                        .get_socket_mut()
+                        .write(format!("A admin change the tick to {}\n", _arg).as_bytes());
+                }
+            } else {
+                for client in server.get_clients_by_type_mut(define::ROLE_ADMIN) {
+                    let _ = client.get_socket_mut().write(
+                        format!(
+                            "A admin try to set tick with a {} argument, bully them !\n",
+                            _arg
+                        )
+                        .as_bytes(),
+                    );
+                }
+            }
+        });
         self.register("stop", |_c: mio::Token, server: &mut Server, _arg: &str| {
             let mut to_disconnect: Vec<mio::Token> = Vec::new();
             for client in server.get_clients_by_type_mut("player") {
@@ -670,9 +693,9 @@ impl CommandManager {
                             }
                             "inventaire" => self.next_execute.insert(token, server._game._tick + 1),
                             "fork" => self.next_execute.insert(token, server._game._tick + 42),
-                            // "incantation_internal" => {
-                            //     self.next_execute.insert(token, server._game._tick + 300)
-                            // }
+                            "incantation_internal" => {
+                                self.next_execute.insert(token, server._game._tick + 300)
+                            }
                             "egg_waiting" => {
                                 self.next_execute.insert(token, server._game._tick + 42)
                             }
@@ -717,8 +740,8 @@ impl CommandManager {
                                     if self.next_execute.get(&player).is_none() {
                                         self.next_execute.insert(*player, 0);
                                     }
-                                    self.next_execute
-                                        .insert(*player, self.next_execute[&player] + 300);
+                                    // self.next_execute
+                                    // .insert(*player, self.next_execute[&player] + 300);
                                     self.add_to_queue_internal(
                                         "incantation_internal".to_string(),
                                         *player,
@@ -830,10 +853,24 @@ fn expulse_player(server: &mut Server, token: Token) -> bool {
     let mut expelled = false;
     let next_pos = match server._clients.get(&token) {
         Some(client) => match client.orientation {
-            'N' => (position.0, position.1.saturating_sub(1)),
-            'E' => (position.0 + 1, position.1),
-            'S' => (position.0, position.1 + 1),
-            'O' => (position.0.saturating_sub(1), position.1),
+            'N' => (
+                position.0,
+                if position.1 != 0 {
+                    (position.1 - 1) % server._game.map.get_height()
+                } else {
+                    server._game.map.get_height()
+                },
+            ),
+            'E' => ((position.0 + 1) % server._game.map.get_width(), position.1),
+            'S' => (position.0, (position.1 + 1) % server._game.map.get_height()),
+            'O' => (
+                if position.0 != 0 {
+                    (position.0 - 1) % server._game.map.get_width()
+                } else {
+                    server._game.map.get_width()
+                },
+                position.1,
+            ),
             _ => position,
         },
         _ => position,
