@@ -548,7 +548,9 @@ impl CommandManager {
                         if let Some(v) = tmp {
                             *v += 1;
                         }
-                        server.send_to_graph += &graphic::end_fork(team_name, *egg_id, *x, *y);
+						if *egg_id > 0 {
+                            server.send_to_graph += &graphic::end_fork(team_name, *egg_id, *x, *y);
+                        }
                     }
                 }
                 //end fork
