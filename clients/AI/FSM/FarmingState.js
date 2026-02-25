@@ -16,10 +16,19 @@ class FarmingState extends IState {
         super()
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Does nothing except putting a log in console in this state
+     */
     onEnter() {
         console.log('[FARMING] Entering state')
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Check what stone are missing to elevate.
+     * @return {String[]} - An array of missing stone
+     */
     getMissingStones() {
         const level = GameManager.level
         if (level >= 8) {
@@ -34,9 +43,14 @@ class FarmingState extends IState {
                 missing.push(item)
             }
         }
+
         return missing
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Try to find stones and food
+     */
     async onUpdate() {
         if (GameManager.needToFork) {
             const connectAns = await GameManager.commandManager.sendCommand(AVAILABLE_CONNECTION)
@@ -159,6 +173,10 @@ class FarmingState extends IState {
         GameManager.lastVisionRefresh = 0
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Does nothing except putting a log in console in this state
+     */
     onExit() {
         console.log(`[FARMING] Exiting State`)
     }

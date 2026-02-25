@@ -140,6 +140,10 @@ class GameManager {
         }
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Calculate if AI need to fork or not.
+     */
     evaluatePopulationNeed() {
         const teamSize = this.activeTeamMembers.size
         console.log(`[POPULATION] Actual team size: ${teamSize}`)

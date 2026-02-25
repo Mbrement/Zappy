@@ -17,6 +17,10 @@ class ElevationState extends IState {
         this.isCensusDone = false
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Reset state and clear array used for this state
+     */
     onEnter() {
         console.log(`[ELEVATION] Entering state, elevation to level ${GameManager.level + 1}.`)
         this.isIncanting = false
@@ -34,6 +38,11 @@ class ElevationState extends IState {
         GameManager.elevationReadyPlayers.add(GameManager.main.config.broadcastID)
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Try to elevate by sending broadcast message.
+     * @return {Promise<void>}
+     */
     async onUpdate() {
         if (this.isIncanting) {
             return
@@ -103,6 +112,10 @@ class ElevationState extends IState {
         }
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Reset state and clear array used for this state
+     */
     onExit() {
         console.log('[ELEVATION] End State.')
         if (!this.isElevationSuccessful) {

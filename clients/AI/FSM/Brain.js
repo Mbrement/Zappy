@@ -30,6 +30,11 @@ class Brain {
         this.currentStateFunc = this.state.get(this.currentState)
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Switches the current state of the brain to a new state.
+     * @param newState {Symbol} - The new state to switch to.
+     */
     switchState(newState) {
         if (this.currentState === newState) {
             return
@@ -42,6 +47,11 @@ class Brain {
         this.currentStateFunc.onEnter()
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Evaluate what will be the next of the brain.
+     * @return {symbol} - The next state of the brain.
+     */
     evaluateNextState() {
         const food = GameManager.inventory.nourriture
 
@@ -64,6 +74,11 @@ class Brain {
         return STATE.FARMING
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Evaluate if the player has the necessary item to elevate.
+     * @return {boolean} - A boolean that state if elevation possible
+     */
     canElevate() {
         const level = GameManager.level
 
@@ -87,6 +102,10 @@ class Brain {
         return true
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Execute onUpdate methods of the current state & refresh inventory/vision if needed.
+     */
     async think() {
         if (this.currentState === STATE.INIT) {
             await this.currentStateFunc.onUpdate()
@@ -113,6 +132,10 @@ class Brain {
         await this.currentStateFunc.onUpdate()
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Start the brain thinking loop.
+     */
     async start() {
         console.log('[BRAIN] Starting brain...')
         this.isRunning = true
@@ -128,6 +151,12 @@ class Brain {
         }
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Build the itinerary to the given index.
+     * @param destinationIndex {Number} - The index of the destination in the vision array.
+     * @return {String[]|[]} - An array of command or an empty array if already to the destination
+     */
     buildItinerary(destinationIndex) {
         const itinerary = []
 
