@@ -486,12 +486,11 @@ class Players {
      * @authorEmma (epolitze) Politzer
      * @description The broadcast shader
      * @param uProgressArg - The progress uniform
+     * @param uColorArg - The color uniform
      * @returns {*}
      */
-    broadcastShader(uProgressArg) {
-        return Fn(([uProgress]) => {
-            const waveColor = color(1.0, 0.0, 0.0).toConst()
-
+    broadcastShader(uProgressArg, uColorArg) {
+        return Fn(([uProgress, uColor]) => {
             const localPos = positionLocal.toConst()
 
             let alpha = float(0.0).toVar()
@@ -505,16 +504,17 @@ class Players {
                 alpha.assign(1.0)
             })
 
-            return vec4(waveColor, alpha)
-        })(uProgressArg)
+            return vec4(uColor, alpha)
+        })(uProgressArg, uColorArg)
     }
 
     /**
      * @author Emma (epolitze) Politzer
      * @description Add broadcast animation
      * @param playerId - The id of the player that is broadcasting
+     * @param message - The message of the player
      */
-    addPlayerBroadcast(playerId) {
+    addPlayerBroadcast(playerId, message) {
         if (this.animatedPlayerBroadcasts.length === 0) {
             this.world.updateManager.add(this, "shaders", "animatePlayerBroadcast")
         }
@@ -527,7 +527,15 @@ class Players {
 
         const broadcastMesh = new THREE.Mesh(this.broadcastGeometry, this.broadcastMaterial.clone())
         broadcastMesh.userData.uProgress = uniform(0.0)
-        broadcastMesh.material.fragmentNode = this.broadcastShader(broadcastMesh.userData.uProgress)
+
+        if (message.search("NEED") !== -1) {
+            broadcastMesh.userData.uColor = uniform(color(0.0, 1.0, 0.0))
+        }
+        else {
+            broadcastMesh.userData.uColor = uniform(color(1.0, 0.0, 0.0))
+        }
+
+        broadcastMesh.material.fragmentNode = this.broadcastShader(broadcastMesh.userData.uProgress, broadcastMesh.userData.uColor)
         broadcastMesh.position.copy(this.dummyObject.position)
         this.scene.add(broadcastMesh)
 
