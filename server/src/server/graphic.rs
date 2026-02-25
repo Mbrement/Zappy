@@ -160,7 +160,7 @@ pub(crate) fn egg_hatches(token: &Token, server: &Server) -> String {
 }
 
 pub(crate) fn rotten_egg(egg_id: u128) -> String {
-    format!("eht {}", egg_id)
+    format!("eht {}\n", egg_id)
 }
 
 fn get_time_unit(tick: u64) -> String {
