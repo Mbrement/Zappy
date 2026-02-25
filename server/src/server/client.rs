@@ -21,7 +21,7 @@ impl client::Client {
             socket,
             token,
             r#type: String::from("unknown"),
-            inventory: [1260, 0, 0, 0, 0, 0, 0],
+            inventory: [1260, 1, 0, 0, 0, 0, 0],
             level: 1,
             //hunger: 1260,
             position: (0, 0),

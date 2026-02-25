@@ -694,7 +694,8 @@ impl CommandManager {
                             "inventaire" => self.next_execute.insert(token, server._game._tick + 1),
                             "fork" => self.next_execute.insert(token, server._game._tick + 42),
                             "incantation_internal" => {
-                                self.next_execute.insert(token, server._game._tick + 300)
+                                //println!("incantation_internal in the process_queue for token {:?} at tick {}", token, server._game._tick);
+                                self.next_execute.insert(token, server._game._tick)
                             }
                             "egg_waiting" => {
                                 self.next_execute.insert(token, server._game._tick + 42)
@@ -740,8 +741,11 @@ impl CommandManager {
                                     if self.next_execute.get(&player).is_none() {
                                         self.next_execute.insert(*player, 0);
                                     }
-                                    // self.next_execute
-                                    // .insert(*player, self.next_execute[&player] + 300);
+                                    self.next_execute.insert(*player, server._game._tick + 300);
+                                    println!(
+                                        "Adding incantation_internal for player {:?} at tick {}",
+                                        player, self.next_execute[&player]
+                                    );
                                     self.add_to_queue_internal(
                                         "incantation_internal".to_string(),
                                         *player,
@@ -858,7 +862,7 @@ fn expulse_player(server: &mut Server, token: Token) -> bool {
                 if position.1 != 0 {
                     (position.1 - 1) % server._game.map.get_height()
                 } else {
-                    server._game.map.get_height()
+                    server._game.map.get_height() - 1
                 },
             ),
             'E' => ((position.0 + 1) % server._game.map.get_width(), position.1),
@@ -867,7 +871,7 @@ fn expulse_player(server: &mut Server, token: Token) -> bool {
                 if position.0 != 0 {
                     (position.0 - 1) % server._game.map.get_width()
                 } else {
-                    server._game.map.get_width()
+                    server._game.map.get_width() - 1
                 },
                 position.1,
             ),

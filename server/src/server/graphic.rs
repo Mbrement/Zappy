@@ -239,7 +239,7 @@ pub(crate) fn event_incant_end(server: &mut Server, success: bool, token: Token)
     let mut res = String::new();
     let (x, y) = server._game.get_player_position(token);
     res += &end_incant(x, y, success);
-	res
+    res
     // let tile: &Tile = &server.get_map().get_tiles()[y as usize][x as usize];
 
     // for player_token in server._incantation_list.get(&token).unwrap() {

@@ -492,14 +492,20 @@ impl Server {
                                                     .get_mut(&cmd)
                                                     .unwrap()
                                                     .push(player_token); //push the client token into the team
-                                                let response = format!(
-                                                    "{}\n{} {}\n",
+												let response = format!(
+													"{}\n{} {}\n",
                                                     self._max_clients[&cmd] as usize
-                                                        - self._game.team[&cmd].len()
-                                                        + 1,
+													- self._game.team[&cmd].len()
+													+ 1,
                                                     self._game.map.get_height(),
                                                     self._game.map.get_width()
                                                 );
+												if self._max_clients[&cmd] as usize
+													- self._game.team[&cmd].len()
+													< 0
+												{
+													to_disconnect.push(player_token);
+												}
                                                 if client
                                                     .get_socket_mut()
                                                     .write(response.as_bytes())
