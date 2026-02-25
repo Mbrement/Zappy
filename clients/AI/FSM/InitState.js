@@ -8,6 +8,10 @@ export default class InitState extends IState {
         this.ticks = 0
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Initialize state, reset team and ping
+     */
     onEnter() {
         console.log('[INIT] Entering state')
         this.ticks = 0
@@ -19,6 +23,10 @@ export default class InitState extends IState {
         GameManager.commandManager.sendCommand(pingMsg)
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Wait for responses then switch to FARMING
+     */
     async onUpdate() {
         this.ticks++
 
@@ -32,6 +40,10 @@ export default class InitState extends IState {
         GameManager.lastVisionRefresh = 0
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Does nothing except putting a log in console in this state
+     */
     onExit() {
         console.log('[INIT] Exiting state')
     }

@@ -7,10 +7,18 @@ export default class HomingState extends IState {
         super();
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Does nothing except putting a log in console in this state
+     */
     onEnter() {
         console.log('[HOMING] Entering state');
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Follow the broadcast direction
+     */
     async onUpdate() {
         if (!GameManager.followedBroadcast) {
             return;
@@ -45,6 +53,10 @@ export default class HomingState extends IState {
         }
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Does nothing except putting a log in console in this state
+     */
     onExit() {
         console.log('[HOMING] End of state');
     }

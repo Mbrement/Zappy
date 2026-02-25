@@ -7,10 +7,18 @@ class SurvivalState extends IState {
         super()
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Does nothing except putting a log in console in this state
+     */
     onEnter() {
         console.log("[SURVIVAL] Entering state")
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Try to find food and take it
+     */
     async onUpdate() {
         const vision = GameManager.vision
 
@@ -59,6 +67,10 @@ class SurvivalState extends IState {
         GameManager.lastVisionRefresh = 0
     }
 
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Does nothing except putting a log in console in this state
+     */
     onExit() {
         console.log('[SURVIVAL] Exiting state')
     }

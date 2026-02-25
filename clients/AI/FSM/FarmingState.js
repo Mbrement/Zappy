@@ -123,7 +123,7 @@ class FarmingState extends IState {
             }
         }
 
-        if (targetIndex === -1 && GameManager.inventory[FOOD] < 3500) {
+        if (targetIndex === -1 && GameManager.inventory[FOOD] < 3000) {
             for (let i = 1; i < vision.length; i++) {
                 if (vision[i] && vision[i].includes(FOOD)) {
                     targetIndex = i
