@@ -637,15 +637,21 @@ class Players {
      * @param playerColor - The color of the player
      */
     addPlayerIncantation(playerId, playerColor) {
-        if (this.animatedPlayerIncantations.length === 0) {
-            this.world.updateManager.add(this, "shaders", "animatePlayerIncantation")
+        const index = this.getPlayerById(playerId)
+
+        let player = null
+        for (let i = 0; i < this.animatedPlayersMove.length; i++) {
+            if (this.animatedPlayersMove[i].index === index) {
+                player = this.animatedPlayersMove[i]
+                this.dummyObject.position.copy(player.endPosition)
+                break
+            }
         }
 
-        const index = this.getPlayerById(playerId)
-        const totalTime = actionTicks.incantation * this.tickTime
-
-        this.playerInstance.getMatrixAt(index, this.positionningMatrix)
-        this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+        if (!player) {
+            this.playerInstance.getMatrixAt(index, this.positionningMatrix)
+            this.positionningMatrix.decompose(this.dummyObject.position, this.dummyObject.quaternion, this.dummyObject.scale)
+        }
 
         const incantationMesh = new THREE.Mesh(this.incantationGeometry, this.incantationMaterial.clone())
         incantationMesh.position.copy(this.dummyObject.position)
@@ -656,32 +662,22 @@ class Players {
 
         this.animatedPlayerIncantations.push({
             index,
-            duration: totalTime,
-            passedTime: 0,
-            mesh: incantationMesh
+            mesh: incantationMesh,
+            x: this.gameState.playerInfo.get(playerId).x,
+            y: this.gameState.playerInfo.get(playerId).y,
         })
     }
 
     /**
      * @author Emma (epolitze) Politzer
-     * @description Animates the player incantations
+     * @description Stops the player incantation animation for the given player
+     * @param incantationInfo - The incantation info
      */
-    animatePlayerIncantation() {
-        if (this.animatedPlayerIncantations.length < 1) {
-            this.world.updateManager.remove(this, "shaders", "animatePlayerIncantation")
-        }
-
-        const deltaTime = this.world.updateManager.time.deltaInSecond
-
-        let incantation
-        for (let i = 0; i < this.animatedPlayerIncantations.length; i++) {
-            incantation = this.animatedPlayerIncantations[i]
-
-            incantation.passedTime += deltaTime
-        }
+    stopIncantation(incantationInfo) {
+        const [x, y, _] = incantationInfo
 
         this.animatedPlayerIncantations = this.animatedPlayerIncantations.filter((incantation) => {
-            const remove = incantation.passedTime > incantation.duration
+            const remove = incantation.x === x && incantation.y === y
             if (remove) {
                 incantation.mesh.material.dispose()
                 this.scene.remove(incantation.mesh)

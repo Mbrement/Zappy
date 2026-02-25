@@ -338,7 +338,8 @@ class MessageHandler {
         }
 
         this.gameState.stopIncantation(integerArguments)
-        // console.log("Received end of incantation on tiles", {x: integerArguments[0], y:integerArguments[1]})
+
+        this.world.players.stopIncantation(integerArguments)
     }
 
     /**
