@@ -742,10 +742,10 @@ impl CommandManager {
                                         self.next_execute.insert(*player, 0);
                                     }
                                     self.next_execute.insert(*player, server._game._tick + 300);
-                                    println!(
-                                        "Adding incantation_internal for player {:?} at tick {}",
-                                        player, self.next_execute[&player]
-                                    );
+                                    // println!(
+                                    //     "Adding incantation_internal for player {:?} at tick {}",
+                                    //     player, self.next_execute[&player]
+                                    // );
                                     self.add_to_queue_internal(
                                         "incantation_internal".to_string(),
                                         *player,
