@@ -84,7 +84,7 @@ class ElevationState extends IState {
         } else {
             this.censusTicks++
 
-            if (this.censusTicks > 25) {
+            if (this.censusTicks > 150) {
                 console.log(`[ELEVATION] Awaiting for to long... Canceling`)
                 GameManager.elevationCooldown = Date.now() + 10000
                 GameManager.lastVisionRefresh = 0
