@@ -423,12 +423,12 @@ impl Server {
                                                         cmd == self.get_team_for_player(&pos.2)
                                                     })
                                                     .map(|(k, v)| (*k, v.0, v.1, v.2, v.3));
-                                                let (egg_id, _, _, _, tick) =
+                                                let (egg_id, x, y, _, tick) =
                                                     found.unwrap_or((0, 0, 0, Token(0), 0));
                                                 if egg_id != 0 {
                                                     _command_manager
                                                         .next_execute
-                                                        .insert(token, tick + 600); //get the tick of the hatching of the egg ??? ca n'est pas bon, tu attend pas 600s après l'eclosion de l'oeuf
+                                                        .insert(token, tick); //get the tick of the hatching of the egg ??? ca n'est pas bon, tu attend pas 600s après l'eclosion de l'oeuf
                                                 }
                                                 _command_manager.add_to_queue_internal(
                                                     "spawning".to_string(),
@@ -448,7 +448,8 @@ impl Server {
                                                         );
                                                     }
                                                 }
-                                                self._game.spawn_player(player_token, &cmd, found)
+                                                (x, y)
+                                                //self._game.spawn_player(player_token, &cmd, found)
                                             };
                                             if let Some(client) =
                                                 self._clients.get_mut(&player_token)
@@ -476,12 +477,13 @@ impl Server {
                                                     self._game.map.get_height(),
                                                     self._game.map.get_width()
                                                 );
-                                                if self._max_clients[&cmd] as usize
-                                                    - self._game.team[&cmd].len()
-                                                    < 0
-                                                {
-                                                    to_disconnect.push(player_token);
-                                                }
+                                                //soustraction de usize, qui sont des unsigned, donc ne peut pas déscendre en negatif donc la condition est toujours fausse
+                                                //if self._max_clients[&cmd] as usize
+                                                //    - self._game.team[&cmd].len()
+                                                //    < 0
+                                                //{
+                                                //    to_disconnect.push(player_token);
+                                                //}
                                                 if client
                                                     .get_socket_mut()
                                                     .write(response.as_bytes())
@@ -614,6 +616,23 @@ impl Server {
                         let _ = client.get_socket_mut().write(b"mort\n");
                         to_disconnect.push(client.get_token());
                     }
+                }
+                let mut ticks_to_remove: Vec<u128> = Vec::new();
+                for (egg_id, (_, _, token, tick)) in self._game.map.egg_position.iter() {
+                    if tick < &self._game._tick {
+                        let team_name = self.get_team_for_player(&token);
+                        let tmp = self._max_clients.get_mut(&team_name);
+                        if let Some(v) = tmp {
+                            if *v > self._max_clients_per_team {
+                                *v -= 1;
+                            }
+                        }
+                        ticks_to_remove.push(*egg_id);
+                    }
+                }
+                for t in ticks_to_remove {
+                    self.send_to_graph += &graphic::rotten_egg(t);
+                    self._game.map.egg_position.remove(&t);
                 }
                 let mut graph_msg = String::new();
                 for token in &to_disconnect {

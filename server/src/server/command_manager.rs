@@ -595,7 +595,6 @@ impl CommandManager {
                             }
                         }
                         ticks_to_remove.push(*egg_id);
-                        break;
                     }
                 }
                 for t in ticks_to_remove {
@@ -752,7 +751,7 @@ impl CommandManager {
                                 self.next_execute.insert(token, server._game._tick + 600)
                             }
                             "egg_death" => self.next_execute.insert(token, server._game._tick),
-                            "connect_nbr" | "incantation" | "incantation_internal" => {
+                            "connect_nbr" | "incantation" | "incantation_internal" | "end_fork" => {
                                 self.next_execute.insert(token, server._game._tick)
                             }
                             _ => None,
