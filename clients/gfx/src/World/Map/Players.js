@@ -943,6 +943,29 @@ class Players {
 
         this.restackPlayers(eggState.x, eggState.y)
     }
+
+    removeMeshes(objArray) {
+        objArray.forEach((obj) => {
+            if (obj.mesh) {
+                this.scene.remove(obj.mesh)
+            }
+        })
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description clears the player and egg instances
+     */
+    clear() {
+        this.removeMeshes(this.animatedPlayersMove)
+        this.removeMeshes(this.animatedPlayersRotate)
+        this.removeMeshes(this.animatedPlayerBroadcasts)
+        this.removeMeshes(this.animatedPlayerIncantations)
+        this.removeMeshes(this.animatedPlayerPickUp)
+        this.removeMeshes(this.animatedPlayerDrop)
+
+        this.scene.remove(this.playerInstance, this.eggInstance)
+    }
 }
 
 module.exports = Players

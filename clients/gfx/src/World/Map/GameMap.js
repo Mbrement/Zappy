@@ -190,6 +190,14 @@ class GameMap {
         resourceInstance.setMatrixAt(index, this.positioningMatrix)
         resourceInstance.instanceMatrix.needsUpdate = true
     }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description clears map tile instances
+     */
+    clear() {
+        this.resourceAssets.clear()
+    }
 }
 
 module.exports = GameMap

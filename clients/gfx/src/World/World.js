@@ -305,8 +305,11 @@ class World {
      * @param winningTeam - The name of the winning team
      */
     displayResults(winningTeam) {
+        this.gameEnded = true
         this.updateManager.remove(this, 'world','updateHover')
         this.gameEnded = true
+        this.players.clear()
+        this.gameMap.clear()
 
         this.teamNameMesh = new THREE.Mesh(
             createTextGeometry(0.1, winningTeam, 1),
