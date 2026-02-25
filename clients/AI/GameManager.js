@@ -185,11 +185,6 @@ class GameManager {
             return
         }
 
-        if (parsedBroadcast.action === 'NEED' && parsedBroadcast.direction === 0) {
-            this.commandManager.sendCommand(this.buildBroadcastMessage(BROAD_WITH_PLAYER, parsedBroadcast.senderID))
-            return
-        }
-
         if (parsedBroadcast.action === BROAD_CANCEL) {
             if (this.followedBroadcast && this.followedBroadcast.senderID === parsedBroadcast.senderID) {
                 console.log(`[GAMEMANAGER] Leader ${parsedBroadcast.senderID} has cancel elevation...`)
