@@ -418,13 +418,6 @@ impl Server {
                                             < self._max_clients[&cmd] as usize
                                         {
                                             let player_token = token;
-                                            //drop(client);
-                                            // self._game
-                                            //     .team
-                                            //     .get_mut(&cmd)
-                                            //     .unwrap()
-                                            //     .push(player_token);
-
                                             let position = if !self._game.starting {
                                                 (
                                                     self._game.map.rng.random_range(
@@ -492,20 +485,20 @@ impl Server {
                                                     .get_mut(&cmd)
                                                     .unwrap()
                                                     .push(player_token); //push the client token into the team
-												let response = format!(
-													"{}\n{} {}\n",
+                                                let response = format!(
+                                                    "{}\n{} {}\n",
                                                     self._max_clients[&cmd] as usize
-													- self._game.team[&cmd].len()
-													+ 1,
+                                                        - self._game.team[&cmd].len()
+                                                        + 1,
                                                     self._game.map.get_height(),
                                                     self._game.map.get_width()
                                                 );
-												if self._max_clients[&cmd] as usize
-													- self._game.team[&cmd].len()
-													< 0
-												{
-													to_disconnect.push(player_token);
-												}
+                                                if self._max_clients[&cmd] as usize
+                                                    - self._game.team[&cmd].len()
+                                                    < 0
+                                                {
+                                                    to_disconnect.push(player_token);
+                                                }
                                                 if client
                                                     .get_socket_mut()
                                                     .write(response.as_bytes())
@@ -513,12 +506,33 @@ impl Server {
                                                 {
                                                     self._clients.remove(&player_token);
                                                 }
-                                                //if !self._game.starting {
+                                                if self._clients[&player_token].was_egg > 0 {
+
                                                 graphic::send_graphic_clients(
                                                     graphic::egg_hatches(&player_token, self),
                                                     self,
                                                 );
-                                                //}
+											}
+                                                if self._clients.get(&player_token).unwrap().was_egg
+                                                    > 0
+                                                {
+                                                    self._game.map.egg_position.remove(
+                                                        &self
+                                                            ._clients
+                                                            .get(&player_token)
+                                                            .unwrap()
+                                                            .was_egg,
+                                                    );
+                                                    graphic::send_graphic_clients(
+														graphic::rotten_egg(
+															self._clients
+																.get(&player_token)
+																.unwrap()
+																.was_egg,
+														),
+														self,
+													);
+                                                }
                                             }
                                             self._game.starting = true;
                                         } else {

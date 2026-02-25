@@ -2,6 +2,7 @@ use crate::server;
 use crate::server::graphic;
 use crate::server::utils::debug_manager_register;
 use crate::server::{Server, client::Client, define, utils};
+use getopts::Options;
 use mio::Token;
 use std::collections::{HashMap, VecDeque};
 use std::io::Write;
@@ -548,7 +549,7 @@ impl CommandManager {
                         if let Some(v) = tmp {
                             *v += 1;
                         }
-                            server.send_to_graph += &graphic::end_fork(team_name, *egg_id, *x, *y);
+                        server.send_to_graph += &graphic::end_fork(team_name, *egg_id, *x, *y);
                     }
                 }
                 //end fork
@@ -629,21 +630,23 @@ impl CommandManager {
                     let _ = client
                         .get_socket_mut()
                         .write(format!("A admin change the tick to {}\n", _arg).as_bytes());
-				}
+                }
             } else {
-				for client in server.get_clients_by_type_mut(define::ROLE_ADMIN) {
-					let _ = client.get_socket_mut().write(
-						format!(
-							"A admin try to set tick with a {} argument, bully them !\n",
+                for client in server.get_clients_by_type_mut(define::ROLE_ADMIN) {
+                    let _ = client.get_socket_mut().write(
+                        format!(
+                            "A admin try to set tick with a {} argument, bully them !\n",
                             _arg
                         )
                         .as_bytes(),
                     );
                 }
-				let tick = server.get_ticks();
-				for client in server.get_clients_by_type_mut(define::GRAPHICAL_CLIENT) {
-					let _ = client.get_socket_mut().write(format!("sgt {}\n", tick).as_bytes());
-				}
+                let tick = server.get_ticks();
+                for client in server.get_clients_by_type_mut(define::GRAPHICAL_CLIENT) {
+                    let _ = client
+                        .get_socket_mut()
+                        .write(format!("sgt {}\n", tick).as_bytes());
+                }
             }
         });
         self.register("stop", |_c: mio::Token, server: &mut Server, _arg: &str| {
@@ -700,6 +703,7 @@ impl CommandManager {
                             "incantation_internal" => {
                                 //println!("incantation_internal in the process_queue for token {:?} at tick {}", token, server._game._tick);
                                 self.next_execute.insert(token, server._game._tick)
+								// Options::new()
                             }
                             "egg_waiting" => {
                                 self.next_execute.insert(token, server._game._tick + 42)

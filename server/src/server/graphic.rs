@@ -156,9 +156,6 @@ pub(crate) fn egg_hatches(token: &Token, server: &Server) -> String {
         res += &format!("eht {}\n", player.was_egg);
     }
     res += &new_player(server.get_team_for_player(&player.token), player);
-	if player.was_egg > 0 {
-		res += &format!("eht {}\n", player.was_egg);
-	}
     res
 }
 
@@ -194,11 +191,13 @@ pub(crate) fn event_graph_connect(server: &Server) -> String {
     res += &map_content(server._game.map.get_tiles());
     res += &team_names(server._game.team.clone());
     for player in server.get_clients_by_type(define::ROLE_PLAYER) {
-        res += &new_player(server.get_team_for_player(&player.token), player);
+        if player.was_egg == 0 {
+            res += &new_player(server.get_team_for_player(&player.token), player);
+        }
     }
-    for (egg_id, (x, y, token, tick)) in &server._game.map.egg_position {
-        res += &end_fork(server.get_team_for_player(token), *egg_id, *x, *y);
-    }
+    // for (egg_id, (x, y, token, tick)) in &server._game.map.egg_position {
+    //     res += &end_fork(server.get_team_for_player(token), *egg_id, *x, *y);
+    // }
     res
 }
 
@@ -241,13 +240,15 @@ pub(crate) fn event_fus_ro_dah(players: Vec<&mut Client>, token: Token) -> Strin
 pub(crate) fn event_incant_end(server: &mut Server, success: bool, token: Token) -> String {
     let mut res = String::new();
     let (x, y) = server._game.get_player_position(token);
+    res += &end_incant(x, y, success);
+    let tile: &Tile = &server.get_map().get_tiles()[y as usize][x as usize];
 
     for player_token in server._incantation_list.get(&token).unwrap() {
         if let Some(player) = server._clients.get(player_token) {
             res += &player_level(player);
         }
     }
-    res += &end_incant(x, y, success);
+    res += &content_tile(x, y, tile);
     res
 }
 
