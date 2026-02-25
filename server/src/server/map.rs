@@ -44,7 +44,7 @@ impl Map {
             tiles: vec![vec![Tile::new(); width as usize]; height as usize],
             player_position: HashMap::new(),
             egg_position: HashMap::new(),
-            egg_id_counter: 0,
+            egg_id_counter: 1,
         }
     }
     pub fn set_width(&mut self, width: u32) {
