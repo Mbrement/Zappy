@@ -1,18 +1,19 @@
 import process from 'node:process'
 import {
+    AVAILABLE_CONNECTION,
     BROADCAST_RECEIVED_REGEX,
-    DEATH, EXPULSION_REGEX, INCANTATION, INCANTATION_DONE,
+    DEATH, EXPULSION_REGEX, INCANTATION, INCANTATION_CMD, INCANTATION_DONE, INVENTORY, KO, MAP_SIZE_REGEX,
     MAX_SERVER_MSG,
-    NO_PROMISE_TO_RESOLVE, START_INCANTION,
+    NO_PROMISE_TO_RESOLVE, OK, ONLY_NUMBER_REGEX, SEE, START_INCANTION,
     WELCOME
-} from "../constant.js";
-import GameManager from "../GameManager.js";
+} from "../constant.js"
+import GameManager from "../GameManager.js"
 
 class CommandManager {
     #inProcessQueue = []
     #waitingQueue = []
     constructor(networkClient) {
-        this.networkClient = networkClient;
+        this.networkClient = networkClient
 
         this.handleResponseBind = this.handleResponse.bind(this)
 
@@ -62,13 +63,68 @@ class CommandManager {
 
     /**
      * @author Corentin (ccharton) Charton
+     * @description Check if the send response is valid for the current command to resolve.
+     * @param command {String} - The command to resolve.
+     * @param response {String} - The response send by the server.
+     * @return {boolean} - Whether the response match the command to resolve or not.
+     */
+    isValidResponse(command, response) {
+        const cmd = command.trim().split(" ")[0]
+
+        if (cmd === GameManager.teamName) {
+            return ONLY_NUMBER_REGEX.test(response) || MAP_SIZE_REGEX.test(response)
+        }
+
+        if (cmd === SEE || cmd === INVENTORY) {
+            return response.startsWith("{") && response.endsWith("}")
+        }
+
+        if (cmd === AVAILABLE_CONNECTION) {
+            return ONLY_NUMBER_REGEX.test(response)
+        }
+
+        if (cmd === INCANTATION) {
+            return response === START_INCANTION || INCANTATION_DONE.test(response)
+        }
+
+        return response === OK || response === KO
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Check if the response send by the server match the current command to resolve
+     * @param message {String} - The response send by the server
+     */
+    flushDroppedCommands(message) {
+        while (this.#inProcessQueue.length > 0) {
+            const currentRequest = this.#inProcessQueue[0]
+
+            if (this.isValidResponse(currentRequest.command, message)) {
+                break
+            }
+
+            console.warn(`[COMMAND MANAGER] Command dropped: ${currentRequest.command}. Received instead: ${message}`)
+            const droppedReq = this.#inProcessQueue.shift()
+
+            const fallbackAnswer = [...droppedReq.answer]
+            while (droppedReq.expectedAnswerCount > 0) {
+                fallbackAnswer.push("ko")
+                droppedReq.expectedAnswerCount--
+            }
+
+            droppedReq.resolve(fallbackAnswer)
+        }
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
      * @description Handle the response from the server and push waiting one if it's not death or broadcast.
      * @param message {String} - The response send by the server
      */
     handleResponse(message) {
         if (message === WELCOME) {
             GameManager.handshakeServer()
-            return;
+            return
         }
 
         if (BROADCAST_RECEIVED_REGEX.test(message)) {
@@ -83,45 +139,48 @@ class CommandManager {
         }
 
         if (EXPULSION_REGEX.test(message)) {
-            console.log(`[COMMAND MANAGER] Player expulse from it's tile (${message})`);
+            console.log(`[COMMAND MANAGER] Player expulse from it's tile (${message})`)
 
-            GameManager.lastVisionRefresh = 0;
+            GameManager.lastVisionRefresh = 0
 
             if (GameManager.followedBroadcast) {
-                GameManager.followedBroadcast.direction = -1;
+                GameManager.followedBroadcast.direction = -1
             }
 
-            return;
+            return
         }
 
         if (message === START_INCANTION) {
             const isIncantationFromThisAI = this.#inProcessQueue.length > 0 &&
-                this.#inProcessQueue[0].command === INCANTATION
+                this.#inProcessQueue[0].command === INCANTATION_CMD
 
             if (!isIncantationFromThisAI) {
-                console.log("[SERVER] Elevation started by another player. Freezing current command.")
+                console.log("[COMMAND MANAGER] Elevation started by another player. Freezing current command.")
                 return
             }
         }
 
         if (INCANTATION_DONE.test(message)) {
             const isIncantationFromThisAI = this.#inProcessQueue.length > 0 &&
-                this.#inProcessQueue[0].command === INCANTATION
+                this.#inProcessQueue[0].command === INCANTATION_CMD
 
             if (!isIncantationFromThisAI) {
-                const newLevel = parseInt(message.split(':')[1].trim());
-                console.log(`[SERVER] Elevation from an other player has been done: ${newLevel}`);
+                const newLevel = parseInt(message.split(':')[1].trim())
+                console.log(`[COMMAND MANAGER] Elevation from an other player has been done: ${newLevel}`)
 
-                GameManager.updateLevel(newLevel);
+                GameManager.updateLevel(newLevel)
                 GameManager.followedBroadcast = null
-                GameManager.lastVisionRefresh = 0;
-                GameManager.main.brain.think();
+                GameManager.lastVisionRefresh = 0
+                GameManager.main.brain.think()
                 return
             }
         }
 
+        this.flushDroppedCommands(message)
+
         if (this.#inProcessQueue.length <= 0) {
             console.error(NO_PROMISE_TO_RESOLVE, message)
+            this.trySend()
             return
         }
 

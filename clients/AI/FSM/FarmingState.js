@@ -1,12 +1,12 @@
 import IState from "./IState.js"
 import {
-    ADVANCE,
-    AVAILABLE_CONNECTION,
+    ADVANCE_CMD,
+    AVAILABLE_CONNECTION_CMD,
     FOOD,
-    FORK,
+    FORK_CMD,
     INCANTATION_TABLE,
-    LEFT,
-    RIGHT,
+    LEFT_CMD,
+    RIGHT_CMD,
     TAKE_COMMANDS
 } from "../constant.js"
 import GameManager from "../GameManager.js"
@@ -53,7 +53,7 @@ class FarmingState extends IState {
      */
     async onUpdate() {
         if (GameManager.needToFork) {
-            const connectAns = await GameManager.commandManager.sendCommand(AVAILABLE_CONNECTION)
+            const connectAns = await GameManager.commandManager.sendCommand(AVAILABLE_CONNECTION_CMD)
             const availableSlots = parseInt(connectAns[0], 10)
 
             if (availableSlots > 0) {
@@ -65,7 +65,7 @@ class FarmingState extends IState {
 
             if (GameManager.inventory.nourriture > 2000) {
                 console.log('[FARMING] Laying an egg...')
-                await GameManager.commandManager.sendCommand(FORK)
+                await GameManager.commandManager.sendCommand(FORK_CMD)
                 GameManager.needToFork = false
 
                 setTimeout(() => {
@@ -160,12 +160,12 @@ class FarmingState extends IState {
         }
 
         const rand = Math.random()
-        let moveCmd = ADVANCE
+        let moveCmd = ADVANCE_CMD
 
         if (rand > 0.85) {
-            moveCmd = RIGHT
+            moveCmd = RIGHT_CMD
         } else if (rand > 0.70) {
-            moveCmd = LEFT
+            moveCmd = LEFT_CMD
         }
 
         console.log(`[FARMING] Nothing found in vision. Moving ${moveCmd}...`)

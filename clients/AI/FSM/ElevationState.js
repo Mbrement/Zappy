@@ -2,9 +2,9 @@ import IState from './IState.js'
 import GameManager from '../GameManager.js'
 import {
     INCANTATION_TABLE,
-    INCANTATION,
+    INCANTATION_CMD,
     BROAD_NEED_PLAYER,
-    SEE,
+    SEE_CMD,
     BROAD_CANCEL
 } from '../constant.js'
 
@@ -55,7 +55,7 @@ class ElevationState extends IState {
                 this.isCensusDone = true
                 GameManager.evaluatePopulationNeed()
             } else {
-                const vision = await GameManager.commandManager.sendCommand(SEE)
+                const vision = await GameManager.commandManager.sendCommand(SEE_CMD)
                 GameManager.updateVision(vision[0])
                 return
             }
@@ -68,7 +68,7 @@ class ElevationState extends IState {
             console.log(`[ELEVATION] Everyone is ready to elevate (${playersReadyCount}/${requiredPlayers}).`)
             this.isIncanting = true
 
-            const answers = await GameManager.commandManager.sendCommand(INCANTATION, 2)
+            const answers = await GameManager.commandManager.sendCommand(INCANTATION_CMD, 2)
             console.log('[ELEVATION] Result:', answers)
 
             const finalAnswer = answers[1]

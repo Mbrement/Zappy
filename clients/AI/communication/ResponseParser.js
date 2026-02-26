@@ -1,8 +1,8 @@
 import {
     BROADCAST_MSG_OBJECT,
     BROADCAST_RECEIVED_REGEX,
-    INVENTORY_REGEX,
-    INVENTORY_TEMPLATE,
+    INVENTORY_CMD_REGEX,
+    INVENTORY_CMD_TEMPLATE,
     ONLY_NUMBER_REGEX,
     VALID_ITEM_LIST,
     VISION_REGEX
@@ -19,12 +19,12 @@ class ResponseParser {
      * @returns {Object|null} - The parsed inventory object or null if string passed was not valid
      */
     parseInventory(inventory) {
-        if (!INVENTORY_REGEX.test(inventory)) {
+        if (!INVENTORY_CMD_REGEX.test(inventory)) {
             console.log('[RESPONSE PARSER] Inventory is invalid', inventory)
             return null
         }
 
-        let finalInventory = {...INVENTORY_TEMPLATE}
+        let finalInventory = {...INVENTORY_CMD_TEMPLATE}
 
         inventory = inventory.replaceAll(/[{}]/g, '')
         let inventoryByItem = inventory.split(',')

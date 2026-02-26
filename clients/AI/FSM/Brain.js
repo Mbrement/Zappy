@@ -1,12 +1,12 @@
 import {
-    ADVANCE,
+    ADVANCE_CMD,
     INCANTATION_TABLE,
-    LEFT,
-    RIGHT,
+    LEFT_CMD,
+    RIGHT_CMD,
     STATE,
-    INVENTORY_REFRESH_RATE,
+    INVENTORY_CMD_REFRESH_RATE,
     VISION_REFRESH_RATE,
-    INVENTORY, SEE, HEARTBEAT_INTERVAL, BROAD_ALIVE
+    INVENTORY_CMD, SEE_CMD, HEARTBEAT_INTERVAL, BROAD_ALIVE
 } from "../constant.js"
 import SurvivalState from "./SurvivalState.js"
 import FarmingState from "./FarmingState.js"
@@ -120,14 +120,14 @@ class Brain {
 
         const now = Date.now()
 
-        if (now - GameManager.lastInventoryRefresh > INVENTORY_REFRESH_RATE) {
-            const inventory = await GameManager.commandManager.sendCommand(INVENTORY)
+        if (now - GameManager.lastInventoryRefresh > INVENTORY_CMD_REFRESH_RATE) {
+            const inventory = await GameManager.commandManager.sendCommand(INVENTORY_CMD)
             GameManager.updateInventory(inventory[0])
             return
         }
 
         if (now - GameManager.lastVisionRefresh > VISION_REFRESH_RATE) {
-            const vision = await GameManager.commandManager.sendCommand(SEE)
+            const vision = await GameManager.commandManager.sendCommand(SEE_CMD)
             GameManager.updateVision(vision[0])
             return
         }
@@ -172,7 +172,7 @@ class Brain {
         const Y =  Math.floor(Math.sqrt(destinationIndex))
 
         for (let i = 0; i < Y; i++) {
-            itinerary.push(ADVANCE)
+            itinerary.push(ADVANCE_CMD)
         }
 
         const centerOfY = Y * Y + Y
@@ -180,15 +180,15 @@ class Brain {
         let leftOrRight = destinationIndex - centerOfY
 
         if (leftOrRight < 0) {
-            itinerary.push(LEFT)
+            itinerary.push(LEFT_CMD)
             while(leftOrRight < 0) {
-                itinerary.push(ADVANCE)
+                itinerary.push(ADVANCE_CMD)
                 leftOrRight++
             }
         } else if (leftOrRight > 0) {
-            itinerary.push(RIGHT)
+            itinerary.push(RIGHT_CMD)
             while(leftOrRight > 0) {
-                itinerary.push(ADVANCE)
+                itinerary.push(ADVANCE_CMD)
                 leftOrRight--
             }
         }

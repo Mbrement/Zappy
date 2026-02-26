@@ -1,6 +1,6 @@
 import IState from "./IState.js"
 import GameManager from "../GameManager.js"
-import {ADVANCE, FOOD, LEFT, RIGHT, TAKE_FOOD} from "../constant.js"
+import {ADVANCE_CMD, FOOD, LEFT_CMD, RIGHT_CMD, TAKE_FOOD_CMD} from "../constant.js"
 
 class SurvivalState extends IState {
     constructor() {
@@ -23,7 +23,7 @@ class SurvivalState extends IState {
         const vision = GameManager.vision
 
         if (vision && vision.includes(FOOD)) {
-            await GameManager.commandManager.sendCommand(TAKE_FOOD)
+            await GameManager.commandManager.sendCommand(TAKE_FOOD_CMD)
             GameManager.lastVisionRefresh = 0
             return
         }
@@ -39,7 +39,7 @@ class SurvivalState extends IState {
         if (targetIndex !== -1) {
             const itinerary = GameManager.main.brain.buildItinerary(targetIndex)
 
-            itinerary.push(TAKE_FOOD)
+            itinerary.push(TAKE_FOOD_CMD)
 
             console.log(`[SURVIVAL] Going to take food at index ${targetIndex}. Itinerary :`, itinerary.map(cmd => cmd.trim()))
 
@@ -53,12 +53,12 @@ class SurvivalState extends IState {
         }
 
         const rand = Math.random()
-        let moveCmd = ADVANCE
+        let moveCmd = ADVANCE_CMD
 
         if (rand > 0.85) {
-            moveCmd = RIGHT
+            moveCmd = RIGHT_CMD
         } else if (rand > 0.70) {
-            moveCmd = LEFT
+            moveCmd = LEFT_CMD
         }
 
         console.log(`[SURVIVAL] No food found in vision. Moving ${moveCmd}...`);

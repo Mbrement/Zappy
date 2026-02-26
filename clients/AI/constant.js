@@ -1,7 +1,7 @@
 export const DEFAULT_HOSTNAME = 'localhost';
 export const MAX_SERVER_MSG = 9
 export const VISION_REFRESH_RATE = 500
-export const INVENTORY_REFRESH_RATE = 5000
+export const INVENTORY_CMD_REFRESH_RATE = 5000
 export const HEARTBEAT_INTERVAL = 150
 export const HEARTBEAT_TIMEOUT = 400
 
@@ -17,6 +17,7 @@ export const NO_SPACE_AVAILABLE = 'No space available in the team... Exiting.'
  ****************/
 
 export const ONLY_NUMBER_REGEX = /^\d+$/
+export const MAP_SIZE_REGEX = /^\d+ \d+$/
 
 
 /*****************
@@ -42,7 +43,7 @@ export const INCANTATION_TABLE = [
     {player: 6, linemate: 2, deraumere: 2, sibur: 2, mendiane: 2, phiras: 2, thystame: 1},
 ]
 
-export const INVENTORY_TEMPLATE = {
+export const INVENTORY_CMD_TEMPLATE = {
     nourriture: 0,
     linemate: 0,
     deraumere: 0,
@@ -52,50 +53,66 @@ export const INVENTORY_TEMPLATE = {
     thystame: 0
 }
 
-export const VALID_ITEM_LIST = new Set([PLAYER, ...Object.keys(INVENTORY_TEMPLATE)])
+export const VALID_ITEM_LIST = new Set([PLAYER, ...Object.keys(INVENTORY_CMD_TEMPLATE)])
 
+/****************
+ *   BASE CMD   *
+ ***************/
+
+export const ADVANCE = 'avance'
+export const RIGHT = 'droite'
+export const LEFT = 'gauche'
+export const SEE = 'voir'
+export const INVENTORY = 'inventaire'
+
+export const TAKE = 'prend'
+export const PUT_FOOD = 'pose'
+export const KICK = 'expulse'
+export const INCANTATION = 'incantation'
+export const FORK = 'fork'
+export const AVAILABLE_CONNECTION = 'connect_nbr'
 
 /*****************
  *  SERVER MSG   *
  ****************/
 
-export const ADVANCE = 'avance\n'
-export const RIGHT = 'droite\n'
-export const LEFT = 'gauche\n'
-export const SEE = 'voir\n'
-export const INVENTORY = 'inventaire\n'
+export const ADVANCE_CMD = 'avance\n'
+export const RIGHT_CMD = 'droite\n'
+export const LEFT_CMD = 'gauche\n'
+export const SEE_CMD = 'voir\n'
+export const INVENTORY_CMD = 'inventaire\n'
 
-export const TAKE_FOOD = `prend ${FOOD}\n`
-export const TAKE_LINEMATE = `prend ${LINEMATE}\n`
-export const TAKE_DERAUMERE = `prend ${DERAUMERE}\n`
-export const TAKE_SIBUR = `prend ${SIBUR}\n`
-export const TAKE_MENDIANE = `prend ${MENDIANE}\n`
-export const TAKE_PHIRAS = `prend ${PHIRAS}\n`
-export const TAKE_THYSTAME = `prend ${THYSTAME}\n`
+export const TAKE_FOOD_CMD = `prend ${FOOD}\n`
+export const TAKE_LINEMATE_CMD = `prend ${LINEMATE}\n`
+export const TAKE_DERAUMERE_CMD = `prend ${DERAUMERE}\n`
+export const TAKE_SIBUR_CMD = `prend ${SIBUR}\n`
+export const TAKE_MENDIANE_CMD = `prend ${MENDIANE}\n`
+export const TAKE_PHIRAS_CMD = `prend ${PHIRAS}\n`
+export const TAKE_THYSTAME_CMD = `prend ${THYSTAME}\n`
 
 
 export const TAKE_COMMANDS = {
-    [LINEMATE]: TAKE_LINEMATE,
-    [DERAUMERE]: TAKE_DERAUMERE,
-    [SIBUR]: TAKE_SIBUR,
-    [MENDIANE]: TAKE_MENDIANE,
-    [PHIRAS]: TAKE_PHIRAS,
-    [THYSTAME]: TAKE_THYSTAME,
-    [FOOD]: TAKE_FOOD
+    [LINEMATE]: TAKE_LINEMATE_CMD,
+    [DERAUMERE]: TAKE_DERAUMERE_CMD,
+    [SIBUR]: TAKE_SIBUR_CMD,
+    [MENDIANE]: TAKE_MENDIANE_CMD,
+    [PHIRAS]: TAKE_PHIRAS_CMD,
+    [THYSTAME]: TAKE_THYSTAME_CMD,
+    [FOOD]: TAKE_FOOD_CMD
 };
 
-export const PUT_FOOD = `pose ${FOOD}\n`
-export const PUT_LINEMATE = `pose ${LINEMATE}\n`
-export const PUT_DERAUMERE = `pose ${DERAUMERE}\n`
-export const PUT_SIBUR = `pose ${SIBUR}\n`
-export const PUT_MENDIANE = `pose ${MENDIANE}\n`
-export const PUT_PHIRAS = `pose ${PHIRAS}\n`
-export const PUT_THYSTAME = `pose ${THYSTAME}\n`
+export const PUT_FOOD_CMD = `pose ${FOOD}\n`
+export const PUT_LINEMATE_CMD = `pose ${LINEMATE}\n`
+export const PUT_DERAUMERE_CMD = `pose ${DERAUMERE}\n`
+export const PUT_SIBUR_CMD = `pose ${SIBUR}\n`
+export const PUT_MENDIANE_CMD = `pose ${MENDIANE}\n`
+export const PUT_PHIRAS_CMD = `pose ${PHIRAS}\n`
+export const PUT_THYSTAME_CMD = `pose ${THYSTAME}\n`
 
-export const KICK = 'expulse\n'
-export const INCANTATION = 'incantation\n'
-export const FORK = 'fork\n'
-export const AVAILABLE_CONNECTION = 'connect_nbr\n'
+export const KICK_CMD = 'expulse\n'
+export const INCANTATION_CMD = 'incantation\n'
+export const FORK_CMD = 'fork\n'
+export const AVAILABLE_CONNECTION_CMD = 'connect_nbr\n'
 export const COMMAND_COST = {
     avance: 7,
     droite: 7,
@@ -117,7 +134,7 @@ export const COMMAND_COST = {
 
 export const WELCOME = 'BIENVENUE'
 export const VISION_REGEX =  /^\{([\w\s]*,?)*}$/
-export const INVENTORY_REGEX = /^\{(\s*\w+\s+\d+,?)*\s*}$/
+export const INVENTORY_CMD_REGEX = /^\{(\s*\w+\s+\d+,?)*\s*}$/
 export const EXPULSION_REGEX = /^deplacement [1-8]$/
 export const OK = 'ok'
 export const KO = 'ko'
@@ -150,14 +167,14 @@ export const BROADCAST_MSG_OBJECT = {
 }
 
 export const SOUND_MAPPING = {
-    1: [ADVANCE],
-    2: [ADVANCE],
-    3: [LEFT, ADVANCE],
-    4: [LEFT, ADVANCE],
-    5: [LEFT, LEFT, ADVANCE],
-    6: [RIGHT, ADVANCE],
-    7: [RIGHT, ADVANCE],
-    8: [ADVANCE]
+    1: [ADVANCE_CMD],
+    2: [ADVANCE_CMD],
+    3: [LEFT_CMD, ADVANCE_CMD],
+    4: [LEFT_CMD, ADVANCE_CMD],
+    5: [LEFT_CMD, LEFT_CMD, ADVANCE_CMD],
+    6: [RIGHT_CMD, ADVANCE_CMD],
+    7: [RIGHT_CMD, ADVANCE_CMD],
+    8: [ADVANCE_CMD]
 }
 
 
