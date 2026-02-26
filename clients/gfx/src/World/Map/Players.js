@@ -545,6 +545,8 @@ class Players {
             passedTime: 0,
             mesh: broadcastMesh
         })
+
+        this.main.musicManager.playBroadcast()
     }
 
     /**

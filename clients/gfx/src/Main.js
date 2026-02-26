@@ -123,7 +123,6 @@ class Main extends EventEmitter {
         this.eventManager.modules.ConnectMenu.hideConnectMenu()
 
         this.world.themeManager.switchSky('Dark_Theme')
-        this.musicManager.playDefault()
 
         const broadcastContainer = document.getElementById('broadcastContainer')
         broadcastContainer.classList.remove('hidden')
@@ -140,6 +139,7 @@ class Main extends EventEmitter {
      * @description Hides the connectMenu and starts the 3D visualisation
      */
     startVisualisation() {
+        this.musicManager.playDefault()
         this.world.createWorld()
         this.messageHandler.world = window.worldInstance
         this.networkClient.send("GRAPHIC\n")

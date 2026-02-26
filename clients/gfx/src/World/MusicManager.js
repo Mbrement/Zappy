@@ -5,7 +5,8 @@ class MusicManager extends EventEmitter {
     constructor() {
         super()
 
-        this.defaultSoundTrack = 'Ghost_n’_Goblins_(CPC_6128)_OST'
+        this.selectedSoundTrack = 'Dwarf_fortress_OST'
+        this.soundPromise = null
         this.sources = soundtracks
         this.soundtracks = {}
 
@@ -21,7 +22,7 @@ class MusicManager extends EventEmitter {
             return new Promise((resolve, reject) => {
                 const audio = new Audio(soundtrack.path)
                 audio.volume = soundtrack.volume
-                audio.loop = true
+                audio.loop = soundtrack.loop
 
                 audio.addEventListener('canplaythrough', () => {
                     resolve()
@@ -49,13 +50,12 @@ class MusicManager extends EventEmitter {
      * @description Turns off all soundtracks and resets them
      */
     turnOffSoundtrack() {
-        if (!this.soundPromise) {
+        if (!this.soundPromise || this.selectedSoundTrack === "The_sound_of_space") {
             return
         }
-        Object.keys(this.soundtracks).forEach((key) => {
-            this.soundtracks[key].pause()
-            this.soundtracks[key].currentTime = 0
-        })
+
+        this.soundtracks[this.selectedSoundTrack].pause()
+        this.soundtracks[this.selectedSoundTrack].currentTime = 0
     }
 
     /**
@@ -65,6 +65,7 @@ class MusicManager extends EventEmitter {
      */
     switchSoundtrack(newTrack) {
         this.turnOffSoundtrack()
+        this.selectedSoundTrack = newTrack
         if (newTrack !== "The_sound_of_space") {
             this.soundPromise = this.soundtracks[newTrack].play()
         }
@@ -76,7 +77,15 @@ class MusicManager extends EventEmitter {
      */
     playDefault() {
         this.turnOffSoundtrack()
-        this.soundPromise = this.soundtracks[this.defaultSoundTrack].play()
+        this.soundPromise = this.soundtracks[this.selectedSoundTrack].play()
+    }
+
+    playBroadcast() {
+        if (this.selectedSoundTrack !== "The_sound_of_space") {
+            const broadcastSound = this.soundtracks['broadcast'].cloneNode()
+            broadcastSound.volume = 0.02
+            broadcastSound.play()
+        }
     }
 }
 
