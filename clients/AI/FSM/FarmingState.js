@@ -22,6 +22,9 @@ class FarmingState extends IState {
      */
     onEnter() {
         console.log('[FARMING] Entering state')
+        if (GameManager.internalTicks > 350) {
+            GameManager.evaluatePopulationNeed()
+        }
     }
 
     /**
@@ -47,6 +50,20 @@ class FarmingState extends IState {
         return missing
     }
 
+    async checkEggHatched(startingTick) {
+        console.log('[FARMING] Checking for an egg to be hatched')
+
+        const connectAns = await GameManager.commandManager.sendCommand(AVAILABLE_CONNECTION_CMD);
+        const availableSlots = parseInt(connectAns[0])
+        if (availableSlots > 0) {
+            console.log(`[FARMING] Egg confirmed hatched (${availableSlots} slots). Spawning new child AI.`);
+            GameManager.main.processManager.fork()
+        } else if (GameManager.internalTicks - startingTick < 300 ) {
+            setTimeout(() => this.checkEggHatched(startingTick), 50);
+        }
+    }
+
+
     /**
      * @author Corentin (ccharton) Charton
      * @description Try to find stones and food
@@ -64,19 +81,25 @@ class FarmingState extends IState {
             }
 
             if (GameManager.inventory.nourriture > 2000) {
-                console.log('[FARMING] Laying an egg...')
+                console.log("[FARMING] Laying an egg...")
+
                 await GameManager.commandManager.sendCommand(FORK_CMD)
                 GameManager.needToFork = false
 
-                setTimeout(() => {
-                    console.log('[FARMING] Egg should have hatches, spawning new child AI.')
+                const connectAns = await GameManager.commandManager.sendCommand(AVAILABLE_CONNECTION_CMD)
+                const availableSlots = parseInt(connectAns[0], 10)
+
+                if (availableSlots > 0) {
+                    console.log(`[FARMING] Server opened a frozen slot (${availableSlots} available). Spawning child AI immediately!`)
                     GameManager.main.processManager.fork()
-                }, 6500)
+                } else {
+                    console.log("[FARMING] Weird, fork finished but server says 0 slots. They lied!")
+                }
 
                 GameManager.lastVisionRefresh = 0
                 return
             } else {
-                console.log('[FARMING] Not enough food to reproduce (>2000).')
+                console.log("[FARMING] Not enough food to reproduce (>2000).")
             }
         }
 
