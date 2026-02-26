@@ -742,11 +742,6 @@ impl CommandManager {
                             }
                             "inventaire" => self.next_execute.insert(token, server._game._tick + 1),
                             "fork" => self.next_execute.insert(token, server._game._tick + 42),
-                            "incantation_internal" => {
-                                //println!("incantation_internal in the process_queue for token {:?} at tick {}", token, server._game._tick);
-                                self.next_execute.insert(token, server._game._tick)
-								// Options::new()
-                            }
                             "egg_waiting" => {
                                 self.next_execute.insert(token, server._game._tick + 600)
                             }

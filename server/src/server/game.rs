@@ -141,32 +141,7 @@ impl Game {
             _ => {}
         }
     }
-
-    pub fn spawn_player(
-        &mut self,
-        token: Token,
-        team: &str,
-        found: Option<(u128, u32, u32, Token, u128)>,
-    ) -> (u32, u32) {
-        // find an egg matching the team and copy its key and coords out of the borrow
-        // let found = self
-        //     .map
-        //     .egg_position
-        //     .iter()
-        //     .find(|(_, pos)| team == server.get_team_for_player(&pos.2))
-        //     .map(|(k, v)| (*k, v.0, v.1));
-        if let Some((egg_token, x, y, player_token, tick)) = found {
-            // safe to remove now because the immutable borrow from `iter()` has ended
-            self.map.egg_position.remove(&egg_token);
-            self.map.player_position.insert(token, (x, y));
-            return (x, y);
-        }
-        let x = self.map.rng.random_range((0..self.map.get_width()));
-        let y = self.map.rng.random_range((0..self.map.get_height()));
-        self.map.player_position.insert(token, (x, y));
-        (x, y)
-    }
-
+    
     pub fn put_item_on_cell(&mut self, client: &mut Client, item: &str) -> bool {
         let idx: usize = match item {
             define::FOOD => define::FOOD_INV,

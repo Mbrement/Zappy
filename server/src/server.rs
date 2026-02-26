@@ -1,4 +1,4 @@
-use mio::net::TcpListener;
+use mio::net::{TcpListener, TcpStream};
 use mio::{Events, Interest, Poll, Token};
 use std::collections::HashMap;
 use std::io::{Read, Write};
@@ -11,6 +11,7 @@ mod map;
 pub mod utils;
 use crate::server::client::Client;
 use crate::server::command_manager::CommandManager;
+use crate::server::map::Egg;
 //use crate::server::{self};
 use rand::*;
 //use std::collections::VecDeque;
@@ -273,6 +274,272 @@ impl Server {
         println!("Client {:?} disconnected", client.get_token());
     }
 
+    fn connect_attempt(&mut self, client_stream: TcpStream) -> bool {
+        let token = Token(self._next_token as usize);
+        if self._clients.contains_key(&token) {
+            eprintln!("Client with token {:?} already exists", token);
+            return false;
+        }
+        self._next_token += 1;
+        self._clients
+            .insert(token, Client::new(client_stream, token));
+        let tmp = self._clients.get_mut(&token);
+        if tmp.is_none() {
+            eprintln!("Failed to get client socket");
+            self._clients.remove(&token);
+            return false;
+        }
+        let check = self._poll.registry().register(
+            tmp.unwrap().get_socket_mut(),
+            token,
+            Interest::READABLE,
+        );
+        if check.is_err() {
+            eprintln!("Failed to register client");
+            self._clients.remove(&token);
+            return false;
+        }
+        let response = format!("BIENVENUE\n");
+        if self
+            ._clients
+            .get_mut(&token)
+            .unwrap()
+            .get_socket_mut()
+            .write(response.as_bytes())
+            .is_err()
+        {
+            self._clients.remove(&token);
+            return false;
+        }
+        self._clients.get_mut(&token).unwrap().r#type = "welcomed".to_string();
+        return true;
+    }
+
+    fn get_position_new_client(&mut self, token: Token, cmd: &String, _command_manager: &mut CommandManager) -> (u32, u32) {
+        //let mut egg: Egg = Egg::new(0,0, 0, cmd, 0);
+        let mut egg: (u128, u32, u32, String, u128) = (0,0,0,cmd.clone(), 0);
+        if self._game.starting {
+            match self._game.map.egg_position.iter()
+                .find(|(_, pos)| {
+                    *cmd == pos.2
+                })
+                .map(|(k,v)| (*k, v.0, v.1, v.2.clone(), v.3)) {
+                    Some(egg_found) => egg = egg_found,
+                    _ => egg = egg,
+            };
+        }
+        if (egg.0 == 0) {
+            /*TODO
+            _command_manager.add_to_queue_internal(
+                "spawning_no_egg".to_string(),
+                token,
+                0,
+            ); */
+            return (
+                self._game.map.rng.random_range(
+                    0..self._game.map.get_width(),
+                ),
+                self._game.map.rng.random_range(
+                    0..self._game.map.get_height(),
+                ),
+            )
+        }
+        _command_manager.next_execute.insert(token, egg.4);
+        _command_manager.add_to_queue_internal(
+            "spawning".to_string(),
+            token,
+            egg.0.to_string(),
+        );
+        #[cfg(feature = "log")]
+        {
+            if _command_manager
+                .next_execute
+                .contains_key(&token)
+            {
+                println!(
+                    "{:?}, {:?}",
+                    _command_manager.next_execute[&token],
+                    self._game._tick
+                );
+            };
+        }
+        (egg.1, egg.2)
+    }
+
+    fn update_new_client_info(&mut self, token: &Token, cmd: &String, _command_manager: &mut CommandManager) {
+
+        let position = (0,0);
+        if self._clients.contains_key(token) {
+            let position = self.get_position_new_client(*token, cmd, _command_manager);
+        }
+        if let Some(client) =
+            self._clients.get_mut(&token)
+        {
+            let player_token = client.get_token();
+		    client.r#type = define::ROLE_PLAYER.to_string();
+            client.position = position;
+            self._game.update_player_position(
+                player_token,
+                client.position,
+            );
+            client.orientation = "NESW"
+                .chars()
+                .nth(self._game.map.rng.random_range(0..3))
+                .unwrap();
+            self._game
+                .team
+                .get_mut(cmd)
+                .unwrap()
+                .push(player_token); //push the client token into the team
+            let response = format!(
+                "{}\n{} {}\n",
+                self._max_clients[cmd] as usize
+                    - self._game.team[cmd].len()
+                    + 1,
+                self._game.map.get_height(),
+                self._game.map.get_width()
+            );
+            if client
+                .get_socket_mut()
+                .write(response.as_bytes())
+                .is_err()
+            {
+                self._clients.remove(&player_token);
+            }
+            //change condition
+            if !self._game.starting {
+                graphic::send_graphic_clients(
+                    graphic::egg_hatches(&player_token, self),
+                    self,
+                );
+            }
+        }
+        self._game.starting = true;
+    }
+
+    fn not_enough_space(&mut self, token: &Token, to_disconnect: &mut Vec<Token>) {
+        if let Some(client) = self._clients.get_mut(token) {
+            let _ = client.get_socket_mut().write(
+                format!(
+                    "0\n{} {}\n",
+                    self._game.map.get_height(),
+                    self._game.map.get_width()
+                )
+                .as_bytes(),
+            );
+        }
+        to_disconnect.push(*token);
+    }
+
+    fn admin_cmd(&mut self, buffer: [u8;1024], n: usize, token: &Token, _command_manager: &mut CommandManager) {
+        let cmd = String::from_utf8_lossy(&buffer[..n]).trim().to_string();
+        let mut parts = cmd.splitn(2, ' ');
+        let name = parts.next().unwrap_or("");
+        let arg = parts.next().unwrap_or("");
+        #[cfg(feature = "log")]
+        println!("Received command '{}' from {:?} 3", cmd, token);
+        _command_manager.execute(name, *token, arg, self);
+    }
+
+    fn graph_connect(&mut self, token: &Token, to_disconnect: &mut Vec<Token>) {
+        let client = self._clients.get(token).unwrap();
+        if client
+            .get_socket()
+            .write(graphic::event_graph_connect(self).as_bytes())
+            .is_err()
+        {
+            self._clients.remove(token);
+            to_disconnect.push(*token);
+        }
+    }
+
+    fn clients_hunger(&mut self, to_disconnect: &mut Vec<Token>) {
+        for client in self.get_clients_by_type_mut(define::ROLE_PLAYER) {
+            client.hunger_tick();
+            #[cfg(feature = "debug")]
+            println!(
+                "Client {:?} hunger: {}",
+                client.get_token(),
+                client.inventory[0]
+            );
+            if client.inventory[0] == 0 {
+                let _ = client.get_socket_mut().write(b"mort\n");
+                to_disconnect.push(client.get_token());
+            }
+        }
+    }
+
+    fn register_listener(&mut self) -> bool {
+        if let Err(e) = self._poll.registry().register(
+            &mut self._socket,
+            self._client_token,
+            Interest::READABLE,
+        ) {
+            eprintln!("Failed to register socket: {}", e);
+            return true;
+        }
+        false
+    }
+
+    fn check_poll(&mut self) -> bool {
+        let check = self._poll.poll(
+            &mut self._events,
+            Some(time::Duration::from_millis(1000 / self._ticks)),
+        );
+        if check.is_err() {
+            eprintln!("Failed to poll events");
+            return true;
+        }
+        false
+    }
+
+    fn on_tick(&mut self, to_disconnect: &mut Vec<Token>, _command_manager: &mut CommandManager) -> bool {
+        if time::Instant::now()
+            .duration_since(self._game.last_update)
+            .as_millis()
+            >= (1000 / self._ticks) as u128
+        {
+            #[cfg(feature = "debug")]
+            println!(
+                "Game has been running for {} ticks",
+                (time::Instant::now()
+                    .duration_since(self._game.starting_time)
+                    .as_millis())
+            );
+            self._game.last_update = time::Instant::now();
+            self.send_to_graph += &self._game.routine();
+            _command_manager.process_queue(self);
+
+            self.clients_hunger(to_disconnect);
+            let mut ticks_to_remove: Vec<u128> = Vec::new();
+            for (egg_id, (_, _, team, tick)) in self._game.map.egg_position.iter() {
+                if tick < &self._game._tick {
+                    let team_name = team;
+                    let tmp = self._max_clients.get_mut(team);
+                    if let Some(v) = tmp {
+                        if *v > self._max_clients_per_team {
+                             *v -= 1;
+                        }
+                    }
+                    ticks_to_remove.push(*egg_id);
+                }
+            }
+            for t in ticks_to_remove {
+                self.send_to_graph += &graphic::rotten_egg(t);
+                self._game.map.egg_position.remove(&t);
+            }
+            let mut graph_msg = String::new();
+            for token in to_disconnect {
+                graph_msg += &graphic::player_death(&token);
+                self.disconnect_client_by_token(&token);
+            }
+            graphic::send_graphic_clients(graph_msg, self);
+            return true;
+            //to_disconnect.clear();
+        }
+        false
+    }
+
     pub fn run(&mut self) {
         let mut _command_manager = CommandManager::new_server();
         let mut buf = [0; 1024];
@@ -280,22 +547,12 @@ impl Server {
         println!("Server is running...");
 
         // register listener once
-        if let Err(e) = self._poll.registry().register(
-            &mut self._socket,
-            self._client_token,
-            Interest::READABLE,
-        ) {
-            eprintln!("Failed to register socket: {}", e);
+        if self.register_listener() {
             return;
         }
         let mut to_disconnect = Vec::new();
         loop {
-            let check = self._poll.poll(
-                &mut self._events,
-                Some(time::Duration::from_millis(1000 / self._ticks)),
-            );
-            if check.is_err() {
-                eprintln!("Failed to poll events");
+            if self.check_poll() {
                 return;
             }
             let events_snapshot: Vec<mio::event::Event> = self._events.iter().cloned().collect();
@@ -304,43 +561,9 @@ impl Server {
                     // loop {
                     match self._socket.accept() {
                         Ok((client_stream, _)) => {
-                            let token = Token(self._next_token as usize);
-                            if self._clients.contains_key(&token) {
-                                eprintln!("Client with token {:?} already exists", token);
+                            if !self.connect_attempt(client_stream) {
                                 break;
                             }
-                            self._next_token += 1;
-                            self._clients
-                                .insert(token, Client::new(client_stream, token));
-                            let tmp = self._clients.get_mut(&token);
-                            if tmp.is_none() {
-                                eprintln!("Failed to get client socket");
-                                self._clients.remove(&token);
-                                break;
-                            }
-                            let check = self._poll.registry().register(
-                                tmp.unwrap().get_socket_mut(),
-                                token,
-                                Interest::READABLE,
-                            );
-                            if check.is_err() {
-                                eprintln!("Failed to register client");
-                                self._clients.remove(&token);
-                                break;
-                            }
-                            let response = format!("BIENVENUE\n");
-                            if self
-                                ._clients
-                                .get_mut(&token)
-                                .unwrap()
-                                .get_socket_mut()
-                                .write(response.as_bytes())
-                                .is_err()
-                            {
-                                self._clients.remove(&token);
-                                break;
-                            }
-                            self._clients.get_mut(&token).unwrap().r#type = "welcomed".to_string();
                         }
                         Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => break,
                         Err(e) => {
@@ -348,17 +571,12 @@ impl Server {
                             break;
                         }
                     }
-                    // break;
-                    // }
                 } else {
                     let mut graphic_ok: bool = false;
                     let token = event.token();
                     if let Some(client) = self._clients.get_mut(&token) {
                         match client.get_socket_mut().read(&mut buf) {
                             Ok(0) => {
-                                // let _ = client.get_socket_mut().shutdown(std::net::Shutdown::Both);
-
-                                // self._clients.remove(&token);
                                 to_disconnect.push(token);
                                 #[cfg(feature = "log")]
                                 println!("Client {:?} disconnected", token);
@@ -367,20 +585,7 @@ impl Server {
                                 #[cfg(feature = "debug")]
                                 println!("Received {} bytes from {:?} 1", n, token);
                                 if client.r#type == define::ROLE_PLAYER {
-                                    let cmd = String::from_utf8_lossy(&buf[..n]).trim().to_string();
-                                    for line in cmd.lines() {
-                                        let mut parts = line.splitn(2, ' ');
-                                        let name = parts.next().unwrap_or("");
-                                        let arg = parts.next().unwrap_or("");
-                                        #[cfg(feature = "debug")]
-                                        println!("Received command '{}' from {:?}", cmd, token);
-                                        let token = client.get_token();
-                                        _command_manager.add_to_queue(
-                                            name.to_string(),
-                                            token,
-                                            arg.to_string(),
-                                        );
-                                    }
+                                    command_received(buf, n, client, &mut _command_manager);
                                 } else if client.r#type == define::ROLE_WELCOMED {
                                     let cmd = String::from_utf8_lossy(&buf[..n]).trim().to_string();
                                     if cmd == define::GRAPHICAL_CLIENT {
@@ -403,167 +608,19 @@ impl Server {
                                         if self._game.team[&cmd].len()
                                             < self._max_clients[&cmd] as usize
                                         {
-                                            let player_token = token;
-                                            let position = if !self._game.starting {
-                                                (
-                                                    self._game.map.rng.random_range(
-                                                        0..self._game.map.get_width(),
-                                                    ),
-                                                    self._game.map.rng.random_range(
-                                                        0..self._game.map.get_height(),
-                                                    ),
-                                                )
-                                            } else {
-                                                let found = self
-                                                    ._game
-                                                    .map
-                                                    .egg_position
-                                                    .iter()
-                                                    .find(|(_, pos)| {
-                                                        cmd == self.get_team_for_player(&pos.2)
-                                                    })
-                                                    .map(|(k, v)| (*k, v.0, v.1, v.2, v.3));
-                                                let (egg_id, x, y, _, tick) =
-                                                    found.unwrap_or((0, 0, 0, Token(0), 0));
-                                                if egg_id != 0 {
-                                                    _command_manager
-                                                        .next_execute
-                                                        .insert(token, tick); //get the tick of the hatching of the egg ??? ca n'est pas bon, tu attend pas 600s après l'eclosion de l'oeuf
-                                                }
-                                                _command_manager.add_to_queue_internal(
-                                                    "spawning".to_string(),
-                                                    token,
-                                                    egg_id.to_string(),
-                                                );
-                                                #[cfg(feature = "log")]
-                                                {
-                                                    if _command_manager
-                                                        .next_execute
-                                                        .contains_key(&token)
-                                                    {
-                                                        println!(
-                                                            "{:?}, {:?}",
-                                                            _command_manager.next_execute[&token],
-                                                            self._game._tick
-                                                        );
-                                                    }
-                                                }
-                                                (x, y)
-                                                //self._game.spawn_player(player_token, &cmd, found)
-                                            };
-                                            if let Some(client) =
-                                                self._clients.get_mut(&player_token)
-                                            {
-												client.r#type = define::ROLE_PLAYER.to_string();
-                                                client.position = position;
-                                                self._game.update_player_position(
-                                                    player_token,
-                                                    client.position,
-                                                );
-                                                client.orientation = "NESW"
-                                                    .chars()
-                                                    .nth(self._game.map.rng.random_range(0..3))
-                                                    .unwrap();
-                                                self._game
-                                                    .team
-                                                    .get_mut(&cmd)
-                                                    .unwrap()
-                                                    .push(player_token); //push the client token into the team
-                                                let response = format!(
-                                                    "{}\n{} {}\n",
-                                                    self._max_clients[&cmd] as usize
-                                                        - self._game.team[&cmd].len()
-                                                        + 1,
-                                                    self._game.map.get_height(),
-                                                    self._game.map.get_width()
-                                                );
-                                                //soustraction de usize, qui sont des unsigned, donc ne peut pas déscendre en negatif donc la condition est toujours fausse
-                                                //if self._max_clients[&cmd] as usize
-                                                //    - self._game.team[&cmd].len()
-                                                //    < 0
-                                                //{
-                                                //    to_disconnect.push(player_token);
-                                                //}
-                                                if client
-                                                    .get_socket_mut()
-                                                    .write(response.as_bytes())
-                                                    .is_err()
-                                                {
-                                                    self._clients.remove(&player_token);
-                                                }
-                                                if !self._game.starting {
-                                                    graphic::send_graphic_clients(
-                                                        graphic::egg_hatches(&player_token, self),
-                                                        self,
-                                                    );
-                                                }
-                                            }
-                                            self._game.starting = true;
+                                            self.update_new_client_info(&token, &cmd, &mut _command_manager);
                                         } else {
-                                            if let Some(client) = self._clients.get_mut(&token) {
-                                                let _ = client.get_socket_mut().write(
-                                                    format!(
-                                                        "0\n{} {}\n",
-                                                        self._game.map.get_height(),
-                                                        self._game.map.get_width()
-                                                    )
-                                                    .as_bytes(),
-                                                );
-                                            }
-                                            to_disconnect.push(token);
+                                            self.not_enough_space(&token, &mut to_disconnect)
                                         }
                                     } else if cmd
                                         == format!("{} {}", define::ADMIN_CLIENT, self.__pass__)
                                     {
-                                        #[cfg(feature = "log")]
-                                        println!("Received command '{}' from {:?} 2", cmd, token);
-                                        client.r#type = define::ADMIN_CLIENT.to_string();
-                                        let response =
-                                            "Welcome to the admin client!\n\n".to_string();
-                                        if client
-                                            .get_socket_mut()
-                                            .write(response.as_bytes())
-                                            .is_err()
-                                        {
-                                            to_disconnect.push(token);
-                                        }
-                                        // let response = format!(					//uncessesary
-                                        //     "0\n{} {}\n\n",
-                                        //     self._game.map.get_height(),
-                                        //     self._game.map.get_width()
-                                        // );
-                                        if client
-                                            .get_socket_mut()
-                                            .write(response.as_bytes())
-                                            .is_err()
-                                        {
-                                            to_disconnect.push(token);
-                                        }
+                                        admin_client_connect(&token, client, &mut to_disconnect);
                                     } else {
-                                        let response = format!(
-                                            "0\n{} {}\n",
-                                            self._game.map.get_height(),
-                                            self._game.map.get_width()
-                                        );
-                                        if client
-                                            .get_socket_mut()
-                                            .write(response.as_bytes())
-                                            .is_err()
-                                        {
-                                            // client
-                                            //     .get_socket_mut()
-                                            //     .shutdown(std::net::Shutdown::Both);
-                                            to_disconnect.push(token);
-                                        }
+                                        default_response(&token, client, &mut to_disconnect, self._game.map.get_height(), self._game.map.get_width());
                                     }
                                 } else if client.r#type == define::ADMIN_CLIENT {
-                                    let cmd = String::from_utf8_lossy(&buf[..n]).trim().to_string();
-                                    let mut parts = cmd.splitn(2, ' ');
-                                    let name = parts.next().unwrap_or("");
-                                    let arg = parts.next().unwrap_or("");
-                                    #[cfg(feature = "log")]
-                                    println!("Received command '{}' from {:?} 3", cmd, token);
-                                    _command_manager.execute(name, token, arg, self);
+                                    self.admin_cmd(buf, n, &token, &mut _command_manager);
                                 }
                             }
                             Err(_) => {
@@ -576,70 +633,11 @@ impl Server {
                         }
                     }
                     if graphic_ok {
-                        let client = self._clients.get(&token).unwrap();
-                        if client
-                            .get_socket()
-                            .write(graphic::event_graph_connect(self).as_bytes())
-                            .is_err()
-                        {
-                            self._clients.remove(&token);
-                            to_disconnect.push(token);
-                        }
+                        self.graph_connect(&token, &mut to_disconnect);
                     }
                 }
             }
-            if time::Instant::now()
-                .duration_since(self._game.last_update)
-                .as_millis()
-                >= (1000 / self._ticks) as u128
-            {
-                #[cfg(feature = "debug")]
-                println!(
-                    "Game has been running for {} ticks",
-                    (time::Instant::now()
-                        .duration_since(self._game.starting_time)
-                        .as_millis())
-                );
-                self._game.last_update = time::Instant::now();
-                self.send_to_graph += &self._game.routine();
-                _command_manager.process_queue(self);
-
-                for client in self.get_clients_by_type_mut(define::ROLE_PLAYER) {
-                    client.hunger_tick();
-                    #[cfg(feature = "debug")]
-                    println!(
-                        "Client {:?} hunger: {}",
-                        client.get_token(),
-                        client.inventory[0]
-                    );
-                    if client.inventory[0] == 0 {
-                        let _ = client.get_socket_mut().write(b"mort\n");
-                        to_disconnect.push(client.get_token());
-                    }
-                }
-                let mut ticks_to_remove: Vec<u128> = Vec::new();
-                for (egg_id, (_, _, token, tick)) in self._game.map.egg_position.iter() {
-                    if tick < &self._game._tick {
-                        let team_name = self.get_team_for_player(&token);
-                        let tmp = self._max_clients.get_mut(&team_name);
-                        if let Some(v) = tmp {
-                            if *v > self._max_clients_per_team {
-                                *v -= 1;
-                            }
-                        }
-                        ticks_to_remove.push(*egg_id);
-                    }
-                }
-                for t in ticks_to_remove {
-                    self.send_to_graph += &graphic::rotten_egg(t);
-                    self._game.map.egg_position.remove(&t);
-                }
-                let mut graph_msg = String::new();
-                for token in &to_disconnect {
-                    graph_msg += &graphic::player_death(&token);
-                    self.disconnect_client_by_token(&token);
-                }
-                graphic::send_graphic_clients(graph_msg, self);
+            if self.on_tick(&mut to_disconnect, &mut _command_manager) {
                 to_disconnect.clear();
             }
         }
@@ -731,4 +729,62 @@ pub fn exit_game(server: &mut Server) {
             .write(format!("{}\n", "mort").as_bytes());
     }
     process::exit(0);
+}
+
+fn command_received(buffer: [u8;1024], n: usize, client: &mut Client, _command_manager: &mut CommandManager) {
+    //
+    let cmd = String::from_utf8_lossy(&buffer[..n]).trim().to_string();
+    for line in cmd.lines() {
+        let mut parts = line.splitn(2, ' ');
+        let name = parts.next().unwrap_or("");
+        let arg = parts.next().unwrap_or("");
+        #[cfg(feature = "debug")]
+        println!("Received command '{}' from {:?}", cmd, token);
+        let token = client.get_token();
+        _command_manager.add_to_queue(
+            name.to_string(),
+            token,
+            arg.to_string(),
+        );
+    }
+}
+
+fn admin_client_connect(token: &Token, client: &mut Client, to_disconnect: &mut Vec<Token>) {
+    #[cfg(feature = "log")]
+    println!("Received command '{}' from {:?} 2", cmd, token);
+    client.r#type = define::ADMIN_CLIENT.to_string();
+    let response =
+        "Welcome to the admin client!\n\n".to_string();
+    if client
+        .get_socket_mut()
+        .write(response.as_bytes())
+        .is_err()
+    {
+        to_disconnect.push(*token);
+    }
+    if client
+        .get_socket_mut()
+        .write(response.as_bytes())
+        .is_err()
+    {
+        to_disconnect.push(*token);
+    }
+}
+
+fn default_response(token: &Token, client: &mut Client, to_disconnect: &mut Vec<Token>, height: u32, width: u32) {
+    let response = format!(
+        "0\n{} {}\n",
+        height,
+        width
+    );
+    if client
+        .get_socket_mut()
+        .write(response.as_bytes())
+        .is_err()
+    {
+        // client
+        //     .get_socket_mut()
+        //     .shutdown(std::net::Shutdown::Both);
+        to_disconnect.push(*token);
+    }
 }

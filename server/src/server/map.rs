@@ -9,8 +9,30 @@ pub struct Map {
     height: u32,
     pub(crate) egg_id_counter: u128,
     tiles: Vec<Vec<Tile>>,
-    pub(crate) egg_position: HashMap<u128, (u32, u32, Token, u128)>,
+    pub(crate) egg_position: HashMap<u128, (u32, u32, String, u128)>,
     pub(crate) player_position: HashMap<Token, (u32, u32)>,
+}
+
+
+//TODO
+pub(crate) struct Egg {
+    egg_id: u128,
+    x: u32,
+    y: u32,
+    team: String,
+    death_tick: u128,
+}
+
+impl Egg {
+    pub(crate) fn new(egg_id: u128, x: u32, y: u32, team: String, death_tick: u128) -> Self {
+        Egg {
+            egg_id,
+            x,
+            y,
+            team,
+            death_tick,
+        }
+    }
 }
 
 #[derive(Clone)]
