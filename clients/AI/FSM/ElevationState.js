@@ -3,9 +3,10 @@ import GameManager from '../GameManager.js'
 import {
     INCANTATION_TABLE,
     INCANTATION,
-    BROAD_NEED_PLAYER, BROAD_PING, SEE
+    BROAD_NEED_PLAYER,
+    SEE,
+    BROAD_CANCEL
 } from '../constant.js'
-import {BROAD_CANCEL} from "../constant.js"
 
 class ElevationState extends IState {
     constructor() {
@@ -28,11 +29,6 @@ class ElevationState extends IState {
 
         this.censusTicks = 0
         this.isCensusDone = false
-        GameManager.activeTeamMembers.clear()
-        GameManager.activeTeamMembers.add(GameManager.main.config.broadcastID)
-
-        const pinGameManagersg = GameManager.buildBroadcastMessage(BROAD_PING)
-        GameManager.commandManager.sendCommand(pinGameManagersg)
 
         GameManager.elevationReadyPlayers.clear()
         GameManager.elevationReadyPlayers.add(GameManager.main.config.broadcastID)

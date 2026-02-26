@@ -2,6 +2,8 @@ export const DEFAULT_HOSTNAME = 'localhost';
 export const MAX_SERVER_MSG = 9
 export const VISION_REFRESH_RATE = 500
 export const INVENTORY_REFRESH_RATE = 5000
+export const HEARTBEAT_INTERVAL = 150
+export const HEARTBEAT_TIMEOUT = 400
 
 /*****************
  *     ERROR     *
@@ -136,8 +138,7 @@ export const BROAD_COMING = 'OMW'
 export const BROAD_WITH_PLAYER = 'HERE'
 export const BROAD_INCANTATION = 'CAST'
 export const BROAD_CANCEL = 'CANCEL'
-export const BROAD_PING = 'PING';
-export const BROAD_PONG = 'PONG';
+export const BROAD_ALIVE = 'ALIVE'
 
 
 export const BROADCAST_MSG_OBJECT = {

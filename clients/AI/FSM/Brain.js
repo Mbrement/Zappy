@@ -6,7 +6,7 @@ import {
     STATE,
     INVENTORY_REFRESH_RATE,
     VISION_REFRESH_RATE,
-    INVENTORY, SEE
+    INVENTORY, SEE, HEARTBEAT_INTERVAL, BROAD_ALIVE
 } from "../constant.js"
 import SurvivalState from "./SurvivalState.js"
 import FarmingState from "./FarmingState.js"
@@ -107,6 +107,12 @@ class Brain {
      * @description Execute onUpdate methods of the current state & refresh inventory/vision if needed.
      */
     async think() {
+        if (GameManager.internalTicks - GameManager.lastHeartbeatTick >= HEARTBEAT_INTERVAL) {
+            const aliveMsg = GameManager.buildBroadcastMessage(BROAD_ALIVE);
+            GameManager.commandManager.sendCommand(aliveMsg);
+            GameManager.lastHeartbeatTick = GameManager.internalTicks;
+        }
+
         if (this.currentState === STATE.INIT) {
             await this.currentStateFunc.onUpdate()
             return

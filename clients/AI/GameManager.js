@@ -1,12 +1,13 @@
 import Main from "./Main.js";
 import {
+    BROAD_ALIVE,
     BROAD_CANCEL,
     BROAD_NEED_PLAYER,
-    BROAD_PING,
-    BROAD_PONG,
     BROAD_WITH_PLAYER,
     BROADCAST,
-    COMMAND_COST, NO_SPACE_AVAILABLE,
+    COMMAND_COST,
+    HEARTBEAT_TIMEOUT,
+    NO_SPACE_AVAILABLE,
     ONLY_NUMBER_REGEX,
 } from "./constant.js"
 
@@ -27,15 +28,21 @@ class GameManager {
             thystame: 0
         }
         this.lastInventoryRefresh = 0
+
         this.level = 1
         this.mapSize = {x: -1, y: -1}
+
         this.vision = []
         this.lastVisionRefresh = 0
 
         this.followedBroadcast = null
         this.elevationReadyPlayers = new Set()
 
-        this.activeTeamMembers = new Set()
+
+        this.teamRegistry = new Map()
+        this.internalTicks = 0
+        this.lastHeartbeatTick = 0
+
         this.needToFork = false
         this.elevationCooldown = 0
     }
@@ -129,13 +136,14 @@ class GameManager {
 
     /**
      * @author Corentin (ccharton) Charton
-     * @description Update the food actually available after a command resolve
+     * @description Update the food actually available and internal clock after a command resolve
      * @param commandExecuted {String} - The resolved command already stripped
      * (if command is 'pose sibur\n' param should be 'pose')
      */
-    updateFoodAvailable(commandExecuted) {
+    updateFoodAndInternalClock(commandExecuted) {
         if (COMMAND_COST.hasOwnProperty(commandExecuted)) {
             this.inventory.nourriture -= COMMAND_COST[commandExecuted]
+            this.internalTicks += COMMAND_COST[commandExecuted]
             console.log('Command', commandExecuted, 'Costed:', COMMAND_COST[commandExecuted], 'Food left:', this.inventory.nourriture)
         }
     }
@@ -145,19 +153,21 @@ class GameManager {
      * @description Calculate if AI need to fork or not.
      */
     evaluatePopulationNeed() {
-        const teamSize = this.activeTeamMembers.size
+        for (const [id, lastTick] of this.teamRegistry.entries()) {
+            if (this.internalTicks - lastTick > HEARTBEAT_TIMEOUT) {
+                this.teamRegistry.delete(id)
+            }
+        }
+
+        const teamSize = this.teamRegistry.size + 1;
         console.log(`[POPULATION] Actual team size: ${teamSize}`)
 
         if (teamSize < 10) {
-            console.log(`[POPULATION] < 10 population need to increase`)
             this.needToFork = true
         } else if (teamSize >= 20) {
-            console.log(`[POPULATION] >= 20 population need to stop increasing`)
             this.needToFork = false
         } else {
-            const randomChance = Math.random() > 0.5
-            console.log(`[POPULATION] Stabilising population between (10-19). Random result : ${randomChance ? 'Reproduction' : 'Nothing'}`)
-            this.needToFork = randomChance
+            this.needToFork = Math.random() > 0.5
         }
     }
 
@@ -175,13 +185,8 @@ class GameManager {
             return
         }
 
-        if (parsedBroadcast.action === BROAD_PING) {
-            this.commandManager.sendCommand(this.buildBroadcastMessage(BROAD_PONG, parsedBroadcast.senderID))
-            return
-        }
-
-        if (parsedBroadcast.action === BROAD_PONG && parsedBroadcast.argument === this.main.config.broadcastID) {
-            this.activeTeamMembers.add(parsedBroadcast.senderID)
+        if (parsedBroadcast.action === BROAD_ALIVE) {
+            this.teamRegistry.set(parsedBroadcast.senderID, this.internalTicks)
             return
         }
 
