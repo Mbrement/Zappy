@@ -133,8 +133,8 @@ export const COMMAND_COST = {
  ****************/
 
 export const WELCOME = 'BIENVENUE'
-export const VISION_REGEX =  /^\{([\w\s]*,?)*}$/
-export const INVENTORY_CMD_REGEX = /^\{(\s*\w+\s+\d+,?)*\s*}$/
+export const VISION_REGEX =  /^\{[\w\s,]*}$/
+export const INVENTORY_CMD_REGEX = /^\{[\w\s,\d]*}$/
 export const EXPULSION_REGEX = /^deplacement [1-8]$/
 export const OK = 'ok'
 export const KO = 'ko'
