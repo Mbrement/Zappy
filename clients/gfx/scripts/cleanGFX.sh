@@ -1,19 +1,21 @@
-export OUTPUT_DIR="out"
-export PACKAGE_LOCK="package-lock.json"
-export NODE_MODULES="node_modules"
+cd $(dirname "$0")
+
+export OUTPUT_DIR="../out"
+export PACKAGE_LOCK="../package-lock.json"
+export NODE_MODULES="../node_modules"
 
 if [ -d "$OUTPUT_DIR" ]; then
-  echo "$OUTPUT_DIR does exist."
+  echo "Deleting: $OUTPUT_DIR"
   rm -rf $OUTPUT_DIR
 fi
 
 if [ -f "$PACKAGE_LOCK" ]; then
-  echo "$PACKAGE_LOCK does exist."
+  echo "Deleting: $PACKAGE_LOCK"
   rm -rf $PACKAGE_LOCK
 fi
 
 if [ -d "$NODE_MODULES" ]; then
-  echo "$NODE_MODULES does exist."
+  echo "Deleting: $NODE_MODULES"
   rm -rf $NODE_MODULES
 fi
 
