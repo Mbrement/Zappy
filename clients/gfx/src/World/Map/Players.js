@@ -529,11 +529,8 @@ class Players {
         else if (message.search("HERE") !== -1) {
             broadcastMesh.userData.uColor = uniform(color(1.0, 1.0, 0.0))
         }
-        else if (message.search("PING") !== -1) {
+        else if (message.search("ALIVE") !== -1) {
             broadcastMesh.userData.uColor = uniform(color(1.0, 0.0, 1.0))
-        }
-        else if (message.search("PONG") !== -1) {
-            broadcastMesh.userData.uColor = uniform(color(0.0, 0.0, 1.0))
         }
         else {
             broadcastMesh.userData.uColor = uniform(color(1.0, 0.0, 0.0))
