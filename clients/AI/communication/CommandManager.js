@@ -92,19 +92,38 @@ class CommandManager {
 
     /**
      * @author Corentin (ccharton) Charton
+     * @description Find the index in the queue that match with the message sent.
+     * @param message {String} - The response send by the server
+     * @return {number} - The index in the queue that match with the message sent. -1 if not found.
+     */
+    findMatchingCommandIndex(message) {
+        for (let i = 0; i < this.#inProcessQueue.length; i++) {
+            if (this.isValidResponse(this.#inProcessQueue[i].command, message)) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
      * @description Check if the response send by the server match the current command to resolve
      * @param message {String} - The response send by the server
      */
     flushDroppedCommands(message) {
-        while (this.#inProcessQueue.length > 0) {
-            const currentRequest = this.#inProcessQueue[0]
+        if (this.#inProcessQueue.length === 0) {
+            return true
+        }
 
-            if (this.isValidResponse(currentRequest.command, message)) {
-                break
-            }
+        const matchingCommandIndex = this.findMatchingCommandIndex(message)
+        if (matchingCommandIndex === -1) {
+            console.log('[COMMAND MANAGER] Server has sent garbage:', message)
+            return false
+        }
 
-            console.warn(`[COMMAND MANAGER] Command dropped: ${currentRequest.command}. Received instead: ${message}`)
+        for (let i = 0; i < matchingCommandIndex; i++) {
             const droppedReq = this.#inProcessQueue.shift()
+            console.warn(`[COMMAND MANAGER] Command dropped: ${droppedReq.command}. Received instead: ${message}`)
 
             const fallbackAnswer = [...droppedReq.answer]
             while (droppedReq.expectedAnswerCount > 0) {
@@ -114,6 +133,7 @@ class CommandManager {
 
             droppedReq.resolve(fallbackAnswer)
         }
+        return true
     }
 
     /**
@@ -176,7 +196,11 @@ class CommandManager {
             }
         }
 
-        this.flushDroppedCommands(message)
+        const isMessageUseful = this.flushDroppedCommands(message)
+
+        if (!isMessageUseful) {
+            return
+        }
 
         if (this.#inProcessQueue.length <= 0) {
             console.error(NO_PROMISE_TO_RESOLVE, message)
