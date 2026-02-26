@@ -61,6 +61,12 @@ class Players {
         this.dummyQuaternion = new THREE.Quaternion()
 
         this.createInstances()
+
+        this.world.updateManager.add(this, "world", "animatePlayerRotate")
+        this.world.updateManager.add(this, "world", "animatePlayerMove")
+        this.world.updateManager.add(this, "shaders", "animatePlayerBroadcast")
+        this.world.updateManager.add(this, "shaders", "animatePlayerDrop")
+        this.world.updateManager.add(this, "shaders", "animatePlayerPickUp")
     }
 
     /**
@@ -280,10 +286,6 @@ class Players {
             this.playerInstance.computeBoundingSphere()
         }
         else {
-            if (this.animatedPlayersRotate.length === 0) {
-                this.world.updateManager.add(this, "world", "animatePlayerRotate")
-            }
-
             this.animatedPlayersRotate.push({
                 index,
                 passedTime: 0,
@@ -360,10 +362,6 @@ class Players {
         else {
             this.restackPlayers(playerState.x, playerState.y)
 
-            if (this.animatedPlayersMove.length === 0) {
-                this.world.updateManager.add(this, "world", "animatePlayerMove")
-            }
-
             this.animatedPlayersMove.push({
                 index,
                 passedTime: 0,
@@ -398,10 +396,6 @@ class Players {
      * @description Animates the player movements
      */
     animatePlayerMove() {
-        if (this.animatedPlayersMove.length < 1) {
-            this.world.updateManager.remove(this, "world", "animatePlayerMove")
-        }
-
         const deltaTime = this.world.updateManager.time.deltaInSecond
 
         let player
@@ -438,10 +432,6 @@ class Players {
      * @description Animates the player rotations
      */
     animatePlayerRotate() {
-        if (this.animatedPlayersRotate.length < 1) {
-            this.world.updateManager.remove(this, "world", "animatePlayerRotate")
-        }
-
         const deltaTime = this.world.updateManager.time.deltaInSecond
 
         let player
@@ -511,10 +501,6 @@ class Players {
      * @param message - The message of the player
      */
     addPlayerBroadcast(playerId, message) {
-        if (this.animatedPlayerBroadcasts.length === 0) {
-            this.world.updateManager.add(this, "shaders", "animatePlayerBroadcast")
-        }
-
         const index = this.getPlayerById(playerId)
 
         this.playerInstance.getMatrixAt(index, this.positionningMatrix)
@@ -554,10 +540,6 @@ class Players {
      * @description Animates the player broadcasts
      */
     animatePlayerBroadcast() {
-        if (this.animatedPlayerBroadcasts.length < 1) {
-            this.world.updateManager.remove(this, "shaders", "animatePlayerBroadcast")
-        }
-
         const deltaTime = this.world.updateManager.time.deltaInSecond
 
         let broadcast
@@ -696,10 +678,6 @@ class Players {
      * @param resourceType - The type of resource
      */
     addPlayerPickUp(playerId, resourceType) {
-        if (this.animatedPlayerPickUp.length === 0) {
-            this.world.updateManager.add(this, "shaders", "animatePlayerPickUp")
-        }
-
         const index = this.getPlayerById(playerId)
         const orientation = window.mainInstance.gameState.playerInfo.get(playerId).orientation
 
@@ -739,10 +717,6 @@ class Players {
      * @description Animates the player picking up object
      */
     animatePlayerPickUp() {
-        if (this.animatedPlayerPickUp.length < 1) {
-            this.world.updateManager.remove(this, "shaders", "animatePlayerPickUp")
-        }
-
         const deltaTime = this.world.updateManager.time.deltaInSecond
 
         let pickUp
@@ -774,10 +748,6 @@ class Players {
      * @param resourceType - The type of resource
      */
     addPlayerDrop(playerId, resourceType) {
-        if (this.animatedPlayerDrop.length === 0) {
-            this.world.updateManager.add(this, "shaders", "animatePlayerDrop")
-        }
-
         const index = this.getPlayerById(playerId)
         const orientation = window.mainInstance.gameState.playerInfo.get(playerId).orientation
 
@@ -817,10 +787,6 @@ class Players {
      * @description Animates the player dropping an object
      */
     animatePlayerDrop() {
-        if (this.animatedPlayerDrop.length < 1) {
-            this.world.updateManager.remove(this, "shaders", "animatePlayerDrop")
-        }
-
         const deltaTime = this.world.updateManager.time.deltaInSecond
 
         let Drop
