@@ -581,6 +581,19 @@ body
     padding: 0 15px
 }
 
+.resourceTitle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.resourceDot {
+    height: 80%;
+    aspect-ratio: 1/1;
+    border-radius: 100%;
+    border:2px solid #F5F5F5;
+}
+
 .resourcePlayerText {
     font-size: 1.35rem;
     font-weight: bold;
