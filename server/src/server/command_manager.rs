@@ -504,7 +504,6 @@ impl CommandManager {
         self.register("fork", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             utils::debug_manager_register("fork", _c, server, _arg);
-            // server._game.fork_player(_c);
             let client = server._clients.get_mut(&_c);
             if client.is_none() {
                 #[cfg(feature = "log")]
@@ -512,13 +511,6 @@ impl CommandManager {
                 return;
             }
             let client = client.unwrap();
-            /*
-            let (x, y) = client.position;
-            server._game.map.egg_position.insert(
-                server._game.map.egg_id_counter,
-                (x, y, client.get_token(), server._game._tick),
-            );
-            server._game.map.egg_id_counter += 1;*/
             let _ = client
                 .get_socket_mut()
                 .write(format!("{}", define::R_OK).as_bytes());
@@ -532,12 +524,16 @@ impl CommandManager {
                 #[cfg(feature = "log")]
                 utils::debug_manager_register("spawning", _c, server, _arg);
                 //player hatch
-                let client = server._clients.get_mut(&_c).unwrap();
-                client.inventory[0] = 1260;
-                client.was_egg = _arg.parse().unwrap_or(0);
-				client.level = 1;
-				client.was_egg = 0;
-                server.send_to_graph += &graphic::egg_hatches(&_c, server);
+                if server._clients.contains_key(&_c) {
+                    server.send_to_graph += &graphic::egg_hatches(&_c, server);
+                }
+                if let Some(client) = server._clients.get_mut(&_c) {
+                    client.inventory[0] = 1260;
+				    client.level = 1;
+                    //oeuf retirer ici en cas d'eclosion avec client lié
+                    server._game.map.egg_position.remove(&client.was_egg);
+                    client.was_egg = 0;
+                }
             },
         );
         self.register(
@@ -565,71 +561,9 @@ impl CommandManager {
                 //end fork
             },
         );
-        /* 
-        self.register(
-            "egg_waiting",
-            |_c: mio::Token, server: &mut Server, _arg: &str| {
-                #[cfg(feature = "log")]
-                debug_manager_register("egg_waiting", _c, server, _arg);
-                for (egg_id, (x, y, team, tick)) in &server._game.map.egg_position {
-                    if tick < &server._game._tick {
-                        let tmp = server._max_clients.get_mut(team);
-                        if let Some(v) = tmp {
-                            *v += 1;
-                        }
-                        server.send_to_graph += &graphic::end_fork(*team, *egg_id, *x, *y); // TODO move this line, it send ALL THE EGG not the only the one we want to send
-                    }
-                }
-                //end fork
-            },
-        );
-        self.register(
-            "egg_death",
-            |_c: mio::Token, server: &mut Server, _arg: &str| {
-                #[cfg(feature = "log")]
-                debug_manager_register("egg_death", _c, server, _arg);
-                let mut ticks_to_remove: Vec<u128> = Vec::new();
-                for (egg_id, (_, _, token, tick)) in server._game.map.egg_position.iter() {
-                    if tick < &server._game._tick {
-                        let team_name = server.get_team_for_player(&token);
-                        let tmp = server._max_clients.get_mut(&team_name);
-                        if let Some(v) = tmp {
-                            if *v > server._max_clients_per_team {
-                                *v -= 1;
-                            }
-                        }
-                        ticks_to_remove.push(*egg_id);
-                    }
-                }
-                for t in ticks_to_remove {
-                    server.send_to_graph += &graphic::rotten_egg(t);
-                    server._game.map.egg_position.remove(&t);
-                }
-            },
-        );*/
     }
 
     fn admin_command(&mut self) {
-		self.register(
-			"levelup",
-			|_c: mio::Token, server: &mut Server, _arg: &str| {
- 			let target_token = _arg.parse::<u128>();
-            if target_token.is_err() {
-                #[cfg(feature = "log")]
-                println!("Invalid token provided for levelup command: {}", _arg);
-                return;
-            }
-            let target_token = mio::Token(target_token.unwrap() as usize);
-            let client = server._clients.get_mut(&target_token);
-            if client.is_none() {
-                #[cfg(feature = "log")]
-                println!("No client found for token {:?}", target_token);
-                return;
-            }
-			let client = client.unwrap();
-			client.level += 1;
-				}
-				);
         self.register(
             "status",
             |_c: mio::Token, server: &mut Server, _arg: &str| {

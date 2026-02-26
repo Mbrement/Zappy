@@ -178,44 +178,20 @@ impl Server {
             .filter(|client| client.r#type == clients_type)
             .collect()
     }
-    /*
-    pub fn get_clients_by_pos(&self, clients_pos: (u32, u32)) -> Vec<&Client> {
-        self._clients
-            .values()
-            .filter(|client| client.position == clients_pos)
-            .collect()
-    }*/
 
     pub fn get_clients_by_pos_mut(&mut self, clients_pos: (u32, u32)) -> Vec<&mut Client> {
         self._clients
             .values_mut()
-            .filter(|client| client.position == clients_pos)
+            .filter(|client| client.position == clients_pos && client.level != 0)
             .collect()
     }
-    // pub fn get_clients_number(&self) -> u32 {
-    //     self._max_clients.values().sum()
-    // }
 
     pub fn get_ticks(&self) -> u64 {
         self._ticks
     }
-    /*
-        pub fn get_socket(&self) -> &mio::net::TcpListener {
-            &self._socket
-        }
-
-        pub fn get_socket_mut(&mut self) -> &mut mio::net::TcpListener {
-            &mut self._socket
-        }
-    */
     pub fn get_map(&self) -> &map::Map {
         &self._game.map
     }
-    /*
-        pub fn get_map_mut(&mut self) -> &mut map::Map {
-            &mut self._game.map
-        }
-    */
     pub fn disconnect_client_by_token(&mut self, token: &Token) {
         // Remove the client first to avoid double mutable borrow
         let mut client = match self._clients.remove(token) {

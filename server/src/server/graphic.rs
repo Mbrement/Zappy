@@ -44,7 +44,7 @@ fn team_names(teams: HashMap<String, Vec<mio::Token>>) -> String {
     res
 }
 
-pub(crate) fn new_player(team: String, player: &Client) -> String {
+fn new_player(team: String, player: &Client) -> String {
     let (x, y) = player.position;
     format!(
         "pnw {:?} {} {} {} {} {}\n",
