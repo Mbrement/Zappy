@@ -22,6 +22,10 @@ class PacketBuffer {
      */
     extractMessage() {
         if (!this.#buffer.includes('\n')) {
+            if (this.#buffer.length > 2000000) {
+                this.#buffer = ''
+                console.log('[PACKET BUFFER] Buffer over 2000000 char. Flushing...')
+            }
             return []
         }
 
