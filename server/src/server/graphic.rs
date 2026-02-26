@@ -195,8 +195,8 @@ pub(crate) fn event_graph_connect(server: &Server) -> String {
             res += &new_player(server.get_team_for_player(&player.token), player);
         }
     }
-    for (egg_id, (x, y, token, tick)) in &server._game.map.egg_position {
-         res += &end_fork(server.get_team_for_player(token), *egg_id, *x, *y);
+    for (egg_id, (x, y, team, tick)) in &server._game.map.egg_position {
+         res += &end_fork(team.to_string(), *egg_id, *x, *y);
     }
     res
 }

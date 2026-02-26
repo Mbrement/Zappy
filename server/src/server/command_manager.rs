@@ -8,6 +8,7 @@ use std::io::Write;
 pub type CommandFn = Box<dyn Fn(mio::Token, &mut Server, &str)>;
 pub type CommandArgs = (String, mio::Token, String);
 pub struct CommandManager {
+    internal_queue: HashMap<Token, u8>,
     order: HashMap<Token, VecDeque<CommandArgs>>,
     pub(crate) next_execute: HashMap<Token, u128>,
     egg_waiting: HashMap<String, Vec<u128>>,
@@ -17,6 +18,7 @@ pub struct CommandManager {
 impl CommandManager {
     pub fn new() -> Self {
         Self {
+            internal_queue: HashMap::new(),
             order: HashMap::new(),
             next_execute: HashMap::new(),
             commands: HashMap::new(),
@@ -38,7 +40,7 @@ impl CommandManager {
             println!("Commande '{}' non reconnue.", name);
             return;
         }
-        if self.order.entry(token).or_insert_with(VecDeque::new).len() < 10 {
+        if self.order.entry(token).or_insert_with(VecDeque::new).len() < 10 + *self.internal_queue.get(&token).unwrap_or(&0) as usize {
             #[cfg(feature = "log")]
             println!(
                 "Adding command '{}' to queue for token {:?} with args: {}. queue len : {}",
@@ -81,6 +83,7 @@ impl CommandManager {
         // }
         // if self.order.entry(token).or_insert_with(VecDeque::new).len() {
 
+        *self.internal_queue.entry(token).or_insert(0) += 1;
         self.order
             .entry(token)
             .or_insert_with(VecDeque::new)
@@ -542,6 +545,7 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("end_fork", _c, server, _arg);
+                let team = server.get_team_for_player(&_c);
                 let client = server._clients.get_mut(&_c);
                 if client.is_none() {
                     #[cfg(feature = "log")]
@@ -552,28 +556,28 @@ impl CommandManager {
                 let (x, y) = client.position;
                 server._game.map.egg_position.insert(
                     server._game.map.egg_id_counter,
-                    (x, y, client.get_token(), server._game._tick + 600),
+                    (x, y, team.clone(), server._game._tick + 600),
                 );
                 server._game.map.egg_id_counter += 1;
-                if let Some(max_player) = server._max_clients.get_mut(&server.get_team_for_player(&_c)) {
+                if let Some(max_player) = server._max_clients.get_mut(&team) {
                     *max_player += 1;
                 }
                 //end fork
             },
         );
+        /* 
         self.register(
             "egg_waiting",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 debug_manager_register("egg_waiting", _c, server, _arg);
-                for (egg_id, (x, y, token, tick)) in &server._game.map.egg_position {
+                for (egg_id, (x, y, team, tick)) in &server._game.map.egg_position {
                     if tick < &server._game._tick {
-                        let team_name = server.get_team_for_player(&token);
-                        let tmp = server._max_clients.get_mut(&team_name);
+                        let tmp = server._max_clients.get_mut(team);
                         if let Some(v) = tmp {
                             *v += 1;
                         }
-                        server.send_to_graph += &graphic::end_fork(team_name, *egg_id, *x, *y); // TODO move this line, it send ALL THE EGG not the only the one we want to send
+                        server.send_to_graph += &graphic::end_fork(*team, *egg_id, *x, *y); // TODO move this line, it send ALL THE EGG not the only the one we want to send
                     }
                 }
                 //end fork
@@ -602,7 +606,7 @@ impl CommandManager {
                     server._game.map.egg_position.remove(&t);
                 }
             },
-        );
+        );*/
     }
 
     fn admin_command(&mut self) {

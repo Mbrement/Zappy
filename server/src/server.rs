@@ -315,7 +315,7 @@ impl Server {
         return true;
     }
 
-    fn get_position_new_client(&mut self, token: Token, cmd: &String, _command_manager: &mut CommandManager) -> (u32, u32) {
+    fn get_position_new_client(&mut self, token: Token, cmd: &String, _command_manager: &mut CommandManager) -> ((u32, u32), u128) {
         //let mut egg: Egg = Egg::new(0,0, 0, cmd, 0);
         let mut egg: (u128, u32, u32, String, u128) = (0,0,0,cmd.clone(), 0);
         if self._game.starting {
@@ -325,23 +325,26 @@ impl Server {
                 })
                 .map(|(k,v)| (*k, v.0, v.1, v.2.clone(), v.3)) {
                     Some(egg_found) => egg = egg_found,
-                    _ => egg = egg,
+                    _ => {},
             };
         }
         if (egg.0 == 0) {
-            /*TODO
+            /*TODO ??
             _command_manager.add_to_queue_internal(
                 "spawning_no_egg".to_string(),
                 token,
                 0,
             ); */
             return (
-                self._game.map.rng.random_range(
-                    0..self._game.map.get_width(),
+                (
+                    self._game.map.rng.random_range(
+                        0..self._game.map.get_width(),
+                    ),
+                    self._game.map.rng.random_range(
+                        0..self._game.map.get_height(),
+                    ),
                 ),
-                self._game.map.rng.random_range(
-                    0..self._game.map.get_height(),
-                ),
+                0
             )
         }
         _command_manager.next_execute.insert(token, egg.4);
@@ -363,14 +366,15 @@ impl Server {
                 );
             };
         }
-        (egg.1, egg.2)
+        ((egg.1, egg.2), egg.0)
     }
 
     fn update_new_client_info(&mut self, token: &Token, cmd: &String, _command_manager: &mut CommandManager) {
 
         let position = (0,0);
+        let egg_id = 0;
         if self._clients.contains_key(token) {
-            let position = self.get_position_new_client(*token, cmd, _command_manager);
+            let (position, egg_id) = self.get_position_new_client(*token, cmd, _command_manager);
         }
         if let Some(client) =
             self._clients.get_mut(&token)
@@ -378,6 +382,10 @@ impl Server {
             let player_token = client.get_token();
 		    client.r#type = define::ROLE_PLAYER.to_string();
             client.position = position;
+            client.was_egg = egg_id;
+            if egg_id != 0 {
+                client.level = 0;
+            }
             self._game.update_player_position(
                 player_token,
                 client.position,
@@ -406,8 +414,8 @@ impl Server {
             {
                 self._clients.remove(&player_token);
             }
-            //change condition
-            if !self._game.starting {
+
+            if egg_id == 0 {
                 graphic::send_graphic_clients(
                     graphic::egg_hatches(&player_token, self),
                     self,
@@ -469,6 +477,22 @@ impl Server {
         }
     }
 
+    //check natural death of the eggs without clients
+    fn egg_life(&mut self, ticks_to_remove: &mut Vec<u128>) {
+        for (egg_id, (_, _, team, tick)) in self._game.map.egg_position.iter() {
+            if tick < &self._game._tick {
+                let team_name = team;
+                let tmp = self._max_clients.get_mut(team);
+                if let Some(v) = tmp {
+                    if *v > self._max_clients_per_team {
+                         *v -= 1;
+                    }
+                }
+                ticks_to_remove.push(*egg_id);
+            }
+        }
+    }
+
     fn register_listener(&mut self) -> bool {
         if let Err(e) = self._poll.registry().register(
             &mut self._socket,
@@ -512,30 +536,18 @@ impl Server {
 
             self.clients_hunger(to_disconnect);
             let mut ticks_to_remove: Vec<u128> = Vec::new();
-            for (egg_id, (_, _, team, tick)) in self._game.map.egg_position.iter() {
-                if tick < &self._game._tick {
-                    let team_name = team;
-                    let tmp = self._max_clients.get_mut(team);
-                    if let Some(v) = tmp {
-                        if *v > self._max_clients_per_team {
-                             *v -= 1;
-                        }
-                    }
-                    ticks_to_remove.push(*egg_id);
-                }
-            }
+            self.egg_life(&mut ticks_to_remove);
             for t in ticks_to_remove {
                 self.send_to_graph += &graphic::rotten_egg(t);
                 self._game.map.egg_position.remove(&t);
             }
-            let mut graph_msg = String::new();
             for token in to_disconnect {
-                graph_msg += &graphic::player_death(&token);
+                self.send_to_graph += &graphic::player_death(&token);
                 self.disconnect_client_by_token(&token);
             }
-            graphic::send_graphic_clients(graph_msg, self);
+            graphic::send_graphic_clients(self.send_to_graph.clone(), self);
+            self.send_to_graph.clear();
             return true;
-            //to_disconnect.clear();
         }
         false
     }
@@ -624,8 +636,6 @@ impl Server {
                                 }
                             }
                             Err(_) => {
-                                // let _ = client.get_socket_mut().shutdown(std::net::Shutdown::Both);
-                                // self._clients.remove(&token);
                                 #[cfg(feature = "log")]
                                 println!("Client {:?} disconnected (error)", token);
                                 to_disconnect.push(token);
