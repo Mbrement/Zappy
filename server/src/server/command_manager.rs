@@ -70,29 +70,12 @@ impl CommandManager {
     }*/
 
     pub(crate) fn add_to_queue_internal(&mut self, name: String, token: mio::Token, arg: String) {
-        // #[cfg(feature = "log")]
-        // println!(
-        //     "Try to dded command '{}' to queue for token {:?} withargs: {}. queu len : {}",
-        //     name,
-        //     token,
-        //     arg.clone(),
-        //     self.order.entry(token).or_insert_with(VecDeque::new).len()
-        // );
-        // if !define::COMMANDLIST.contains(&name.as_str()) {			//keep this commented
-        //     return;
-        // }
-        // if self.order.entry(token).or_insert_with(VecDeque::new).len() {
 
         *self.internal_queue.entry(token).or_insert(0) += 1;
         self.order
             .entry(token)
             .or_insert_with(VecDeque::new)
-            // .push_back((name.clone(), token, arg.clone()));
             .push_front((name.clone(), token, arg.clone()));
-        // if self.next_execute.entry(token).or_insert(0) == &0 {
-        //     self.next_execute.insert(token, 0);
-        // }
-        // }
     }
 
     pub fn register<F>(&mut self, name: &str, func: F)
@@ -511,9 +494,6 @@ impl CommandManager {
                 return;
             }
             let client = client.unwrap();
-            let _ = client
-                .get_socket_mut()
-                .write(format!("{}", define::R_OK).as_bytes());
 
             //debut de fork
             server.send_to_graph += &graphic::fork(&client.token);
@@ -549,6 +529,9 @@ impl CommandManager {
                     return;
                 }
                 let client = client.unwrap();
+                let _ = client
+                    .get_socket_mut()
+                    .write(format!("{}", define::R_OK).as_bytes());
                 let (x, y) = client.position;
                 server._game.map.egg_position.insert(
                     server._game.map.egg_id_counter,

@@ -305,12 +305,6 @@ impl Server {
             };
         }
         if (egg.0 == 0) {
-            /*TODO ??
-            _command_manager.add_to_queue_internal(
-                "spawning_no_egg".to_string(),
-                token,
-                0,
-            ); */
             return (
                 (
                     self._game.map.rng.random_range(
