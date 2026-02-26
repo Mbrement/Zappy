@@ -5,6 +5,7 @@ class MusicManager extends EventEmitter {
     constructor() {
         super()
 
+        this.defaultSoundTrack = 'Ghost_n’_Goblins_(CPC_6128)_OST'
         this.sources = soundtracks
         this.soundtracks = {}
 
@@ -48,6 +49,9 @@ class MusicManager extends EventEmitter {
      * @description Turns off all soundtracks and resets them
      */
     turnOffSoundtrack() {
+        if (!this.soundPromise) {
+            return
+        }
         Object.keys(this.soundtracks).forEach((key) => {
             this.soundtracks[key].pause()
             this.soundtracks[key].currentTime = 0
@@ -61,7 +65,9 @@ class MusicManager extends EventEmitter {
      */
     switchSoundtrack(newTrack) {
         this.turnOffSoundtrack()
-        this.soundtracks[newTrack].play()
+        if (newTrack !== "The_sound_of_space") {
+            this.soundPromise = this.soundtracks[newTrack].play()
+        }
     }
 
     /**
@@ -70,7 +76,7 @@ class MusicManager extends EventEmitter {
      */
     playDefault() {
         this.turnOffSoundtrack()
-        this.soundtracks['Ghost_n’_Goblins_(CPC_6128)_OST'].play()
+        this.soundPromise = this.soundtracks[this.defaultSoundTrack].play()
     }
 }
 

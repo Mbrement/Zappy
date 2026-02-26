@@ -30,7 +30,7 @@ class ChangeThemeMusic {
             if (changeMusicDropdown.classList.contains('changeButtonDropdownHidden')) {
                 this.closeChangeTheme()
                 changeMusicDropdown.classList.remove('changeButtonDropdownHidden')
-                changeMusicDropdown.style.height = "135px"
+                changeMusicDropdown.style.height = "175px"
             }
             else {
                 this.closeChangeMusic()
