@@ -123,7 +123,7 @@ class CommandManager {
 
         for (let i = 0; i < matchingCommandIndex; i++) {
             const droppedReq = this.#inProcessQueue.shift()
-            console.warn(`[COMMAND MANAGER] Command dropped: ${droppedReq.command}. Received instead: ${message}`)
+            console.warn(`[COMMAND MANAGER] Command dropped: '${droppedReq.command}'. Received instead: ${message}`)
 
             const fallbackAnswer = [...droppedReq.answer]
             while (droppedReq.expectedAnswerCount > 0) {
@@ -148,7 +148,7 @@ class CommandManager {
         }
 
         if (BROADCAST_RECEIVED_REGEX.test(message)) {
-            console.log('Server broadcast :', message)
+            console.log('[COMMAND MANAGER] receive broadcast message:', message)
             GameManager.handleBroadcastMessage(message)
             return
         }
@@ -210,12 +210,11 @@ class CommandManager {
 
         this.#inProcessQueue.at(0).answer.push(message)
         this.#inProcessQueue.at(0).expectedAnswerCount--
-        console.log(this.#inProcessQueue.at(0))
 
         if (this.#inProcessQueue.at(0).expectedAnswerCount === 0) {
-            console.log('resolved promise')
             const requestToResolve = this.#inProcessQueue.shift()
 
+            console.log(`[COMMAND MANAGER] Command '${requestToResolve.command.trim()}' resolved with answer: ${requestToResolve.answer}`)
             requestToResolve.resolve(requestToResolve.answer)
             GameManager.updateFoodAndInternalClock(requestToResolve.command.trim().split(' ').at(0))
             this.trySend()

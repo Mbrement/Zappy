@@ -167,7 +167,7 @@ class FarmingState extends IState {
                 }
             }
 
-            console.log(`[FARMING] Going to ${targetIndex} and taking :`, commandsToSend.map(cmd => cmd.trim()))
+            console.log(`[FARMING] Going to index ${targetIndex} and taking :`, commandsToSend.map(cmd => cmd.trim()))
 
             const sequencePromises = commandsToSend.map(cmd => {
                 return GameManager.commandManager.sendCommand(cmd)

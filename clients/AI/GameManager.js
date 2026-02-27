@@ -143,7 +143,7 @@ class GameManager {
         if (COMMAND_COST.hasOwnProperty(commandExecuted)) {
             this.inventory.nourriture -= COMMAND_COST[commandExecuted]
             this.internalTicks += COMMAND_COST[commandExecuted]
-            console.log('Command', commandExecuted, 'Costed:', COMMAND_COST[commandExecuted], 'Food left:', this.inventory.nourriture)
+            console.log('[GAME MANAGER] Command', commandExecuted, 'Costed:', COMMAND_COST[commandExecuted], 'Food left:', this.inventory.nourriture)
         }
     }
 
@@ -177,8 +177,6 @@ class GameManager {
      */
     handleBroadcastMessage(broadcast) {
         const parsedBroadcast = this.responseParser.parseBroadcastMessage(broadcast)
-
-        console.log('Broadcast', parsedBroadcast)
 
         if (!parsedBroadcast || parsedBroadcast.teamName !== this.teamName) {
             return

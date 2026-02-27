@@ -32,9 +32,6 @@ class PacketBuffer {
         const messageArray = this.#buffer.split('\n')
         this.#buffer = messageArray.pop()
 
-        console.log('Message Array:', messageArray)
-        console.log('Buffer:', this.#buffer)
-
         return messageArray
     }
 }
