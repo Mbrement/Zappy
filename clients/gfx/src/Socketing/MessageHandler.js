@@ -704,6 +704,7 @@ class MessageHandler {
     cmd_sgt(command) {
         if (command.length !== 2) {
             console.error("Received invalid time unit from server", command)
+            return
         }
 
         if (!this.world.gameRunning) {
@@ -713,6 +714,7 @@ class MessageHandler {
 
         const timeUnit = this.parseNumber(command[1])
         if (timeUnit === null) {
+            console.error("Received invalid time unit from server", command)
             return
         }
 
