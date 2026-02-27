@@ -9,7 +9,7 @@ class BroadcastManager {
     clearBroadcast() {
         const broadcastContainer = document.getElementById('broadcastContainer')
         if (broadcastContainer) {
-            while (broadcastContainer.firstChild) {
+            while (broadcastContainer.firstChild && broadcastContainer.children.length > 10) {
                 broadcastContainer.removeChild(broadcastContainer.firstChild)
             }
         }
