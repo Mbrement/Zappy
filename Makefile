@@ -15,6 +15,8 @@ gfx:
 clear_gfx:
 	@cd $(GFX_CLIENT_DIR) && chmod +x cleanGFX.sh && ./cleanGFX.sh
 
+re_gfx: build_gfx gfx
+
 ############# AI Client #################
 
 build_ai:
@@ -26,7 +28,7 @@ clear_ai:
 ############# Server #############
 
 build_server:
-	@cd $(SERVER_DIR) && cargo build
+	@cd $(SERVER_DIR) && cargo build --release
 
 clear_server:
 	@cd $(SERVER_DIR) && cargo clean
@@ -37,4 +39,4 @@ all: build_gfx build_ai build_server
 
 clear: clear_gfx clear_ai clear_server
 
-.PHONY: build_gfx, gfx, clear_gfx, build_ai, clear_ai, build_server, clear_server
+.PHONY: build_gfx, gfx, clear_gfx, re_gfx, build_ai, clear_ai, build_server, clear_server
