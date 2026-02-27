@@ -1,12 +1,8 @@
 use crate::server::client::{self, Client};
-use crate::server::command_manager::CommandManager;
 use crate::server::map::Map;
 use crate::server::{self, Server, define};
 use mio::Token;
-use rand::RngExt;
-use rand::seq::index::IndexVec;
 use std::collections::HashMap;
-use std::io::Write;
 use std::time;
 
 pub struct Game {
@@ -163,14 +159,6 @@ impl Game {
         true
     }
 
-    pub fn get_player_by_position(&self, position: (u32, u32)) -> Option<Token> {
-        self.map
-            .player_position
-            .iter()
-            .find(|(_, pos)| **pos == position)
-            .map(|(token, _)| *token)
-    }
-
     pub fn get_visible_cells(
         &self,
         position: (u32, u32),
@@ -193,7 +181,7 @@ impl Game {
             let cell_y = (position.1 as i32 + dy).rem_euclid(self.map.get_height() as i32) as u32;
             if let Some(cell) = self.map.get_tile_content(cell_x, cell_y) {
                 visible_cells.push(cell.iter().cloned().collect::<Vec<String>>().join(" "));
-                for i in self
+                for _i in self
                     .map
                     .player_position
                     .iter()
@@ -201,7 +189,6 @@ impl Game {
                     .map(|(token, _)| *token)
                     .collect::<Vec<Token>>()
                 {
-                    // println!("saw a player at ({}, {}), it is {:?}", cell_x, cell_y, i);
                     if max_index == max_index_initial {
                         max_index_initial += 1;
                     } else {
@@ -220,17 +207,13 @@ impl Game {
         visible_cells
     }
 
-    // pub fn fork_player(&mut self, token: Token) {
-    //     println!("Player {:?} is trying to fork", token); // if let Some(client) = self._clients.get(&token) { if client.r#type == define::ROLE_PLAYER { let team_name = self.get_team_for_player(&token); let new_token = Token(self._next_token as usize); self._next_token += 1; self._clients.insert(new_token, Client::new(client.get_socket().try_clone().unwrap(), new_token)); self.teams.get_mut(&team_name).unwrap().push(new_token); self._game.spawn_player(new_token, &team_name); println!("Player {:?} forked successfully as {:?}", token, new_token); } else { println!("Client {:?} is not a player and cannot fork", token); } } else { println!("Client {:?} not found for forking", token); }
-    // }
     pub(crate) fn check_inventory(&self, player_token: &Token, server: &Server) -> bool {
         let player = server._clients.get(player_token).unwrap();
-        let required_items;
-        if player.level != 8 {
-            required_items = define::INCANTATION_REQ[(player.level - 1) as usize];
+        let required_items = if player.level != 8 {
+            define::INCANTATION_REQ[(player.level - 1) as usize]
         } else {
             return false;
-        }
+        };
         for i in 1..7 {
             if player.inventory[i] < required_items[i] {
                 return false;
@@ -239,63 +222,17 @@ impl Game {
         true
     }
 
-    pub(crate) fn can_incantation(&self, player_token: &Token, server: Server) -> Vec<Token> {
-        // for player in &server._game.map.player_position{
-        // 	if player == (player_token, &self.get_player_position(*player_token)) {
-        // 		return true;
-        // 	}
-        // }
-        let (x, y) = server._game.map.player_position[player_token];
-        let player_incanting: Vec<Token> = server
-            ._game
-            .map
-            .player_position
-            .iter()
-            .filter(|(token, pos)| *pos == &(x, y) && *token != player_token)
-            .map(|(token, _)| *token)
-            .collect();
-        player_incanting
-        // if player_incanting.len() != define::INCANTATION_REQ[(server._clients[player_token].level - 1) as usize][0] as usize &&
-        //     self.check_inventory(player_token, &*server) {
-        //     {
-
-        //         return true;
-        //     }
-        // }
-        // false
-    }
-
     pub fn take_item_from_cell(&mut self, client: &mut Client, item: &str) -> bool {
         let position = self.get_player_position(client.get_token());
-        // println!("micka ?\n"); // maieuh...
         if self.map.remove_item_from_cell(position.0, position.1, item) {
-            // if item == define::FOOD {
-            // 	client.set_hunger(client.hunger.saturating_add(define::FOOD_VALUE));
-            // } else {
-            // 	define::ITEMS_DICT.get(item).map(|&idx| {
-            // 		if idx < client.inventory.len() {
-            // 			client.inventory[idx] = client.inventory[idx].saturating_add(1);
-            // 		}
-            // 	});
-            // }
 
             let mut inc: u128 = 1;
             if item == define::FOOD {
                 inc = define::FOOD_VALUE;
             }
             client.inventory[define::ITEMS_DICT[item]] += inc;
-            // match item {
-            //     define::FOOD => client.set_hunger(client.hunger + define::FOOD_VALUE), // Assuming 126 is the hunger value for food
-            //     define::T1_MAT => client.inventory[define::T1_MAT_INV] += 1,
-            //     define::T2_MAT => client.inventory[define::T2_MAT_INV] += 1,
-            //     define::T3_MAT => client.inventory[define::T3_MAT_INV] += 1,
-            //     define::T4_MAT => client.inventory[define::T4_MAT_INV] += 1,
-            //     define::T5_MAT => client.inventory[define::T5_MAT_INV] += 1,
-            //     define::T6_MAT => client.inventory[define::T6_MAT_INV] += 1,
-            //     _ => (),
-            // }
             return true;
         }
-        return false;
+        false
     }
 }

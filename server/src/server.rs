@@ -11,10 +11,7 @@ mod map;
 pub mod utils;
 use crate::server::client::Client;
 use crate::server::command_manager::CommandManager;
-use crate::server::map::Egg;
-//use crate::server::{self};
 use rand::*;
-//use std::collections::VecDeque;
 use std::{process, time};
 
 pub struct Server {
@@ -26,13 +23,11 @@ pub struct Server {
     _events: Events,
     __pass__: String,
     _clients: HashMap<Token, Client>,
-    // pub teams: HashMap<String, Vec<Token>>,
     pub(crate) _max_clients: HashMap<String, u32>,
     pub _max_clients_per_team: u32,
     _socket: TcpListener,
     _ticks: u64,
     _incantation_list: HashMap<Token, Vec<Token>>,
-    // _command_manager: CommandManager,
     pub(crate) _game: game::Game,
     send_to_graph: String,
 }
@@ -53,13 +48,12 @@ impl Server {
             eprintln!("Poll created unsuccessfully");
             process::exit(1);
         }
-        let pwd;
-        if passwd.is_empty() {
-            pwd = "ADMIN".to_string();
+        let pwd = if passwd.is_empty() {
+            "ADMIN".to_string()
         } else {
-            pwd = passwd.clone();
-        }
-        let tmp = Server {
+            passwd.clone()
+        };
+        Server {
             _address: "0.0.0.0".to_string(),
             _port: port,
             _client_token: Token(0),
@@ -72,45 +66,11 @@ impl Server {
             _next_token: 1,
             _max_clients_per_team: 10,
             __pass__: pwd,
-            // _command_manager: CommandManager::new_server(),
             _game: game::Game::new(10, 10),
             _incantation_list: HashMap::new(),
             send_to_graph: String::new(),
-        };
-        tmp
-    }
-
-    // ________________Setters
-    /*
-    fn set_passwd(&mut self, passwd: String) {
-        self.__pass__ = passwd;
-    }
-
-    pub fn set_address(&mut self, addr: String) {
-        self._address = format!("{}", addr);
-        let tmp_socket =
-            TcpListener::bind(format!("{}:{}", "127.0.0.1", self._port).parse().unwrap());
-        if tmp_socket.is_err() {
-            eprintln!("Failed to bind to address");
-            process::exit(1);
         }
-        #[cfg(feature = "log")]
-        println!("Server address changed to: {}", self._address);
-        self._socket = tmp_socket.unwrap();
     }
-
-    pub fn set_port(&mut self, port: u16) {
-        self._port = port;
-        let tmp_socket =
-            TcpListener::bind(format!("{}:{}", self._address, self._port).parse().unwrap());
-        if tmp_socket.is_err() {
-            eprintln!("Failed to bind to address");
-            process::exit(1);
-        }
-        #[cfg(feature = "log")]
-        println!("Server port changed to: {}", self._port);
-        self._socket = tmp_socket.unwrap();
-    }*/
 
     pub fn set_map_width(&mut self, width: u32) {
         self._game.map.set_width(width);
@@ -131,44 +91,6 @@ impl Server {
         }
     }
 
-    // ________________Getters
-    /*
-    pub fn get_port(&self) -> u16 {
-        self._port
-    }*/
-
-    pub fn get_height(&self) -> u32 {
-        self._game.map.get_height()
-    }
-
-    pub fn get_width(&self) -> u32 {
-        self._game.map.get_width()
-    }
-    /*
-        pub fn get_address(&self) -> String {
-            self._address.clone()
-        }
-
-        pub fn get_events(&self) -> &Events {
-            &self._events
-        }
-
-        pub fn get_events_mut(&mut self) -> &mut Events {
-            &mut self._events
-        }
-
-        pub fn get_poll(&self) -> &Poll {
-            &self._poll
-        }
-
-        pub fn get_poll_mut(&mut self) -> &mut Poll {
-            &mut self._poll
-        }
-
-        pub fn get_clients(&self) -> &HashMap<Token, client::Client> {
-            &self._clients
-        }
-    */
     pub fn get_clients_by_type(&self, clients_type: &str) -> Vec<&Client> {
         self._clients
             .values()
@@ -211,19 +133,8 @@ impl Server {
         println!("Client {:?} disconnected", token);
     }
 
-    // pub fn disconnect_client(&mut self, client: Client) {
-    //     client.get_socket().shutdown(std::net::Shutdown::Both);
-    //     self._clients.remove(&client.get_token());
-    // 	if client.r#type == define::ROLE_PLAYER{
-
-    // 	}
-    //     #[cfg(feature = "log")]
-    //     println!("Client {:?} disconnected", client.get_token());
-    // }
-
     pub fn disconnect_client_mut(&mut self, client: &mut Client) {
         let _ = client.get_socket_mut().shutdown(std::net::Shutdown::Both);
-        // self._clients.remove(&client.get_token()); // Already removed in disconnect_client_by_token
         if client.r#type == define::ROLE_PLAYER {
             if client.is_incanting != Token(0) {
                 self._incantation_list
@@ -278,7 +189,7 @@ impl Server {
             self._clients.remove(&token);
             return false;
         }
-        let response = format!("BIENVENUE\n");
+        let response = "BIENVENUE\n".to_string();
         if self
             ._clients
             .get_mut(&token)
@@ -291,7 +202,7 @@ impl Server {
             return false;
         }
         self._clients.get_mut(&token).unwrap().r#type = "welcomed".to_string();
-        return true;
+        true
     }
 
     fn get_position_new_client(
@@ -300,24 +211,21 @@ impl Server {
         cmd: &String,
         _command_manager: &mut CommandManager,
     ) -> ((u32, u32), u128) {
-        //let mut egg: Egg = Egg::new(0,0, 0, cmd, 0);
         let mut egg: (u128, u32, u32, String, u128, bool) = (0, 0, 0, cmd.clone(), 0, false);
-        if self._game.starting {
-            match self
+        if self._game.starting
+            && let Some(egg_found) = self
                 ._game
                 .map
                 .egg_position
                 .iter()
                 .find(|(_, pos)| *cmd == pos.2 && !pos.4)
                 .map(|(k, v)| (*k, v.0, v.1, v.2.clone(), v.3, v.4))
-            {
-                Some(egg_found) => egg = egg_found,
-                _ => {}
-            };
-        }
+        {
+            egg = egg_found
+        };
 
         println!("get_position_new_client egg:{:?}", egg);
-        if (egg.0 == 0) {
+        if egg.0 == 0 {
             return (
                 (
                     self._game
@@ -332,7 +240,7 @@ impl Server {
                 0,
             );
         }
-        let mut egg_mut = self._game.map.egg_position.get_mut(&egg.0).unwrap();
+        let egg_mut = self._game.map.egg_position.get_mut(&egg.0).unwrap();
         egg_mut.4 = true;
         _command_manager.next_execute.insert(token, egg.4);
         _command_manager.add_to_queue_internal("spawning".to_string(), token, egg.0.to_string());
@@ -359,7 +267,7 @@ impl Server {
         if self._clients.contains_key(token) {
             (position, egg_id) = self.get_position_new_client(*token, cmd, _command_manager);
         }
-        if let Some(client) = self._clients.get_mut(&token) {
+        if let Some(client) = self._clients.get_mut(token) {
             let player_token = client.get_token();
             client.r#type = define::ROLE_PLAYER.to_string();
             client.position = position;
@@ -455,16 +363,10 @@ impl Server {
     fn egg_life(&mut self, ticks_to_remove: &mut Vec<u128>) {
         for (egg_id, (_, _, team, tick, _)) in self._game.map.egg_position.iter() {
             if tick < &self._game._tick {
-                let team_name = team;
                 let tmp = self._max_clients.get_mut(team);
-                if let Some(v) = tmp {
-                    if *v > self._max_clients_per_team {
-                        *v -= 1;
-                        println!(
-                            "max player dec {} egg_id {} at tick {}",
-                            v, egg_id, &self._game._tick
-                        );
-                    }
+                if let Some(v) = tmp
+                    && *v > self._max_clients_per_team {
+                    *v -= 1;
                 }
                 ticks_to_remove.push(*egg_id);
             }
@@ -526,12 +428,12 @@ impl Server {
             for token in to_disconnect {
                 if self
                     ._clients
-                    .get(&token)
-                    .map_or(false, |c| c.r#type == define::ROLE_PLAYER)
+                    .get(token)
+                    .is_some_and(|c| c.r#type == define::ROLE_PLAYER)
                 {
-                    self.send_to_graph += &graphic::player_death(&token);
+                    self.send_to_graph += &graphic::player_death(token);
                 }
-                self.disconnect_client_by_token(&token);
+                self.disconnect_client_by_token(token);
             }
             graphic::send_graphic_clients(self.send_to_graph.clone(), self);
             self.send_to_graph.clear();
@@ -684,7 +586,7 @@ impl Server {
             if let Some(player) = self._clients.get_mut(&token) {
                 for i in 1..6 {
                     player.inventory[i] -=
-                        define::INCANTATION_REQ[player_level as usize - 1][i] as u128;
+                        define::INCANTATION_REQ[player_level as usize - 1][i];
                 }
             } else {
                 eprintln!("Player with token {:?} not found", token);
@@ -762,7 +664,6 @@ fn command_received(
     let buf_len = &mut entry.1;
     let end = (*buf_len).saturating_add(n);
     if end > buf.len() {
-        // eprintln!("Received more data than buffer can hold for token {:?}", token);
         return;
     }
     let content_str = String::from_utf8_lossy(&buf[..end]);
@@ -802,9 +703,6 @@ fn default_response(
 ) {
     let response = format!("0\n{} {}\n", height, width);
     if client.get_socket_mut().write(response.as_bytes()).is_err() {
-        // client
-        //     .get_socket_mut()
-        //     .shutdown(std::net::Shutdown::Both);
         to_disconnect.push(*token);
     }
 }

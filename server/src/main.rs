@@ -1,12 +1,7 @@
-#![allow(warnings)]
-// extern crate getopts;
+//#![allow(warnings)]
 use getopts::Options;
 use std::env;
-// use std::io::{Read, Write};
 mod server;
-// use mio::net::{TcpListener, TcpStream};
-//use mio::Token;
-// use std::collections::HashMap;
 
 use crate::server::{Server, define};
 
@@ -30,28 +25,26 @@ fn main() -> std::io::Result<()> {
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
         Err(f) => {
-            eprintln!("{}", f.to_string());
+            eprintln!("{}", f);
             return Ok(());
         }
     };
     let mut server: Server;
-    let port;
-    if matches.opt_present("p")
+    let port = if matches.opt_present("p")
         && matches.opt_str("p").is_some()
         && matches.opt_str("p").unwrap().parse::<u16>().is_ok()
     {
-        port = matches.opt_str("p").unwrap().parse().unwrap();
+        matches.opt_str("p").unwrap().parse().unwrap()
     } else {
         eprintln!("Invalid or no port provided");
-        std::process::exit(1);
-    }
+        std::process::exit(1)
+    };
 
-    let password;
-    if matches.opt_present("s") && matches.opt_str("s").is_some() {
-        password = matches.opt_str("s").unwrap();
+    let password = if matches.opt_present("s") && matches.opt_str("s").is_some() {
+        matches.opt_str("s").unwrap()
     } else {
-        password = "ADMIN".to_string();
-    }
+        "ADMIN".to_string()
+    };
     server = Server::new(port, password);
 
     if matches.opt_present("h") {
@@ -123,7 +116,7 @@ fn main() -> std::io::Result<()> {
                     std::io::ErrorKind::InvalidInput,
                     "graphical client name used as team",
                 ));
-            } else if server._game.team.get(&arg.clone()).is_some() {
+            } else if server._game.team.contains_key(&arg.clone()) {
                 eprintln!(
                     "Found duplicate {} team, please do not use this as a team name",
                     arg
@@ -169,5 +162,5 @@ fn main() -> std::io::Result<()> {
     }
     server.run();
 
-    return Ok(());
+    Ok(())
 }

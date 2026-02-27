@@ -1,6 +1,9 @@
+#[cfg(feature = "log")]
 use crate::server::Server;
+#[cfg(feature = "log")]
 use std::io::Write;
 
+#[cfg(feature = "log")]
 pub fn debug_manager_register(s: &str, _c: mio::Token, server: &mut Server, _arg: &str) {
     #[cfg(feature = "debug")]
     let client = server._clients.get_mut(&_c).unwrap();

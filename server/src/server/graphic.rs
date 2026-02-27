@@ -1,7 +1,6 @@
 use mio::Token;
 
-use crate::server::client;
-use crate::server::{Server, client::Client, define, game::Game, map::Tile};
+use crate::server::{Server, client::Client, define, map::Tile};
 use std::collections::HashMap;
 use std::io::Write;
 
@@ -24,7 +23,7 @@ pub(crate) fn content_tile(col: u32, row: u32, tile: &Tile) -> String {
     )
 }
 
-fn map_content(map: &Vec<Vec<Tile>>) -> String {
+fn map_content(map: &[Vec<Tile>]) -> String {
     let mut res = String::new();
 
     for (y, row) in map.iter().enumerate() {
@@ -89,13 +88,6 @@ fn player_inventory(player: &Client) -> String {
     )
 }
 
-//Todo:: Bonus
-//fn ban_hammer(player: Client) -> String {
-//    #[cfg(feature = "debug")]
-//    println!("get bonked\n");
-//    format!("hax {:?}\n", player.token)
-//}
-
 fn leonidas(token: &Token) -> String {
     format!("pex {:?}\n", token.0)
 }
@@ -111,7 +103,7 @@ pub(crate) fn start_incant(tokens: Vec<Token>, origin: Token, server: &Server) -
         "pic {} {} {}",
         x,
         y,
-        server._clients.get(&origin).unwrap().level //TODO THIS JUST CRASHED // it should be fixed now
+        server._clients.get(&origin).unwrap().level
     );
     for token in tokens {
         res += &format!(" {:?}", token.0);
@@ -171,18 +163,6 @@ pub(crate) fn end_game(winner: String) -> String {
     format!("seg {}\n", winner)
 }
 
-fn server_msg(message: String) -> String {
-    format!("smg {}\n", message)
-}
-
-fn unknown_cmd() -> String {
-    String::from("suc\n")
-}
-
-fn bad_param() -> String {
-    String::from("sbp\n")
-}
-
 pub(crate) fn event_graph_connect(server: &Server) -> String {
     let mut res = String::new();
 
@@ -195,7 +175,7 @@ pub(crate) fn event_graph_connect(server: &Server) -> String {
             res += &new_player(server.get_team_for_player(&player.token), player);
         }
     }
-    for (egg_id, (x, y, team, tick, _)) in &server._game.map.egg_position {
+    for (egg_id, (x, y, team, _, _)) in &server._game.map.egg_position {
          res += &end_fork(team.to_string(), *egg_id, *x, *y);
     }
     res
@@ -230,7 +210,7 @@ pub(crate) fn event_fus_ro_dah(players: Vec<&mut Client>, token: Token) -> Strin
 
     res += &leonidas(&token);
     for player in players {
-        if (player.token != token) {
+        if player.token != token {
             res += &player_pos(player);
         }
     }

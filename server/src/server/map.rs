@@ -1,5 +1,4 @@
 use crate::server::{define::*, graphic};
-use getopts::Options;
 use mio::Token;
 use rand::{rngs::SmallRng, *};
 use std::collections::HashMap;
@@ -11,28 +10,6 @@ pub struct Map {
     tiles: Vec<Vec<Tile>>,
     pub(crate) egg_position: HashMap<u128, (u32, u32, String, u128, bool)>,
     pub(crate) player_position: HashMap<Token, (u32, u32)>,
-}
-
-
-//TODO
-pub(crate) struct Egg {
-    egg_id: u128,
-    x: u32,
-    y: u32,
-    team: String,
-    death_tick: u128,
-}
-
-impl Egg {
-    pub(crate) fn new(egg_id: u128, x: u32, y: u32, team: String, death_tick: u128) -> Self {
-        Egg {
-            egg_id,
-            x,
-            y,
-            team,
-            death_tick,
-        }
-    }
 }
 
 #[derive(Clone)]
@@ -112,7 +89,7 @@ impl Map {
                     tile.string_tab[FOOD_INV] += 1
                 }
             }
-            100..=130 => {
+            101..=130 => {
                 if tile.string_tab[T1_MAT_INV] < 2 {
                     tile.string_tab[T1_MAT_INV] += 1
                 }
@@ -170,30 +147,6 @@ impl Map {
             None
         }
     }
-    pub fn get_tile_content_mut(&mut self, x: u32, y: u32) -> Vec<String> {
-        if x < self.width && y < self.height {
-            let mut rtn: Vec<String> = Vec::new();
-            for i in 0..7 {
-                let count = self.tiles[y as usize][x as usize].string_tab[i];
-                for _ in 0..count {
-                    let name = match i {
-                        FOOD_INV => FOOD,
-                        T1_MAT_INV => T1_MAT,
-                        T2_MAT_INV => T2_MAT,
-                        T3_MAT_INV => T3_MAT,
-                        T4_MAT_INV => T4_MAT,
-                        T5_MAT_INV => T5_MAT,
-                        T6_MAT_INV => T6_MAT,
-                        _ => continue,
-                    };
-                    rtn.push(name.to_string());
-                }
-            }
-            rtn
-        } else {
-            Vec::new()
-        }
-    }
 
     pub fn remove_item_from_cell(&mut self, x: u32, y: u32, item: &str) -> bool {
         // pourquoi ? C programming in a nutshell, that's why
@@ -228,21 +181,15 @@ impl Map {
         }
     }
     pub fn partial_fill(&mut self, ticks: u8) -> String {
-        //TODO : optimize this with iterator on the 2nd loop
         let mut res = String::new();
-        let mut row_nb: u32 = 0;
-        let mut tile_nb: u32 = 0;
-        for row in &mut self.tiles {
-            tile_nb = 0;
-            for tile in row {
-                if (tile_nb + row_nb) % 4 == ticks as u32 {
+        for (row_nb, row) in &mut self.tiles.iter_mut().enumerate() {
+            for (tile_nb, tile) in row.iter_mut().enumerate() {
+                if (tile_nb + row_nb) % 4 == ticks as usize {
                     let rng: i32 = self.rng.random_range(0..=300);
                     Self::fill_case(tile, rng);
-                    res += &graphic::content_tile(tile_nb, row_nb, tile);
+                    res += &graphic::content_tile(tile_nb as u32, row_nb as u32, tile);
                 }
-                tile_nb += 1;
             }
-            row_nb += 1;
         }
         #[cfg(feature = "debug")]
         self.print_map();
