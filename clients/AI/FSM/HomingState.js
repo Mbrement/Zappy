@@ -1,0 +1,63 @@
+import IState from './IState.js';
+import GameManager from '../GameManager.js';
+import { SOUND_MAPPING } from '../constant.js';
+
+export default class HomingState extends IState {
+    constructor() {
+        super();
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Does nothing except putting a log in console in this state
+     */
+    onEnter() {
+        console.log('[HOMING] Entering state');
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Follow the broadcast direction
+     */
+    async onUpdate() {
+        if (!GameManager.followedBroadcast) {
+            return;
+        }
+
+        const direction = GameManager.followedBroadcast.direction;
+
+        if (direction === -1) {
+            return
+        }
+
+        if (direction === 0) {
+            console.log('[HOMING] On the followed broadcast tile, awaiting...');
+            return
+        }
+
+        const itinerary = SOUND_MAPPING[direction];
+
+        if (itinerary && itinerary.length > 0) {
+            console.log(`[HOMING] Following sound from: ${direction} -> Itinerary :`, itinerary.map(cmd => cmd.trim()));
+
+            const sequencePromises = itinerary.map((cmd) => {
+                return GameManager.commandManager.sendCommand(cmd);
+            });
+            await Promise.all(sequencePromises);
+
+            if (GameManager.followedBroadcast && GameManager.followedBroadcast.direction) {
+                GameManager.followedBroadcast.direction = -1;
+            }
+
+            GameManager.lastVisionRefresh = 0;
+        }
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Does nothing except putting a log in console in this state
+     */
+    onExit() {
+        console.log('[HOMING] End of state');
+    }
+}
