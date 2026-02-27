@@ -40,7 +40,9 @@ impl CommandManager {
             println!("Commande '{}' non reconnue.", name);
             return;
         }
-        if self.order.entry(token).or_insert_with(VecDeque::new).len() < 10 + *self.internal_queue.get(&token).unwrap_or(&0) as usize {
+        if self.order.entry(token).or_insert_with(VecDeque::new).len()
+            < 10 + *self.internal_queue.get(&token).unwrap_or(&0) as usize
+        {
             #[cfg(feature = "log")]
             println!(
                 "Adding command '{}' to queue for token {:?} with args: {}. queue len : {}",
@@ -70,7 +72,6 @@ impl CommandManager {
     }*/
 
     pub(crate) fn add_to_queue_internal(&mut self, name: String, token: mio::Token, arg: String) {
-
         *self.internal_queue.entry(token).or_insert(0) += 1;
         self.order
             .entry(token)
@@ -478,7 +479,13 @@ impl CommandManager {
                     return;
                 }
                 let client = client.unwrap();
-                println!("connect number res {} tick {} max {} nmbr {}", d, server._game._tick, server._max_clients[&tmp], server._game.team[&tmp].len());
+                println!(
+                    "connect number res {} tick {} max {} nmbr {}",
+                    d,
+                    server._game._tick,
+                    server._max_clients[&tmp],
+                    server._game.team[&tmp].len()
+                );
                 let _ = client.get_socket_mut().write(format!("{}\n", d).as_bytes()); // TODO check error here
             },
         );
@@ -510,7 +517,7 @@ impl CommandManager {
                 }
                 if let Some(client) = server._clients.get_mut(&_c) {
                     client.inventory[0] = 1260;
-				    client.level = 1;
+                    client.level = 1;
                     //oeuf retirer ici en cas d'eclosion avec client lié
                     server._game.map.egg_position.remove(&client.was_egg);
                     client.was_egg = 0;
@@ -542,7 +549,8 @@ impl CommandManager {
                 if let Some(max_player) = server._max_clients.get_mut(&team) {
                     *max_player += 1;
                 }
-                server.send_to_graph += &graphic::end_fork(team, server._game.map.egg_id_counter - 1, x, y);
+                server.send_to_graph +=
+                    &graphic::end_fork(team, server._game.map.egg_id_counter - 1, x, y);
                 //end fork
             },
         );
@@ -554,7 +562,6 @@ impl CommandManager {
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
                 utils::debug_manager_register("status", _c, server, _arg);
-                // Collect immutable data before taking a mutable borrow of the client map
                 let len = server.get_clients_by_type(define::ROLE_PLAYER).len();
 				let graphics = server.get_clients_by_type(define::ROLE_GRAPHIC).len();
 				let admins = server.get_clients_by_type(define::ROLE_ADMIN).len();
@@ -606,13 +613,9 @@ impl CommandManager {
                         .as_bytes(),
                     );
                 }
-                let tick = server.get_ticks();
-                for client in server.get_clients_by_type_mut(define::GRAPHICAL_CLIENT) {
-                    let _ = client
-                        .get_socket_mut()
-                        .write(format!("sgt {}\n", tick).as_bytes());
-                }
             }
+            let tick = server.get_ticks();
+            graphic::send_graphic_clients(graphic::get_time_unit(tick), server);
         });
         self.register("stop", |_c: mio::Token, server: &mut Server, _arg: &str| {
             let mut to_disconnect: Vec<mio::Token> = Vec::new();
@@ -741,12 +744,12 @@ impl CommandManager {
                             // );
                         } else if command.as_str() == "fork" {
                             // For fork, we want to add the new command to the front of the queue, so we use add_to_queue_internal
-/*
-                            self.egg_waiting
-                                .entry(server.get_team_for_player(&token))
-                                .or_insert_with(Vec::new)
-                                .push(server._game._tick + 642);
-*/
+                            /*
+                                                        self.egg_waiting
+                                                            .entry(server.get_team_for_player(&token))
+                                                            .or_insert_with(Vec::new)
+                                                            .push(server._game._tick + 642);
+                            */
                             self.order.get_mut(&token).unwrap().pop_front();
                             self.add_to_queue_internal(
                                 "end_fork".to_string(),

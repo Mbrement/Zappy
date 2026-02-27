@@ -524,7 +524,11 @@ impl Server {
                 self._game.map.egg_position.remove(&t);
             }
             for token in to_disconnect {
-                if self._clients.get(&token).map_or(false, |c| c.r#type == define::ROLE_PLAYER) {
+                if self
+                    ._clients
+                    .get(&token)
+                    .map_or(false, |c| c.r#type == define::ROLE_PLAYER)
+                {
                     self.send_to_graph += &graphic::player_death(&token);
                 }
                 self.disconnect_client_by_token(&token);
@@ -541,10 +545,8 @@ impl Server {
         let mut buf: ClientBuffer = ClientBuffer {
             data: HashMap::new(),
         };
-        // #[cfg(feature = "log")]
+        #[cfg(feature = "log")]
         println!("Server is running...");
-
-        // register listener once
         if self.register_listener() {
             return;
         }
@@ -556,7 +558,6 @@ impl Server {
             let events_snapshot: Vec<mio::event::Event> = self._events.iter().cloned().collect();
             for event in events_snapshot.iter() {
                 if event.token() == self._client_token {
-                    // loop {
                     match self._socket.accept() {
                         Ok((client_stream, _)) => {
                             if !self.connect_attempt(client_stream) {
@@ -573,8 +574,6 @@ impl Server {
                     let mut graphic_ok: bool = false;
                     let token = event.token();
                     if let Some(client) = self._clients.get_mut(&token) {
-                        // match client
-                        // Ensure an entry exists and read into the buffer starting at its current length
                         let entry = buf.data.entry(token).or_insert(([0; 500_000], 0));
                         let start = entry.1;
                         match client.get_socket_mut().read(&mut entry.0[start..]) {
@@ -651,7 +650,7 @@ impl Server {
                                 to_disconnect.push(token);
                             }
                         }
-					}
+                    }
                     if graphic_ok {
                         self.graph_connect(&token, &mut to_disconnect);
                     }
@@ -752,32 +751,21 @@ pub fn exit_game(server: &mut Server) {
 }
 
 fn command_received(
-    // buffer: [u8; 500_000],
     buffer: &mut ClientBuffer,
     n: usize,
     client: &mut Client,
     _command_manager: &mut CommandManager,
 ) {
     let token = client.get_token();
-
-    // Ensure an entry exists: entry.0 is the byte array, entry.1 is the current length of valid data
     let entry = buffer.data.entry(token).or_insert(([0; 500_000], 0));
     let buf = &mut entry.0;
     let buf_len = &mut entry.1;
-
-    // Append new bytes: we expect the caller to have written `n` bytes at buf[*buf_len .. *buf_len + n]
-    // If caller wrote into the front of the buffer directly, `n` should be the number of valid bytes now available.
     let end = (*buf_len).saturating_add(n);
     if end > buf.len() {
-        // Prevent overflow; if overflow would occur, clamp end to buffer size
-        eprintln!("Received more data than buffer can hold for token {:?}", token);
+        // eprintln!("Received more data than buffer can hold for token {:?}", token);
         return;
     }
-
-    // Interpret current content as UTF-8 lossily up to `end`
     let content_str = String::from_utf8_lossy(&buf[..end]);
-
-    // If there's at least one newline, process complete lines
     if let Some(last_newline) = content_str.rfind('\n') {
         let complete_part = &content_str[..last_newline];
 
@@ -787,31 +775,19 @@ fn command_received(
             let arg = parts.next().unwrap_or("");
             _command_manager.add_to_queue(name.to_string(), token, arg.to_string());
         }
-
-        // Move leftover bytes (after last_newline) to the front of the buffer
         let leftover_start = last_newline + 1;
         let leftover_len = end - leftover_start;
-        // copy the leftover region to the front
         buf.copy_within(leftover_start..end, 0);
-        // zero out the rest (optional)
-        // for i in leftover_len..*buf_len { buf[i] = 0; }
 
-        // update buffer length to leftover length
         *buf_len = leftover_len;
     } else {
-        // No newline found: update stored length to include newly read bytes
         *buf_len = end;
     }
 }
 
 fn admin_client_connect(token: &Token, client: &mut Client, to_disconnect: &mut Vec<Token>) {
-    //#[cfg(feature = "log")]
-    //println!("Received command '{}' from {:?} 2", cmd, token);
     client.r#type = define::ADMIN_CLIENT.to_string();
     let response = "Welcome to the admin client!\n\n".to_string();
-    if client.get_socket_mut().write(response.as_bytes()).is_err() {
-        to_disconnect.push(*token);
-    }
     if client.get_socket_mut().write(response.as_bytes()).is_err() {
         to_disconnect.push(*token);
     }

@@ -163,7 +163,7 @@ pub(crate) fn rotten_egg(egg_id: u128) -> String {
     format!("eht {}\n", egg_id)
 }
 
-fn get_time_unit(tick: u64) -> String {
+pub(crate) fn get_time_unit(tick: u64) -> String {
     format!("sgt {}\n", tick)
 }
 

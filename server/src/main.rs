@@ -19,7 +19,7 @@ fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
     let mut opts = Options::new();
-    opts.optopt("p", "port", "set the port for the server", "PORT");
+    opts.optopt("p", "", "set the port for the server", "PORT");
     opts.optopt("x", "", "set the width of the map", "WIDTH");
     opts.optopt("y", "", "set the height of the map", "HEIGHT");
     opts.reqopt("n", "", "set team", "team_name_1 team_name_2 ...");
@@ -42,8 +42,8 @@ fn main() -> std::io::Result<()> {
     {
         port = matches.opt_str("p").unwrap().parse().unwrap();
     } else {
-        println!("Default port : 4242");
-        port = 4242;
+        eprintln!("Invalid or no port provided");
+        std::process::exit(1);
     }
 
     let password;
@@ -66,10 +66,8 @@ fn main() -> std::io::Result<()> {
         {
             server.set_map_width(width.parse().unwrap());
         } else {
-            eprintln!(
-                "Invalid map width value, keeping default value of {}",
-                server.get_width()
-            );
+            eprintln!("Invalid map width value",);
+            std::process::exit(1);
         }
     }
 
@@ -81,11 +79,12 @@ fn main() -> std::io::Result<()> {
         {
             server.set_map_height(height.parse().unwrap());
         } else {
-            eprintln!(
-                "Invalid map height value, keeping default value of {}",
-                server.get_height()
-            );
+            eprintln!("Invalid map height value");
+            std::process::exit(1);
         }
+    } else {
+        eprintln!("Invalid map height value");
+        std::process::exit(1);
     }
 
     if matches.opt_present("t") {
@@ -98,15 +97,16 @@ fn main() -> std::io::Result<()> {
         {
             server.set_ticks(tick.parse().unwrap());
         } else {
-            eprintln!(
-                "Invalid tick value, keeping default value of {}",
-                server.get_ticks()
-            );
+            eprintln!("Invalid tick value");
+            std::process::exit(1);
         }
+    } else {
+        eprintln!("Invalid tick value");
+        std::process::exit(1);
     }
+
     if matches.opt_present("n") {
         let teams = matches.opt_positions("n");
-        // let mut team_names: Vec<String> = Vec::new();
         let mut tmp = 0usize;
         for arg in &args {
             #[cfg(feature = "debug")]
@@ -145,7 +145,14 @@ fn main() -> std::io::Result<()> {
                 "no teams found",
             ));
         }
+    } else {
+        eprintln!("No teams found, please add teams using the -n option");
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "no teams found",
+        ));
     }
+
     if matches.opt_present("c") {
         let clients = matches.opt_str("c").unwrap();
         #[cfg(feature = "log")]
@@ -153,11 +160,12 @@ fn main() -> std::io::Result<()> {
         if clients.parse::<u32>().is_ok() {
             server.set_clients_number(clients.parse().unwrap());
         } else {
-            eprintln!("Invalid client value, keeping default value of {}", 10);
+            eprintln!("Invalid client value");
+            std::process::exit(1);
         }
     } else {
-        server.set_clients_number(10);
-        eprintln!("No client number provided, keeping default value of {}", 10);
+        eprintln!("Invalid client value");
+        std::process::exit(1);
     }
     server.run();
 
