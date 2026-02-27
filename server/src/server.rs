@@ -435,16 +435,18 @@ impl Server {
 
     fn clients_hunger(&mut self, to_disconnect: &mut Vec<Token>) {
         for client in self.get_clients_by_type_mut(define::ROLE_PLAYER) {
-            client.hunger_tick();
-            #[cfg(feature = "debug")]
-            println!(
-                "Client {:?} hunger: {}",
-                client.get_token(),
-                client.inventory[0]
-            );
-            if client.inventory[0] == 0 {
-                let _ = client.get_socket_mut().write(b"mort\n");
-                to_disconnect.push(client.get_token());
+            if client.level != 0 {
+                client.hunger_tick();
+                #[cfg(feature = "debug")]
+                println!(
+                    "Client {:?} hunger: {}",
+                    client.get_token(),
+                    client.inventory[0]
+                );
+                if client.inventory[0] == 0 {
+                    let _ = client.get_socket_mut().write(b"mort\n");
+                    to_disconnect.push(client.get_token());
+                }
             }
         }
     }
@@ -522,7 +524,9 @@ impl Server {
                 self._game.map.egg_position.remove(&t);
             }
             for token in to_disconnect {
-                self.send_to_graph += &graphic::player_death(&token);
+                if self._clients.get(&token).map_or(false, |c| c.r#type == define::ROLE_PLAYER) {
+                    self.send_to_graph += &graphic::player_death(&token);
+                }
                 self.disconnect_client_by_token(&token);
             }
             graphic::send_graphic_clients(self.send_to_graph.clone(), self);
