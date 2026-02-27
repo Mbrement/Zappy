@@ -7,40 +7,29 @@ SERVER_DIR		= ./server
 ########### Graphical Client ###########
 
 build_gfx:
-	@cd $(GFX_CLIENT_DIR)
-	@chmod +x buildGFX.sh
-	@./buildGFX.sh
+	@cd $(GFX_CLIENT_DIR) && chmod +x buildGFX.sh && ./buildGFX.sh
 
 gfx:
-	@cd $(GFX_CLIENT_DIR)
-	@chmod +x runGFX.sh
-	@./runGFX.sh
+	@cd $(GFX_CLIENT_DIR) && chmod +x runGFX.sh && ./runGFX.sh
 
 clear_gfx:
-	@cd $(GFX_CLIENT_DIR)
-	@chmod +x cleanGFX.sh
-	@./cleanGFX.sh
+	@cd $(GFX_CLIENT_DIR) && chmod +x cleanGFX.sh && ./cleanGFX.sh
 
 ############# AI Client #################
 
 build_ai:
-	@cd $(AI_CLIENT_DIR)
-	@chmod +x buildSea.sh
-	@./buildSea.sh
+	@cd $(AI_CLIENT_DIR) && chmod +x buildSea.sh && ./buildSea.sh
 
 clear_ai:
-	@cd $(AI_CLIENT_DIR)
-	@npm cache clean --force
-	@rm -rf node_modules package-lock.json AIClient
+	@cd $(AI_CLIENT_DIR) && npm cache clean --force && rm -rf node_modules package-lock.json AIClient
 
 ############# Server #############
 
 build_server:
-	@cd $(SERVER_DIR)
-	@cargo build
+	@cd $(SERVER_DIR) && cargo build
 
 clear_server:
-	@cargo clean
+	@cd $(SERVER_DIR) && cargo clean
 
 ############# General #############
 
