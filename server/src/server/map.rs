@@ -14,14 +14,12 @@ pub struct Map {
 
 #[derive(Clone)]
 pub struct Tile {
-    // strings: Vec<String>,
     string_tab: [u32; 7],
 }
 
 impl Tile {
     pub fn new() -> Self {
         Tile {
-            // strings: Vec::new(),
             string_tab: [0; 7],
         }
     }
@@ -56,12 +54,6 @@ impl Map {
         self.tiles = vec![vec![Tile::new(); self.width as usize]; height as usize];
     }
 
-    // pub fn resize(&mut self, width: u32, height: u32) {
-    //     self.set_width(width);
-    //     self.set_height(height);
-    //     //TODO DO IT resize existe for the vec, check them tho
-    // }
-
     pub fn get_width(&self) -> u32 {
         self.width
     }
@@ -77,13 +69,6 @@ impl Map {
     }
     pub fn fill_case(tile: &mut Tile, first_rng: i32) {
         match first_rng {
-            // 0..=100 => tile.strings.push(FOOD.into()),
-            // 100..=130 => tile.strings.push(T1_MAT.into()), //8 tot
-            // 131..=170 => tile.strings.push(T2_MAT.into()), //8 tot
-            // 171..=200 => tile.strings.push(T3_MAT.into()), //10 tot
-            // 201..=220 => tile.strings.push(T4_MAT.into()), //5
-            // 221..=240 => tile.strings.push(T5_MAT.into()), //6
-            // 298..=300 => tile.strings.push(T6_MAT.into()), //1 tot
             0..=100 => {
                 if tile.string_tab[FOOD_INV] < 2 {
                     tile.string_tab[FOOD_INV] += 1
@@ -149,10 +134,6 @@ impl Map {
     }
 
     pub fn remove_item_from_cell(&mut self, x: u32, y: u32, item: &str) -> bool {
-        // pourquoi ? C programming in a nutshell, that's why
-        // if x >= self.width || y >= self.height {
-        //     return false;
-        // }
         let idx = match item {
             FOOD => FOOD_INV,
             T1_MAT => T1_MAT_INV,
