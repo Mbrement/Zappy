@@ -9,7 +9,7 @@ pub struct Map {
     height: u32,
     pub(crate) egg_id_counter: u128,
     tiles: Vec<Vec<Tile>>,
-    pub(crate) egg_position: HashMap<u128, (u32, u32, String, u128)>,
+    pub(crate) egg_position: HashMap<u128, (u32, u32, String, u128, bool)>,
     pub(crate) player_position: HashMap<Token, (u32, u32)>,
 }
 

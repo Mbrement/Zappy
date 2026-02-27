@@ -478,7 +478,7 @@ impl CommandManager {
                     return;
                 }
                 let client = client.unwrap();
-                println!("connect number res {} tick {}", d, server._game._tick);
+                println!("connect number res {} tick {} max {} nmbr {}", d, server._game._tick, server._max_clients[&tmp], server._game.team[&tmp].len());
                 let _ = client.get_socket_mut().write(format!("{}\n", d).as_bytes()); // TODO check error here
             },
         );
@@ -512,8 +512,8 @@ impl CommandManager {
                     client.inventory[0] = 1260;
 				    client.level = 1;
                     //oeuf retirer ici en cas d'eclosion avec client lié
+                    println!("was_egg at spawn {} {}", &client.was_egg, _arg);
                     server._game.map.egg_position.remove(&client.was_egg);
-                    println!("was_egg at spawn {}", &client.was_egg);
                     client.was_egg = 0;
                 }
             },
@@ -537,7 +537,7 @@ impl CommandManager {
                 let (x, y) = client.position;
                 server._game.map.egg_position.insert(
                     server._game.map.egg_id_counter,
-                    (x, y, team.clone(), server._game._tick + 600),
+                    (x, y, team.clone(), server._game._tick + 600, false),
                 );
                 server._game.map.egg_id_counter += 1;
                 if let Some(max_player) = server._max_clients.get_mut(&team) {

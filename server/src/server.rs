@@ -293,17 +293,19 @@ impl Server {
 
     fn get_position_new_client(&mut self, token: Token, cmd: &String, _command_manager: &mut CommandManager) -> ((u32, u32), u128) {
         //let mut egg: Egg = Egg::new(0,0, 0, cmd, 0);
-        let mut egg: (u128, u32, u32, String, u128) = (0,0,0,cmd.clone(), 0);
+        let mut egg: (u128, u32, u32, String, u128, bool) = (0,0,0,cmd.clone(), 0, false);
         if self._game.starting {
             match self._game.map.egg_position.iter()
                 .find(|(_, pos)| {
-                    *cmd == pos.2
+                    *cmd == pos.2 && !pos.4
                 })
-                .map(|(k,v)| (*k, v.0, v.1, v.2.clone(), v.3)) {
+                .map(|(k,v)| (*k, v.0, v.1, v.2.clone(), v.3, v.4)) {
                     Some(egg_found) => egg = egg_found,
                     _ => {},
             };
         }
+
+        println!("get_position_new_client egg:{:?}", egg);
         if (egg.0 == 0) {
             return (
                 (
@@ -317,6 +319,8 @@ impl Server {
                 0
             )
         }
+        let mut egg_mut = self._game.map.egg_position.get_mut(&egg.0).unwrap();
+        egg_mut.4 = true;
         _command_manager.next_execute.insert(token, egg.4);
         _command_manager.add_to_queue_internal(
             "spawning".to_string(),
@@ -449,7 +453,7 @@ impl Server {
 
     //check natural death of the eggs without clients
     fn egg_life(&mut self, ticks_to_remove: &mut Vec<u128>) {
-        for (egg_id, (_, _, team, tick)) in self._game.map.egg_position.iter() {
+        for (egg_id, (_, _, team, tick, _)) in self._game.map.egg_position.iter() {
             if tick < &self._game._tick {
                 let team_name = team;
                 let tmp = self._max_clients.get_mut(team);
