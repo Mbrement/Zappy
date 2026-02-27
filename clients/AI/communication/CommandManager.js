@@ -2,9 +2,9 @@ import process from 'node:process'
 import {
     AVAILABLE_CONNECTION,
     BROADCAST_RECEIVED_REGEX,
-    DEATH, EXPULSION_REGEX, INCANTATION, INCANTATION_CMD, INCANTATION_DONE, INVENTORY, KO, MAP_SIZE_REGEX,
+    DEATH, EXPULSION_REGEX, FOOD_UNIT, INCANTATION, INCANTATION_CMD, INCANTATION_DONE, INVENTORY, KO, MAP_SIZE_REGEX,
     MAX_SERVER_MSG,
-    NO_PROMISE_TO_RESOLVE, OK, ONLY_NUMBER_REGEX, SEE, START_INCANTION,
+    NO_PROMISE_TO_RESOLVE, OK, ONLY_NUMBER_REGEX, SEE, START_INCANTION, TAKE_FOOD_CMD,
     WELCOME
 } from "../constant.js"
 import GameManager from "../GameManager.js"
@@ -213,6 +213,10 @@ class CommandManager {
 
         if (this.#inProcessQueue.at(0).expectedAnswerCount === 0) {
             const requestToResolve = this.#inProcessQueue.shift()
+
+            if (requestToResolve.command === TAKE_FOOD_CMD && requestToResolve.answer.at(0) === OK) {
+                GameManager.inventory.nourriture += FOOD_UNIT
+            }
 
             console.log(`[COMMAND MANAGER] Command '${requestToResolve.command.trim()}' resolved with answer: ${requestToResolve.answer}`)
             requestToResolve.resolve(requestToResolve.answer)

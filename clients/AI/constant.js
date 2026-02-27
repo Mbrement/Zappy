@@ -4,6 +4,7 @@ export const VISION_REFRESH_RATE = 500
 export const INVENTORY_CMD_REFRESH_RATE = 5000
 export const HEARTBEAT_INTERVAL = 150
 export const HEARTBEAT_TIMEOUT = 400
+export const FOOD_UNIT = 126
 
 /*****************
  *     ERROR     *
