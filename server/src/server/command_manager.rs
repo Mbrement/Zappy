@@ -545,6 +545,7 @@ impl CommandManager {
                     println!("end fork max player inc {}", max_player);
                 }
                 println!("end fork {}", server._game._tick);
+                server.send_to_graph += &graphic::end_fork(team, server._game.map.egg_id_counter - 1, x, y);
                 //end fork
             },
         );
