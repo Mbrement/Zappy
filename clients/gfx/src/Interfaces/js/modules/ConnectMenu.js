@@ -1,0 +1,118 @@
+class ConnectMenu {
+    constructor() {
+        this.onKeyDownBind = this.onKeyDown.bind(this)
+        this.instance = document.getElementById("connectMenu");
+        this.address = "";
+        this.port = "";
+
+        this.setEventListener()
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Sets the connection menu event listener
+     */
+    setEventListener() {
+        window.addEventListener('keydown', this.onKeyDownBind)
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description If enter is pressed, we try to connect
+     * @param event - The keydown event
+     */
+    onKeyDown(event) {
+        if (event.key === "Enter") {
+            this.connect()
+        }
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Checks if the given string contains a usable port
+     * @param portStr - the string containing the port number
+     * @returns {number} - the port
+     */
+    parsePort(portStr) {
+        if (!portStr) {
+            throw new Error(`Port must be provided`);
+        }
+
+        if (!/^\d+$/.test(portStr)) {
+            throw new Error(`"${portStr}" is not a valid Int.`);
+        }
+
+        const port = parseInt(portStr);
+
+        if (port < 1 || port > 65535) {
+            throw new Error(`${port} is not in range (1-65535).`);
+        }
+
+        return port;
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Removes errors from the connectMenu
+     */
+    removeError() {
+        document.getElementById('errorText').innerHTML = ""
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Shows port error on the connectMenu
+     * @param error - the error message
+     */
+    addError(error) {
+        document.getElementById('errorText').innerHTML = error
+    }
+
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description If address and port are given and usable we try to connect to the server
+     * This is called when the "connect" button is clicked
+     */
+    connect() {
+        this.address = document.getElementById("address").value || "localhost"
+        this.port = document.getElementById("port").value || "4242"
+
+        this.removeError()
+
+        if (!this.address) {
+            this.addError("Address must be provided")
+            return
+        }
+
+        try {
+            this.parsePort(this.port)
+        }
+        catch (error) {
+            this.addError(error.message)
+            return;
+        }
+
+        window.mainInstance.connectToServer(this.address, this.port)
+        window.removeEventListener('keydown', this.onKeyDownBind)
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Shows connectMenu
+     */
+    showConnectMenu() {
+        this.instance.classList.remove('hidden');
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Hides connectMenu
+     */
+    hideConnectMenu() {
+        this.instance.classList.add('hidden');
+    }
+
+}
+
+module.exports = ConnectMenu

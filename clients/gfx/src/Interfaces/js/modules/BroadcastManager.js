@@ -1,0 +1,42 @@
+class BroadcastManager {
+    constructor() {
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Clears the broadcast container
+     */
+    clearBroadcast() {
+        const broadcastContainer = document.getElementById('broadcastContainer')
+        if (broadcastContainer) {
+            while (broadcastContainer.firstChild && broadcastContainer.children.length > 10) {
+                broadcastContainer.removeChild(broadcastContainer.firstChild)
+            }
+        }
+    }
+
+    /**
+     * @author Corentin (ccharton) Charton
+     * @description Adds a message to the broadcast container
+     * @param messageToAdd {String} - The message to add
+     */
+    addBroadcast(messageToAdd) {
+        if(messageToAdd.length === 0) {
+            return
+        }
+
+        const para = document.createElement('p')
+        para.textContent = messageToAdd
+
+        const broadcastContainer = document.getElementById('broadcastContainer')
+        if (broadcastContainer) {
+            broadcastContainer.appendChild(para)
+            broadcastContainer.scrollTop = broadcastContainer.scrollHeight;
+            if (broadcastContainer.children.length > 200) {
+                this.clearBroadcast()
+            }
+        }
+    }
+}
+
+module.exports = BroadcastManager
