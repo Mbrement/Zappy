@@ -622,7 +622,7 @@ class MessageHandler {
             return
         }
 
-        const oldState = Object.assign({}, this.gameState.playerInfo.get(id))
+        const oldState = Object.assign({}, this.gameState.playerInfo.get(playerId))
         this.gameState.deletePlayer(playerId)
 
         this.world.players.removePlayer(playerId, oldState)
