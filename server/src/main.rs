@@ -1,4 +1,4 @@
-//#![allow(warnings)]
+#![allow(warnings)]
 use getopts::Options;
 use std::env;
 mod server;
