@@ -662,8 +662,6 @@ impl Server {
             }
         }
     }
-voir
-voir
 
     pub fn get_team_for_player(&self, token: &Token) -> String {
         for (team_name, tokens) in &self._game.team {
