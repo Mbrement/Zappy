@@ -37,6 +37,10 @@ pub struct Server {
     send_to_graph: String,
 }
 
+struct ClientBuffer {
+    data: HashMap<Token, ([u8; 500_000], usize)>,
+}
+
 impl Server {
     pub fn new(port: u16, passwd: String) -> Self {
         let tmp_socket = TcpListener::bind(format!("{}:{}", "0.0.0.0", port).parse().unwrap());
@@ -227,7 +231,7 @@ impl Server {
                     .expect("Failed to remove token from incantation list")
                     .retain(|t| t != &client.token);
             }
-			self._game.map.player_position.remove(&client.token);
+            self._game.map.player_position.remove(&client.token);
             if let Some(team_name) = self._game.team.iter_mut().find_map(|(name, tokens)| {
                 if let Some(pos) = tokens.iter().position(|t| t == &client.get_token()) {
                     tokens.remove(pos);
@@ -244,7 +248,6 @@ impl Server {
                     *max -= 1;
                 }
             }
-
         }
         #[cfg(feature = "log")]
         println!("Client {:?} disconnected", client.get_token());
@@ -291,17 +294,25 @@ impl Server {
         return true;
     }
 
-    fn get_position_new_client(&mut self, token: Token, cmd: &String, _command_manager: &mut CommandManager) -> ((u32, u32), u128) {
+    fn get_position_new_client(
+        &mut self,
+        token: Token,
+        cmd: &String,
+        _command_manager: &mut CommandManager,
+    ) -> ((u32, u32), u128) {
         //let mut egg: Egg = Egg::new(0,0, 0, cmd, 0);
-        let mut egg: (u128, u32, u32, String, u128, bool) = (0,0,0,cmd.clone(), 0, false);
+        let mut egg: (u128, u32, u32, String, u128, bool) = (0, 0, 0, cmd.clone(), 0, false);
         if self._game.starting {
-            match self._game.map.egg_position.iter()
-                .find(|(_, pos)| {
-                    *cmd == pos.2 && !pos.4
-                })
-                .map(|(k,v)| (*k, v.0, v.1, v.2.clone(), v.3, v.4)) {
-                    Some(egg_found) => egg = egg_found,
-                    _ => {},
+            match self
+                ._game
+                .map
+                .egg_position
+                .iter()
+                .find(|(_, pos)| *cmd == pos.2 && !pos.4)
+                .map(|(k, v)| (*k, v.0, v.1, v.2.clone(), v.3, v.4))
+            {
+                Some(egg_found) => egg = egg_found,
+                _ => {}
             };
         }
 
@@ -309,91 +320,72 @@ impl Server {
         if (egg.0 == 0) {
             return (
                 (
-                    self._game.map.rng.random_range(
-                        0..self._game.map.get_width(),
-                    ),
-                    self._game.map.rng.random_range(
-                        0..self._game.map.get_height(),
-                    ),
+                    self._game
+                        .map
+                        .rng
+                        .random_range(0..self._game.map.get_width()),
+                    self._game
+                        .map
+                        .rng
+                        .random_range(0..self._game.map.get_height()),
                 ),
-                0
-            )
+                0,
+            );
         }
         let mut egg_mut = self._game.map.egg_position.get_mut(&egg.0).unwrap();
         egg_mut.4 = true;
         _command_manager.next_execute.insert(token, egg.4);
-        _command_manager.add_to_queue_internal(
-            "spawning".to_string(),
-            token,
-            egg.0.to_string(),
-        );
+        _command_manager.add_to_queue_internal("spawning".to_string(), token, egg.0.to_string());
         #[cfg(feature = "log")]
         {
-            if _command_manager
-                .next_execute
-                .contains_key(&token)
-            {
+            if _command_manager.next_execute.contains_key(&token) {
                 println!(
                     "{:?}, {:?}",
-                    _command_manager.next_execute[&token],
-                    self._game._tick
+                    _command_manager.next_execute[&token], self._game._tick
                 );
             };
         }
         ((egg.1, egg.2), egg.0)
     }
 
-    fn update_new_client_info(&mut self, token: &Token, cmd: &String, _command_manager: &mut CommandManager) {
-
-        let mut position = (0,0);
+    fn update_new_client_info(
+        &mut self,
+        token: &Token,
+        cmd: &String,
+        _command_manager: &mut CommandManager,
+    ) {
+        let mut position = (0, 0);
         let mut egg_id = 0;
         if self._clients.contains_key(token) {
             (position, egg_id) = self.get_position_new_client(*token, cmd, _command_manager);
         }
-        if let Some(client) =
-            self._clients.get_mut(&token)
-        {
+        if let Some(client) = self._clients.get_mut(&token) {
             let player_token = client.get_token();
-		    client.r#type = define::ROLE_PLAYER.to_string();
+            client.r#type = define::ROLE_PLAYER.to_string();
             client.position = position;
             client.was_egg = egg_id;
             if egg_id != 0 {
                 client.level = 0;
             }
-            self._game.update_player_position(
-                player_token,
-                client.position,
-            );
+            self._game
+                .update_player_position(player_token, client.position);
             client.orientation = "NESW"
                 .chars()
                 .nth(self._game.map.rng.random_range(0..3))
                 .unwrap();
-            self._game
-                .team
-                .get_mut(cmd)
-                .unwrap()
-                .push(player_token); //push the client token into the team
+            self._game.team.get_mut(cmd).unwrap().push(player_token); //push the client token into the team
             let response = format!(
                 "{}\n{} {}\n",
-                self._max_clients[cmd] as usize
-                    - self._game.team[cmd].len()
-                    + 1,
+                self._max_clients[cmd] as usize - self._game.team[cmd].len() + 1,
                 self._game.map.get_height(),
                 self._game.map.get_width()
             );
-            if client
-                .get_socket_mut()
-                .write(response.as_bytes())
-                .is_err()
-            {
+            if client.get_socket_mut().write(response.as_bytes()).is_err() {
                 self._clients.remove(&player_token);
             }
 
             if egg_id == 0 {
-                graphic::send_graphic_clients(
-                    graphic::egg_hatches(&player_token, self),
-                    self,
-                );
+                graphic::send_graphic_clients(graphic::egg_hatches(&player_token, self), self);
             }
         }
         self._game.starting = true;
@@ -413,7 +405,13 @@ impl Server {
         to_disconnect.push(*token);
     }
 
-    fn admin_cmd(&mut self, buffer: [u8;1024], n: usize, token: &Token, _command_manager: &mut CommandManager) {
+    fn admin_cmd(
+        &mut self,
+        buffer: &[u8],
+        n: usize,
+        token: &Token,
+        _command_manager: &mut CommandManager,
+    ) {
         let cmd = String::from_utf8_lossy(&buffer[..n]).trim().to_string();
         let mut parts = cmd.splitn(2, ' ');
         let name = parts.next().unwrap_or("");
@@ -460,7 +458,10 @@ impl Server {
                 if let Some(v) = tmp {
                     if *v > self._max_clients_per_team {
                         *v -= 1;
-                        println!("max player dec {} egg_id {} at tick {}", v, egg_id, &self._game._tick);
+                        println!(
+                            "max player dec {} egg_id {} at tick {}",
+                            v, egg_id, &self._game._tick
+                        );
                     }
                 }
                 ticks_to_remove.push(*egg_id);
@@ -492,7 +493,11 @@ impl Server {
         false
     }
 
-    fn on_tick(&mut self, to_disconnect: &mut Vec<Token>, _command_manager: &mut CommandManager) -> bool {
+    fn on_tick(
+        &mut self,
+        to_disconnect: &mut Vec<Token>,
+        _command_manager: &mut CommandManager,
+    ) -> bool {
         if time::Instant::now()
             .duration_since(self._game.last_update)
             .as_millis()
@@ -529,7 +534,9 @@ impl Server {
 
     pub fn run(&mut self) {
         let mut _command_manager = CommandManager::new_server();
-        let mut buf = [0; 1024];
+        let mut buf: ClientBuffer = ClientBuffer {
+            data: HashMap::new(),
+        };
         // #[cfg(feature = "log")]
         println!("Server is running...");
 
@@ -562,7 +569,11 @@ impl Server {
                     let mut graphic_ok: bool = false;
                     let token = event.token();
                     if let Some(client) = self._clients.get_mut(&token) {
-                        match client.get_socket_mut().read(&mut buf) {
+                        // match client
+                        // Ensure an entry exists and read into the buffer starting at its current length
+                        let entry = buf.data.entry(token).or_insert(([0; 500_000], 0));
+                        let start = entry.1;
+                        match client.get_socket_mut().read(&mut entry.0[start..]) {
                             Ok(0) => {
                                 to_disconnect.push(token);
                                 #[cfg(feature = "log")]
@@ -572,9 +583,13 @@ impl Server {
                                 #[cfg(feature = "debug")]
                                 println!("Received {} bytes from {:?} 1", n, token);
                                 if client.r#type == define::ROLE_PLAYER {
-                                    command_received(buf, n, client, &mut _command_manager);
+                                    // pass the whole ClientBuffer so command_received can manage lengths
+                                    command_received(&mut buf, n, client, &mut _command_manager);
                                 } else if client.r#type == define::ROLE_WELCOMED {
-                                    let cmd = String::from_utf8_lossy(&buf[..n]).trim().to_string();
+                                    // interpret only the newly read bytes
+                                    let cmd = String::from_utf8_lossy(&entry.0[start..start + n])
+                                        .trim()
+                                        .to_string();
                                     if cmd == define::GRAPHICAL_CLIENT {
                                         client.r#type = define::GRAPHICAL_CLIENT.to_string();
                                         graphic_ok = true;
@@ -595,7 +610,11 @@ impl Server {
                                         if self._game.team[&cmd].len()
                                             < self._max_clients[&cmd] as usize
                                         {
-                                            self.update_new_client_info(&token, &cmd, &mut _command_manager);
+                                            self.update_new_client_info(
+                                                &token,
+                                                &cmd,
+                                                &mut _command_manager,
+                                            );
                                         } else {
                                             self.not_enough_space(&token, &mut to_disconnect)
                                         }
@@ -604,10 +623,22 @@ impl Server {
                                     {
                                         admin_client_connect(&token, client, &mut to_disconnect);
                                     } else {
-                                        default_response(&token, client, &mut to_disconnect, self._game.map.get_height(), self._game.map.get_width());
+                                        default_response(
+                                            &token,
+                                            client,
+                                            &mut to_disconnect,
+                                            self._game.map.get_height(),
+                                            self._game.map.get_width(),
+                                        );
                                     }
                                 } else if client.r#type == define::ADMIN_CLIENT {
-                                    self.admin_cmd(buf, n, &token, &mut _command_manager);
+                                    // pass a byte slice of the newly-read data
+                                    self.admin_cmd(
+                                        &entry.0[start..start + n],
+                                        n,
+                                        &token,
+                                        &mut _command_manager,
+                                    );
                                 }
                             }
                             Err(_) => {
@@ -616,7 +647,7 @@ impl Server {
                                 to_disconnect.push(token);
                             }
                         }
-                    }
+					}
                     if graphic_ok {
                         self.graph_connect(&token, &mut to_disconnect);
                     }
@@ -627,6 +658,8 @@ impl Server {
             }
         }
     }
+voir
+voir
 
     pub fn get_team_for_player(&self, token: &Token) -> String {
         for (team_name, tokens) in &self._game.team {
@@ -716,21 +749,56 @@ pub fn exit_game(server: &mut Server) {
     process::exit(0);
 }
 
-fn command_received(buffer: [u8;1024], n: usize, client: &mut Client, _command_manager: &mut CommandManager) {
-    //
-    let cmd = String::from_utf8_lossy(&buffer[..n]).trim().to_string();
-    for line in cmd.lines() {
-        let mut parts = line.splitn(2, ' ');
-        let name = parts.next().unwrap_or("");
-        let arg = parts.next().unwrap_or("");
-        #[cfg(feature = "debug")]
-        println!("Received command '{}' from {:?}", cmd, token);
-        let token = client.get_token();
-        _command_manager.add_to_queue(
-            name.to_string(),
-            token,
-            arg.to_string(),
-        );
+fn command_received(
+    // buffer: [u8; 500_000],
+    buffer: &mut ClientBuffer,
+    n: usize,
+    client: &mut Client,
+    _command_manager: &mut CommandManager,
+) {
+    let token = client.get_token();
+
+    // Ensure an entry exists: entry.0 is the byte array, entry.1 is the current length of valid data
+    let entry = buffer.data.entry(token).or_insert(([0; 500_000], 0));
+    let buf = &mut entry.0;
+    let buf_len = &mut entry.1;
+
+    // Append new bytes: we expect the caller to have written `n` bytes at buf[*buf_len .. *buf_len + n]
+    // If caller wrote into the front of the buffer directly, `n` should be the number of valid bytes now available.
+    let end = (*buf_len).saturating_add(n);
+    if end > buf.len() {
+        // Prevent overflow; if overflow would occur, clamp end to buffer size
+        eprintln!("Received more data than buffer can hold for token {:?}", token);
+        return;
+    }
+
+    // Interpret current content as UTF-8 lossily up to `end`
+    let content_str = String::from_utf8_lossy(&buf[..end]);
+
+    // If there's at least one newline, process complete lines
+    if let Some(last_newline) = content_str.rfind('\n') {
+        let complete_part = &content_str[..last_newline];
+
+        for line in complete_part.lines() {
+            let mut parts = line.splitn(2, ' ');
+            let name = parts.next().unwrap_or("");
+            let arg = parts.next().unwrap_or("");
+            _command_manager.add_to_queue(name.to_string(), token, arg.to_string());
+        }
+
+        // Move leftover bytes (after last_newline) to the front of the buffer
+        let leftover_start = last_newline + 1;
+        let leftover_len = end - leftover_start;
+        // copy the leftover region to the front
+        buf.copy_within(leftover_start..end, 0);
+        // zero out the rest (optional)
+        // for i in leftover_len..*buf_len { buf[i] = 0; }
+
+        // update buffer length to leftover length
+        *buf_len = leftover_len;
+    } else {
+        // No newline found: update stored length to include newly read bytes
+        *buf_len = end;
     }
 }
 
@@ -738,35 +806,24 @@ fn admin_client_connect(token: &Token, client: &mut Client, to_disconnect: &mut 
     //#[cfg(feature = "log")]
     //println!("Received command '{}' from {:?} 2", cmd, token);
     client.r#type = define::ADMIN_CLIENT.to_string();
-    let response =
-        "Welcome to the admin client!\n\n".to_string();
-    if client
-        .get_socket_mut()
-        .write(response.as_bytes())
-        .is_err()
-    {
+    let response = "Welcome to the admin client!\n\n".to_string();
+    if client.get_socket_mut().write(response.as_bytes()).is_err() {
         to_disconnect.push(*token);
     }
-    if client
-        .get_socket_mut()
-        .write(response.as_bytes())
-        .is_err()
-    {
+    if client.get_socket_mut().write(response.as_bytes()).is_err() {
         to_disconnect.push(*token);
     }
 }
 
-fn default_response(token: &Token, client: &mut Client, to_disconnect: &mut Vec<Token>, height: u32, width: u32) {
-    let response = format!(
-        "0\n{} {}\n",
-        height,
-        width
-    );
-    if client
-        .get_socket_mut()
-        .write(response.as_bytes())
-        .is_err()
-    {
+fn default_response(
+    token: &Token,
+    client: &mut Client,
+    to_disconnect: &mut Vec<Token>,
+    height: u32,
+    width: u32,
+) {
+    let response = format!("0\n{} {}\n", height, width);
+    if client.get_socket_mut().write(response.as_bytes()).is_err() {
         // client
         //     .get_socket_mut()
         //     .shutdown(std::net::Shutdown::Both);
