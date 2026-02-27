@@ -519,7 +519,9 @@ impl Server {
                 self._game.map.egg_position.remove(&t);
             }
             for token in to_disconnect {
-                self.send_to_graph += &graphic::player_death(&token);
+                if self._clients.get(&token).map_or(false, |c| c.r#type == define::ROLE_PLAYER) {
+                    self.send_to_graph += &graphic::player_death(&token);
+                }
                 self.disconnect_client_by_token(&token);
             }
             graphic::send_graphic_clients(self.send_to_graph.clone(), self);
