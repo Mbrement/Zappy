@@ -725,7 +725,7 @@ class Players {
 
             this.dummyVector.lerpVectors(pickUp.startPosition, pickUp.endPosition, pickUp.passedTime / (actionTicks.prend * this.tickTime))
             pickUp.mesh.position.copy(this.dummyVector)
-            pickUp.mesh.scale.setScalar(1 - (actionTicks.prend * this.tickTime))
+            pickUp.mesh.scale.setScalar(Math.max(1, 1 - (actionTicks.prend * this.tickTime)))
 
             pickUp.passedTime += deltaTime
         }
