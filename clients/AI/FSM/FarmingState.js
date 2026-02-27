@@ -22,9 +22,6 @@ class FarmingState extends IState {
      */
     onEnter() {
         console.log('[FARMING] Entering state')
-        if (GameManager.internalTicks > 350) {
-            GameManager.evaluatePopulationNeed()
-        }
     }
 
     /**
