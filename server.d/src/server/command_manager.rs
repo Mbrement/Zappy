@@ -543,7 +543,7 @@ impl CommandManager {
         self.register("tick", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
             utils::debug_manager_register("tick", _c, server, _arg);
-            if _arg.parse::<u32>().is_ok() {
+            if _arg.parse::<u32>().is_ok() && _arg.parse::<u64>().unwrap() < 120 && _arg.parse::<u64>().unwrap() != 0 {
                 let arg = _arg.parse::<u64>().unwrap();
                 server.set_ticks(arg);
                 for client in server.get_clients_by_type_mut(define::ROLE_ADMIN) {
