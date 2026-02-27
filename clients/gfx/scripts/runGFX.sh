@@ -1,6 +1,6 @@
 cd $(dirname "$0")
 
-export EXECUTABLE="../out/zappy-linux-x64/zappy"
+export EXECUTABLE="../out/gfx-linux-x64/gfx"
 
 if [ -f "$EXECUTABLE" ]; then
   chmod +x $EXECUTABLE

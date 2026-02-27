@@ -1,6 +1,6 @@
 {
   "main": "main.bundle.js",
-  "output": "AIClient",
+  "output": "../../client",
   "disableExperimentalSEAWarning": true,
   "useCodeCache": true
 }

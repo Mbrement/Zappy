@@ -26,13 +26,10 @@ protocol.registerSchemesAsPrivileged([
  */
 function createWindow() {
     const mainWindow = new BrowserWindow({
-        width: 1200,
-        height: 800,
-        // [TEMPORARY]
-        // minWidth: 1200,
-        // minHeight: 800,
-        // maxWidth: 1200,
-        // maxHeight: 800,
+        minWidth: 1200,
+        minHeight: 800,
+        maxWidth: 1920,
+        maxHeight: 1080,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
@@ -40,8 +37,6 @@ function createWindow() {
     });
 
     mainWindow.loadFile('src/index.html');
-
-    mainWindow.webContents.openDevTools();
 }
 
 /**

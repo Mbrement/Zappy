@@ -1,5 +1,5 @@
 {
-  "name": "zappy",
+  "name": "gfx",
   "version": "1.0.0",
   "main": "src/electron.js",
   "dependencies": {

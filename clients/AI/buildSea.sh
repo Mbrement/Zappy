@@ -29,3 +29,5 @@ npx esbuild Main.js --bundle --platform=node --outfile=main.bundle.js
 NODE_PATH=$(which node)
 
 "$NODE_PATH" --build-sea seaConfig.json
+
+rm -rf main.bundle.js
