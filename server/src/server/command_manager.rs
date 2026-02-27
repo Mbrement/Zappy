@@ -146,7 +146,7 @@ impl CommandManager {
             "avance",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
-                debug_manager_register("avance", _c, server, _arg);
+                utils::debug_manager_register("avance", _c, server, _arg);
                 let client = server._clients.get_mut(&_c);
                 if client.is_none() {
                     #[cfg(feature = "log")]
@@ -462,7 +462,7 @@ impl CommandManager {
         self.register(
             "connect_nbr",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
-                // #[cfg(feature = "log")]
+                #[cfg(feature = "log")]
                 utils::debug_manager_register("connect_nbr", _c, server, _arg);
                 let tmp = server.get_team_for_player(&_c);
                 let d: u32;
@@ -478,6 +478,7 @@ impl CommandManager {
                     return;
                 }
                 let client = client.unwrap();
+                println!("connect number res {} tick {}", d, server._game._tick);
                 let _ = client.get_socket_mut().write(format!("{}\n", d).as_bytes()); // TODO check error here
             },
         );
@@ -512,6 +513,7 @@ impl CommandManager {
 				    client.level = 1;
                     //oeuf retirer ici en cas d'eclosion avec client lié
                     server._game.map.egg_position.remove(&client.was_egg);
+                    println!("was_egg at spawn {}", &client.was_egg);
                     client.was_egg = 0;
                 }
             },
@@ -520,7 +522,7 @@ impl CommandManager {
             "end_fork",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
-                debug_manager_register("end_fork", _c, server, _arg);
+                utils::debug_manager_register("end_fork", _c, server, _arg);
                 let team = server.get_team_for_player(&_c);
                 let client = server._clients.get_mut(&_c);
                 if client.is_none() {
@@ -540,7 +542,9 @@ impl CommandManager {
                 server._game.map.egg_id_counter += 1;
                 if let Some(max_player) = server._max_clients.get_mut(&team) {
                     *max_player += 1;
+                    println!("end fork max player inc {}", max_player);
                 }
+                println!("end fork {}", server._game._tick);
                 //end fork
             },
         );
@@ -551,7 +555,7 @@ impl CommandManager {
             "status",
             |_c: mio::Token, server: &mut Server, _arg: &str| {
                 #[cfg(feature = "log")]
-                debug_manager_register("status", _c, server, _arg);
+                utils::debug_manager_register("status", _c, server, _arg);
                 // Collect immutable data before taking a mutable borrow of the client map
                 let len = server.get_clients_by_type(define::ROLE_PLAYER).len();
 				let graphics = server.get_clients_by_type(define::ROLE_GRAPHIC).len();
@@ -585,7 +589,7 @@ impl CommandManager {
         );
         self.register("tick", |_c: mio::Token, server: &mut Server, _arg: &str| {
             #[cfg(feature = "log")]
-            debug_manager_register("tick", _c, server, _arg);
+            utils::debug_manager_register("tick", _c, server, _arg);
             if _arg.parse::<u32>().is_ok() {
                 let arg = _arg.parse::<u64>().unwrap();
                 server.set_ticks(arg);
@@ -662,7 +666,7 @@ impl CommandManager {
                                 self.next_execute.insert(token, server._game._tick + 7)
                             }
                             "inventaire" => self.next_execute.insert(token, server._game._tick + 1),
-                            "fork" => self.next_execute.insert(token, server._game._tick + 42),
+                            "fork" => self.next_execute.insert(token, server._game._tick),
                             "egg_waiting" => {
                                 self.next_execute.insert(token, server._game._tick + 600)
                             }

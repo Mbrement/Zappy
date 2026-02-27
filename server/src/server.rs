@@ -341,10 +341,10 @@ impl Server {
 
     fn update_new_client_info(&mut self, token: &Token, cmd: &String, _command_manager: &mut CommandManager) {
 
-        let position = (0,0);
-        let egg_id = 0;
+        let mut position = (0,0);
+        let mut egg_id = 0;
         if self._clients.contains_key(token) {
-            let (position, egg_id) = self.get_position_new_client(*token, cmd, _command_manager);
+            (position, egg_id) = self.get_position_new_client(*token, cmd, _command_manager);
         }
         if let Some(client) =
             self._clients.get_mut(&token)
@@ -455,7 +455,8 @@ impl Server {
                 let tmp = self._max_clients.get_mut(team);
                 if let Some(v) = tmp {
                     if *v > self._max_clients_per_team {
-                         *v -= 1;
+                        *v -= 1;
+                        println!("max player dec {} egg_id {} at tick {}", v, egg_id, &self._game._tick);
                     }
                 }
                 ticks_to_remove.push(*egg_id);
@@ -730,8 +731,8 @@ fn command_received(buffer: [u8;1024], n: usize, client: &mut Client, _command_m
 }
 
 fn admin_client_connect(token: &Token, client: &mut Client, to_disconnect: &mut Vec<Token>) {
-    #[cfg(feature = "log")]
-    println!("Received command '{}' from {:?} 2", cmd, token);
+    //#[cfg(feature = "log")]
+    //println!("Received command '{}' from {:?} 2", cmd, token);
     client.r#type = define::ADMIN_CLIENT.to_string();
     let response =
         "Welcome to the admin client!\n\n".to_string();
