@@ -224,7 +224,6 @@ impl Server {
             egg = egg_found
         };
 
-        println!("get_position_new_client egg:{:?}", egg);
         if egg.0 == 0 {
             return (
                 (

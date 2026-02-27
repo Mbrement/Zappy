@@ -435,13 +435,6 @@ impl CommandManager {
                     return;
                 }
                 let client = client.unwrap();
-                println!(
-                    "connect number res {} tick {} max {} nmbr {}",
-                    d,
-                    server._game._tick,
-                    server._max_clients[&tmp],
-                    server._game.team[&tmp].len()
-                );
                 let _ = client.get_socket_mut().write(format!("{}\n", d).as_bytes());
             },
         );
