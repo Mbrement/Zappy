@@ -597,6 +597,7 @@ impl CommandManager {
             let _ = client
                 .get_socket_mut()
                 .write(format!("{}\n", "mort").as_bytes());
+            server.send_to_graph += &graphic::player_death(&target_token);
             server.disconnect_client_by_token(&target_token);
         });
     }
