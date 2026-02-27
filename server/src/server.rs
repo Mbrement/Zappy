@@ -437,16 +437,18 @@ impl Server {
 
     fn clients_hunger(&mut self, to_disconnect: &mut Vec<Token>) {
         for client in self.get_clients_by_type_mut(define::ROLE_PLAYER) {
-            client.hunger_tick();
-            #[cfg(feature = "debug")]
-            println!(
-                "Client {:?} hunger: {}",
-                client.get_token(),
-                client.inventory[0]
-            );
-            if client.inventory[0] == 0 {
-                let _ = client.get_socket_mut().write(b"mort\n");
-                to_disconnect.push(client.get_token());
+            if client.level != 0 {
+                client.hunger_tick();
+                #[cfg(feature = "debug")]
+                println!(
+                    "Client {:?} hunger: {}",
+                    client.get_token(),
+                    client.inventory[0]
+                );
+                if client.inventory[0] == 0 {
+                    let _ = client.get_socket_mut().write(b"mort\n");
+                    to_disconnect.push(client.get_token());
+                }
             }
         }
     }

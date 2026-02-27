@@ -512,7 +512,6 @@ impl CommandManager {
                     client.inventory[0] = 1260;
 				    client.level = 1;
                     //oeuf retirer ici en cas d'eclosion avec client lié
-                    println!("was_egg at spawn {} {}", &client.was_egg, _arg);
                     server._game.map.egg_position.remove(&client.was_egg);
                     client.was_egg = 0;
                 }
@@ -542,9 +541,7 @@ impl CommandManager {
                 server._game.map.egg_id_counter += 1;
                 if let Some(max_player) = server._max_clients.get_mut(&team) {
                     *max_player += 1;
-                    println!("end fork max player inc {}", max_player);
                 }
-                println!("end fork {}", server._game._tick);
                 server.send_to_graph += &graphic::end_fork(team, server._game.map.egg_id_counter - 1, x, y);
                 //end fork
             },
