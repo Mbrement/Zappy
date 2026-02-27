@@ -4,13 +4,15 @@ use mio::net::TcpStream;
 
 pub struct Client {
     socket: TcpStream,
-    token: Token,
-    pub r#type: String,
-    pub inventory: Vec<String>,
-    pub level: u8,
-    pub hunger: u32,
-    pub position: (u32, u32),
-    pub orientation: char,
+    pub(crate) token: Token,
+    pub(crate) r#type: String,
+    pub(crate) inventory: [u128; 7],
+    pub(crate) level: u8,
+    //pub(crate) hunger: u128,
+    pub(crate) position: (u32, u32),
+    pub(crate) orientation: char,
+    pub(crate) is_incanting: Token,
+    pub(crate) was_egg: u128,
 }
 
 impl client::Client {
@@ -19,14 +21,22 @@ impl client::Client {
             socket,
             token,
             r#type: String::from("unknown"),
-            inventory: Vec::new(),
-            level: 0,
-            hunger: 0,
+            inventory: [1260, 0, 0, 0, 0, 0, 0],
+            level: 1,
+            //hunger: 1260,
             position: (0, 0),
             orientation: ('N'),
+            is_incanting: mio::Token(0),
+            was_egg: 0,
         }
     }
 
+    pub fn get_inventory(&self) -> [u128; 7] {
+        //let mut tmp = self.inventory;
+        //tmp[0] = self.hunger as u32;
+        //tmp
+        self.inventory
+    }
     pub fn get_socket(&self) -> &TcpStream {
         &self.socket
     }
@@ -37,5 +47,11 @@ impl client::Client {
 
     pub fn get_token(&self) -> Token {
         self.token
+    }
+
+    pub fn hunger_tick(&mut self) {
+        if self.inventory[0] > 0 {
+            self.inventory[0] -= 1;
+        }
     }
 }
