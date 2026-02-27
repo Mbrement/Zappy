@@ -68,16 +68,54 @@ class MessageHandler {
 
     /**
      * @author Emma (epolitze) Politzer
-     * @description Handles the messages comming in from the server
+     * @description Handles the messages coming in from the server
      */
     handleMessage(msg) {
         const command = msg.split(" ")
+
+        let finalCommandArray = command.filter(function (element) {
+            return element;
+        })
+
         if (!this.commands[command[0]]) {
-            // console.log(this.commands)
             return
         }
 
-        this.commands[command[0]](command)
+        this.commands[finalCommandArray[0]](finalCommandArray)
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Parses the given string as a number and makes sure it is valid
+     * @param number - The number we want to parse
+     * @returns {number|null} - The converted number or null if it isn't valid
+     */
+    parseNumber(number) {
+        if (!number) {
+            console.error(`Invalid argument: ${number}`)
+            return null
+        }
+
+        if (!/^\d+$/.test(number)) {
+            console.error(`Invalid argument: ${number}, must be a positive integer`)
+            return null
+        }
+
+        return parseInt(number);
+    }
+
+    /**
+     * @author Emma (epolitze) Politzer
+     * @description Checks if the given resource type is valid
+     * @param resourceType - the number of the resource to be checked
+     * @returns {boolean} - Whether the resource type is valid
+     */
+    isValidResource(resourceType) {
+        if (resourceType < 0 || resourceType > 6) {
+            console.error(`Invalid resource: ${resourceType}, must be between 0 and 6`)
+            return false
+        }
+        return true
     }
 
     /**
@@ -103,10 +141,19 @@ class MessageHandler {
             return
         }
 
-        let x = parseInt(command[1])
-        let y = parseInt(command[2])
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
+            return
+        }
+
+        let x = this.parseNumber(command[1])
+        let y = this.parseNumber(command[2])
+        if (x === null || y === null) {
+            return;
+        }
 
         if (this.gameState.isCorrectCoordinates(x, y)) {
+            console.error(`Invalid coordinates x: ${x}, y: ${y}`)
             return
         }
 
@@ -127,14 +174,29 @@ class MessageHandler {
             return
         }
 
-        let x = parseInt(command[1])
-        let y = parseInt(command[2])
-
-        if (!this.gameState.isCorrectCoordinates(x, y)) {
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
             return
         }
 
-        const integerArguments = command.slice(3).map(Number)
+        let x = this.parseNumber(command[1])
+        let y = this.parseNumber(command[2])
+        if (x === null || y === null) {
+            return;
+        }
+
+        if (!this.gameState.isCorrectCoordinates(x, y)) {
+            console.error(`Invalid coordinates x: ${x}, y: ${y}`)
+            return
+        }
+
+        const integerArguments = command.slice(3)
+        for (let i = 0; i < integerArguments.length; i++) {
+            integerArguments[i] = this.parseNumber(integerArguments[i])
+            if (integerArguments[i] === null) {
+                return
+            }
+        }
 
         this.gameState.setTileContent(x, y, integerArguments)
 
@@ -153,7 +215,13 @@ class MessageHandler {
             return
         }
 
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
+            return
+        }
+
         if (this.gameState.teams.has(command[1])) {
+            console.error(`Team name ${command[1]} already exists`)
             return
         }
 
@@ -172,17 +240,31 @@ class MessageHandler {
             return
         }
 
-        if (!this.gameState.teams.has(command[6])) {
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
             return
         }
 
-        const integerArguments = command.slice(1, 6).map(Number)
+        if (!this.gameState.teams.has(command[6])) {
+            console.error(`Team name ${command[1]} doesn't exists`)
+            return
+        }
+
+        const integerArguments = command.slice(1, 6)
+        for (let i = 0; i < integerArguments.length; i++) {
+            integerArguments[i] = this.parseNumber(integerArguments[i])
+            if (integerArguments[i] === null) {
+                return
+            }
+        }
 
         if (this.gameState.playerInfo.has(integerArguments[0])) {
+            console.error(`Player ${integerArguments[0]} does not exist`)
             return
         }
 
         if (!this.gameState.isCorrectCoordinates(integerArguments[1], integerArguments[2])) {
+            console.error(`Invalid coordinates x: ${integerArguments[1]}, y: ${integerArguments[2]}`)
             return
         }
 
@@ -203,13 +285,26 @@ class MessageHandler {
             return
         }
 
-        const integerArguments = command.slice(1).map(Number)
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
+            return
+        }
+
+        const integerArguments = command.slice(1)
+        for (let i = 0; i < integerArguments.length; i++) {
+            integerArguments[i] = this.parseNumber(integerArguments[i])
+            if (integerArguments[i] === null) {
+                return
+            }
+        }
 
         if (!this.gameState.playerInfo.has(integerArguments[0])) {
+            console.error(`Player ${integerArguments[0]} does not exist`)
             return
         }
 
         if (!this.gameState.isCorrectCoordinates(integerArguments[1], integerArguments[2])) {
+            console.error(`Invalid coordinates x: ${integerArguments[1]}, y: ${integerArguments[2]}`)
             return
         }
 
@@ -231,9 +326,21 @@ class MessageHandler {
             return
         }
 
-        const integerArguments = command.slice(1).map(Number)
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
+            return
+        }
+
+        const integerArguments = command.slice(1)
+        for (let i = 0; i < integerArguments.length; i++) {
+            integerArguments[i] = this.parseNumber(integerArguments[i])
+            if (integerArguments[i] === null) {
+                return
+            }
+        }
 
         if (!this.gameState.playerInfo.has(integerArguments[0])) {
+            console.error(`Player ${integerArguments[0]} does not exist`)
             return
         }
 
@@ -251,13 +358,26 @@ class MessageHandler {
             return
         }
 
-        const integerArguments = command.slice(1).map(Number)
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
+            return
+        }
+
+        const integerArguments = command.slice(1)
+        for (let i = 0; i < integerArguments.length; i++) {
+            integerArguments[i] = this.parseNumber(integerArguments[i])
+            if (integerArguments[i] === null) {
+                return
+            }
+        }
 
         if (!this.gameState.playerInfo.has(integerArguments[0])) {
+            console.error(`Player ${integerArguments[0]} does not exist`)
             return
         }
 
         if (!this.gameState.isCorrectCoordinates(integerArguments[1], integerArguments[2])) {
+            console.error(`Invalid coordinates x: ${integerArguments[1]}, y: ${integerArguments[2]}`)
             return
         }
 
@@ -284,12 +404,27 @@ class MessageHandler {
             return
         }
 
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
+            return
+        }
+
         let message = `#${command[1]}:`
         for (let i = 2; i < command.length; i++) {
             message += " " + command[i]
         }
 
-        this.world.players.addPlayerBroadcast(parseInt(command[1]), message)
+        const playerId = this.parseNumber(command[1])
+        if (playerId === null) {
+            return
+        }
+
+        if (!this.gameState.playerInfo.has(playerId)) {
+            console.error(`Player ${playerId} does not exist`)
+            return
+        }
+
+        this.world.players.addPlayerBroadcast(playerId, message)
 
         this.broadcastManager.addBroadcast(message)
     }
@@ -305,9 +440,21 @@ class MessageHandler {
             return
         }
 
-        const integerArguments = command.slice(1).map(Number)
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
+            return
+        }
+
+        const integerArguments = command.slice(1)
+        for (let i = 0; i < integerArguments.length; i++) {
+            integerArguments[i] = this.parseNumber(integerArguments[i])
+            if (integerArguments[i] === null) {
+                return
+            }
+        }
 
         if (!this.gameState.isCorrectCoordinates(integerArguments[0], integerArguments[1])) {
+            console.error(`Invalid coordinates x: ${integerArguments[0]}, y: ${integerArguments[1]}`)
             return
         }
 
@@ -315,7 +462,14 @@ class MessageHandler {
 
         for (let i = 3; i < integerArguments.length; i++) {
             const playerId = integerArguments[i]
-            const playerColor = this.gameState.playerInfo.get(playerId).color
+            const player = this.gameState.playerInfo.get(playerId)
+
+            if (!player) {
+                console.error(`Player ${playerId} does not exist`)
+                continue
+            }
+
+            const playerColor = player.color
             this.world.players.addPlayerIncantation(playerId, playerColor)
         }
     }
@@ -331,14 +485,37 @@ class MessageHandler {
             return
         }
 
-        const integerArguments = command.slice(1).map(Number)
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
+            return
+        }
+
+        let integerArguments = command.slice(1)
+        for (let i = 0; i < integerArguments.length; i++) {
+            integerArguments[i] = this.parseNumber(integerArguments[i])
+            if (integerArguments[i] === null) {
+                return
+            }
+        }
 
         if (!this.gameState.isCorrectCoordinates(integerArguments[0], integerArguments[1])) {
+            console.error(`Invalid coordinates x: ${integerArguments[0]}, y: ${integerArguments[1]}`)
             return
         }
 
         this.gameState.stopIncantation(integerArguments)
 
+        for (let i = 3; i < integerArguments.length; i++) {
+            let playerId = integerArguments[i]
+            let player = this.gameState.playerInfo.get(playerId)
+
+            if (!player) {
+                console.error(`Player ${playerId} does not exist`)
+                integerArguments = integerArguments.filter((id) => {
+                    return playerId === id
+                })
+            }
+        }
         this.world.players.stopIncantation(integerArguments)
     }
 
@@ -349,11 +526,6 @@ class MessageHandler {
      * @param {Array} command - the command and it's arguments
      */
     cmd_pfk(command) {
-        if (command.length !== 2) {
-            return
-        }
-
-        // console.log(`Player ${parseInt(command[1])} has laid an egg`)
     }
 
     /**
@@ -367,7 +539,27 @@ class MessageHandler {
             return
         }
 
-        this.world.players.addPlayerDrop(parseInt(command[1]), parseInt(command[2]))
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
+            return
+        }
+
+        const playerId = this.parseNumber(command[1])
+        const resourceType = this.parseNumber(command[2])
+        if (playerId === null || resourceType === null) {
+            return
+        }
+
+        if (!this.gameState.playerInfo.has(playerId)) {
+            console.error(`Player ${playerId} does not exist`)
+            return
+        }
+
+        if (!this.isValidResource(resourceType)) {
+            return
+        }
+
+        this.world.players.addPlayerDrop(playerId, resourceType)
     }
 
     /**
@@ -381,7 +573,27 @@ class MessageHandler {
             return
         }
 
-        this.world.players.addPlayerPickUp(parseInt(command[1]), parseInt(command[2]))
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
+            return
+        }
+
+        const playerId = this.parseNumber(command[1])
+        const resourceType = this.parseNumber(command[2])
+        if (playerId === null || resourceType === null) {
+            return
+        }
+
+        if (!this.gameState.playerInfo.has(playerId)) {
+            console.error(`Player ${playerId} does not exist`)
+            return
+        }
+
+        if (!this.isValidResource(resourceType)) {
+            return
+        }
+
+        this.world.players.addPlayerPickUp(playerId, resourceType)
     }
 
     /**
@@ -395,16 +607,25 @@ class MessageHandler {
             return
         }
 
-        const id = parseInt(command[1])
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
+            return
+        }
 
-        if (!this.gameState.playerInfo.has(id)) {
+        const playerId = this.parseNumber(command[1])
+        if (playerId === null) {
+            return
+        }
+
+        if (!this.gameState.playerInfo.has(playerId)) {
+            console.error(`Player ${playerId} does not exist`)
             return
         }
 
         const oldState = Object.assign({}, this.gameState.playerInfo.get(id))
-        this.gameState.deletePlayer(id)
+        this.gameState.deletePlayer(playerId)
 
-        this.world.players.removePlayer(id, oldState)
+        this.world.players.removePlayer(playerId, oldState)
     }
 
     /**
@@ -418,8 +639,24 @@ class MessageHandler {
             return
         }
 
-        const integerArguments = command.slice(3).map(Number)
-        integerArguments.unshift(parseInt(command[1]))
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
+            return
+        }
+
+        const integerArguments = command.slice(3)
+        integerArguments.unshift(command[1])
+        for (let i = 0; i < integerArguments.length; i++) {
+            integerArguments[i] = this.parseNumber(integerArguments[i])
+            if (integerArguments[i] === null) {
+                return
+            }
+        }
+
+        if (!this.gameState.isCorrectCoordinates(integerArguments[1], integerArguments[2])) {
+            console.error(`Invalid coordinates x: ${integerArguments[1]}, y: ${integerArguments[2]}`)
+            return
+        }
 
         this.gameState.addEgg(integerArguments)
 
@@ -437,17 +674,25 @@ class MessageHandler {
             return
         }
 
-        const id = parseInt(command[1])
-
-        if (!this.gameState.eggInfo.has(id)) {
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
             return
         }
 
+        const eggId = this.parseNumber(command[1])
+        if (eggId === null) {
+            return
+        }
 
-        const oldState = Object.assign({}, this.gameState.eggInfo.get(id))
-        this.gameState.removeEgg(id)
+        if (!this.gameState.eggInfo.has(eggId)) {
+            console.error(`Egg ${eggId} does not exist`)
+            return
+        }
 
-        this.world.players.removeEgg(id, oldState)
+        const oldState = Object.assign({}, this.gameState.eggInfo.get(eggId))
+        this.gameState.removeEgg(eggId)
+
+        this.world.players.removeEgg(eggId, oldState)
     }
 
     /**
@@ -461,7 +706,17 @@ class MessageHandler {
             console.error("Received invalid time unit from server", command)
         }
 
-        this.world.players.setTimeUnit(parseInt(command[1]))
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
+            return
+        }
+
+        const timeUnit = this.parseNumber(command[1])
+        if (timeUnit === null) {
+            return
+        }
+
+        this.world.players.setTimeUnit(timeUnit)
     }
 
     /**
@@ -472,6 +727,11 @@ class MessageHandler {
      */
     cmd_seg(command) {
         if (command.length !== 2) {
+            return
+        }
+
+        if (!this.world.gameRunning) {
+            console.error("Game was never started", command)
             return
         }
 
