@@ -14,7 +14,7 @@ This repository contains our complete implementation, which was completed in 23 
 
 ## 📷 Showcase
 
-![Zappy Gameplay](docs/zappy_showcase.mp4)
+<video autoplay loop src='https://github.com/user-attachments/assets/7f63fbb2-d660-496e-8090-d108f95398ed'></video>
 *A view of the game in progress.*
 
 |              Dark Theme               |              Light Theme               |
