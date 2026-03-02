@@ -2,11 +2,32 @@
 
 cd "$(dirname "$0")" || exit
 
-GFX_BIN="../out/gfx-linux-x64/gfx"
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  PLATFORM='linux'
+  BINARY_NAME='gfx'
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  PLATFORM='darwin'
+  BINARY_NAME='gfx.app'
+else
+  echo "Unsupported OS: $OSTYPE"
+  exit 1
+fi
+
+UNAME_ARCH=$(uname -m)
+if [[ "$UNAME_ARCH" == "x86_64" ]]; then
+  ELECTRON_ARCH="x64"
+elif [[ "$UNAME_ARCH" == "aarch64" || "$UNAME_ARCH" == "arm64" ]]; then
+  ELECTRON_ARCH="arm64"
+else
+  echo "Unsupported Uarch: $UNAME_ARCH"
+  exit 1
+fi
+
+GFX_BIN="../out/gfx-${PLATFORM}-${ELECTRON_ARCH}/${BINARY_NAME}"
 BUILD_SCRIPT="./buildGFX.sh"
 GFX_ROOT=".."
 
-if [ ! -f "$GFX_BIN" ]; then
+if [ ! -e "$GFX_BIN" ]; then
     "$BUILD_SCRIPT"
     exit $?
 fi
