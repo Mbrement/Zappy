@@ -1,5 +1,7 @@
 # Zappy
 
+![42 Badge|163](https://img.shields.io/badge/Score-125%2F100-success?style=for-the-badge&logo=42) ![Rust](https://img.shields.io/badge/Rust-F14802?style=for-the-badge&logo=rust&logoColor=white) ![JavaScript|109](https://img.shields.io/badge/Three.js-black?style=for-the-badge&logo=three.js&logoColor=white) ![JavaScript|101](https://img.shields.io/badge/Node.JS-5DB047?style=for-the-badge&logo=node.js&logoColor=white)
+
 **Zappy** is a networking project of the 42 school curriculum.
 The goal is to develop a multiplayer, network-based game featuring a server, a graphical interface, and an AI client.
 
